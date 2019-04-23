@@ -1,1 +1,2 @@
-* canvas_drawer: Don't use only a single vehicle, but use a list instead, allow to add more vehicles and iterate through all vehicles.
+* canvas_drawer.py: Don't use only a single vehicle, but use a list instead, allow to add more vehicles and iterate through all vehicles.
+* gui.py: Check, if it would make sense to use a Grid for placing the GUI elements

@@ -1,4 +1,4 @@
-from tkinter import *
+import tkinter as tk
 from vehicle import Vehicle
 from canvas_drawer import CanvasDrawer
 from time import sleep
@@ -8,7 +8,7 @@ canvas_width = 800
 canvas_height = 400
 
 t_incr = 1.0  # Time increase per tick
-t_tick = 0.001  # Sleep [s] per tick
+t_tick = 0.01  # Sleep [s] per tick
 trace_length_max = int(100.0 / t_incr)  # Max. length of the trace
 
 play = True
@@ -26,155 +26,175 @@ def cb_play_pause():
         btn_play_pause.config(text="Play")
 
 
-master = Tk()
+def cb_canvas_configure(event):
+    global play
+
+    # print("{:04d} : {:04d}".format(event.width, event.height))
+
+    # cb_play_pause()
+    # play = False
+    # btn_play_pause.config(text="Play")
+
+    cd.reset_traces()
+    cd.clear()
+    cd.set_canvas_width(event.width)
+    cd.set_canvas_height(event.height)
+
+    return
+
+
+master = tk.Tk()
 master.title("Ground Truth Simulator")
 
-root = Frame(master)
-root.pack()
+root = tk.Frame(master)
+root.pack(expand=True, fill=tk.BOTH)
 
-# The view frame on top
+# The view tk.Frame on top
 # ---------------------
-view_frame = Frame(root)
-view_frame.pack(expand=True, fill=X, side=TOP)
+frm_view = tk.Frame(root)
+frm_view.pack(expand=False, fill=tk.X, side=tk.TOP, pady=5)
 
 # Position
-frm_pos = Frame(view_frame)
-frm_pos.pack(fill=X, side=LEFT, padx=5)
+frm_pos = tk.Frame(frm_view)
+frm_pos.pack(fill=tk.X, side=tk.LEFT, padx=5)
 
-frm_pos_x = Frame(frm_pos)
-frm_pos_x.pack(fill=X, side=TOP, padx=5)
-lbl_pos_x = Label(frm_pos_x, text="pos x [m]:", width=9, anchor=W)
-lbl_pos_x.pack(fill=X, side=LEFT)
-lbl_pos_x_val = Label(frm_pos_x, text="", width=10, bg="yellow", anchor=E)
-lbl_pos_x_val.pack(fill=X, side=LEFT)
+frm_pos_x = tk.Frame(frm_pos)
+frm_pos_x.pack(fill=tk.X, side=tk.TOP, padx=5)
+lbl_pos_x = tk.Label(frm_pos_x, text="pos x [m]:", width=9, anchor=tk.W)
+lbl_pos_x.pack(fill=tk.X, side=tk.LEFT)
+lbl_pos_x_val = tk.Label(frm_pos_x, text="", width=10, bg="yellow", anchor=tk.E)
+lbl_pos_x_val.pack(fill=tk.X, side=tk.LEFT)
 
-frm_pos_y = Frame(frm_pos)
-frm_pos_y.pack(fill=X, side=TOP, padx=5)
-lbl_pos_y = Label(frm_pos_y, text="pos y [m]:", width=9, anchor=W)
-lbl_pos_y.pack(fill=X, side=LEFT)
-lbl_pos_y_val = Label(frm_pos_y, text="", width=10, bg="yellow", anchor=E)
-lbl_pos_y_val.pack(fill=X, side=LEFT)
+frm_pos_y = tk.Frame(frm_pos)
+frm_pos_y.pack(fill=tk.X, side=tk.TOP, padx=5)
+lbl_pos_y = tk.Label(frm_pos_y, text="pos y [m]:", width=9, anchor=tk.W)
+lbl_pos_y.pack(fill=tk.X, side=tk.LEFT)
+lbl_pos_y_val = tk.Label(frm_pos_y, text="", width=10, bg="yellow", anchor=tk.E)
+lbl_pos_y_val.pack(fill=tk.X, side=tk.LEFT)
 
 # Velocity
-sep_ver_ctrl_1 = Frame(view_frame, width=2, bd=1, relief=SUNKEN)
-sep_ver_ctrl_1.pack(fill=Y, side=LEFT, padx=0)
+sep_ver_ctrl_1 = tk.Frame(frm_view, width=2, bd=1, relief=tk.SUNKEN)
+sep_ver_ctrl_1.pack(fill=tk.Y, side=tk.LEFT, padx=0)
 
-frm_vel = Frame(view_frame)
-frm_vel.pack(fill=X, side=LEFT, padx=5)
+frm_vel = tk.Frame(frm_view)
+frm_vel.pack(fill=tk.X, side=tk.LEFT, padx=5)
 
-frm_vel_x = Frame(frm_vel)
-frm_vel_x.pack(fill=X, side=TOP, padx=5)
-lbl_vel_x = Label(frm_vel_x, text="vel. x [m/s]:", width=10, anchor=W)
-lbl_vel_x.pack(fill=X, side=LEFT)
-lbl_vel_x_val = Label(frm_vel_x, text="", width=10, bg="orange", anchor=E)
-lbl_vel_x_val.pack(fill=X, side=LEFT)
+frm_vel_x = tk.Frame(frm_vel)
+frm_vel_x.pack(fill=tk.X, side=tk.TOP, padx=5)
+lbl_vel_x = tk.Label(frm_vel_x, text="vel. x [m/s]:", width=10, anchor=tk.W)
+lbl_vel_x.pack(fill=tk.X, side=tk.LEFT)
+lbl_vel_x_val = tk.Label(frm_vel_x, text="", width=10, bg="orange", anchor=tk.E)
+lbl_vel_x_val.pack(fill=tk.X, side=tk.LEFT)
 
-frm_vel_y = Frame(frm_vel)
-frm_vel_y.pack(fill=X, side=TOP, padx=5)
-lbl_vel_y = Label(frm_vel_y, text="vel. y [m/s]:", width=10, anchor=W)
-lbl_vel_y.pack(fill=X, side=LEFT)
-lbl_vel_y_val = Label(frm_vel_y, text="", width=10, bg="orange", anchor=E)
-lbl_vel_y_val.pack(fill=X, side=LEFT)
+frm_vel_y = tk.Frame(frm_vel)
+frm_vel_y.pack(fill=tk.X, side=tk.TOP, padx=5)
+lbl_vel_y = tk.Label(frm_vel_y, text="vel. y [m/s]:", width=10, anchor=tk.W)
+lbl_vel_y.pack(fill=tk.X, side=tk.LEFT)
+lbl_vel_y_val = tk.Label(frm_vel_y, text="", width=10, bg="orange", anchor=tk.E)
+lbl_vel_y_val.pack(fill=tk.X, side=tk.LEFT)
 
 # Acceleration
-sep_ver_ctrl_2 = Frame(view_frame, width=2, bd=1, relief=SUNKEN)
-sep_ver_ctrl_2.pack(fill=Y, side=LEFT, padx=0)
+sep_ver_ctrl_2 = tk.Frame(frm_view, width=2, bd=1, relief=tk.SUNKEN)
+sep_ver_ctrl_2.pack(fill=tk.Y, side=tk.LEFT, padx=0)
 
-frm_acc = Frame(view_frame)
-frm_acc.pack(fill=X, side=LEFT, padx=5)
+frm_acc = tk.Frame(frm_view)
+frm_acc.pack(fill=tk.X, side=tk.LEFT, padx=5)
 
-frm_acc_x = Frame(frm_acc)
-frm_acc_x.pack(fill=X, side=TOP, padx=5)
-lbl_acc_x = Label(frm_acc_x, text="accel. x [m/s²]:", width=13, anchor=W)
-lbl_acc_x.pack(fill=X, side=LEFT)
-lbl_acc_x_val = Label(frm_acc_x, text="", width=10, bg="red", anchor=E)
-lbl_acc_x_val.pack(fill=X, side=LEFT)
+frm_acc_x = tk.Frame(frm_acc)
+frm_acc_x.pack(fill=tk.X, side=tk.TOP, padx=5)
+lbl_acc_x = tk.Label(frm_acc_x, text="accel. x [m/s²]:", width=13, anchor=tk.W)
+lbl_acc_x.pack(fill=tk.X, side=tk.LEFT)
+lbl_acc_x_val = tk.Label(frm_acc_x, text="", width=10, bg="red", anchor=tk.E)
+lbl_acc_x_val.pack(fill=tk.X, side=tk.LEFT)
 
-frm_acc_y = Frame(frm_acc)
-frm_acc_y.pack(fill=X, side=TOP, padx=5)
-lbl_acc_y = Label(frm_acc_y, text="accel. y [m/s²]:", width=13, anchor=W)
-lbl_acc_y.pack(fill=X, side=LEFT)
-lbl_acc_y_val = Label(frm_acc_y, text="", width=10, bg="red", anchor=E)
-lbl_acc_y_val.pack(fill=X, side=LEFT)
+frm_acc_y = tk.Frame(frm_acc)
+frm_acc_y.pack(fill=tk.X, side=tk.TOP, padx=5)
+lbl_acc_y = tk.Label(frm_acc_y, text="accel. y [m/s²]:", width=13, anchor=tk.W)
+lbl_acc_y.pack(fill=tk.X, side=tk.LEFT)
+lbl_acc_y_val = tk.Label(frm_acc_y, text="", width=10, bg="red", anchor=tk.E)
+lbl_acc_y_val.pack(fill=tk.X, side=tk.LEFT)
 
-sep_hor_1 = Frame(root, height=2, bd=1, relief=SUNKEN)
-sep_hor_1.pack(fill=X, padx=5, pady=5)
+sep_hor_1 = tk.Frame(root, height=2, bd=1, relief=tk.SUNKEN)
+sep_hor_1.pack(fill=tk.X, padx=5, pady=5)
 
-# The control frame on the left
+# The control tk.Frame on the left
 # -----------------------------
-control_frame = Frame(root)
-control_frame.pack(expand=True, fill=Y, side=LEFT)
+frm_control = tk.Frame(root)
+frm_control.pack(expand=False, fill=tk.Y, side=tk.LEFT)
 
-btn_play_pause = Button(control_frame, text="Pause", width=10, bg="lightblue", command=cb_play_pause)
-btn_play_pause.pack(fill=X, side=TOP)
+btn_play_pause = tk.Button(frm_control, text="Pause", width=10, bg="lightblue", command=cb_play_pause)
+btn_play_pause.pack(fill=tk.X, side=tk.TOP)
 
-draw_pos_trace = IntVar()
+draw_pos_trace = tk.IntVar()
 draw_pos_trace.set(1)
-chk_draw_pos_trace = Checkbutton(control_frame, text="Draw Pos. Trace", variable=draw_pos_trace)
-chk_draw_pos_trace.pack(side=TOP, anchor=W)
+chk_draw_pos_trace = tk.Checkbutton(frm_control, text="Draw Pos. Trace", variable=draw_pos_trace)
+chk_draw_pos_trace.pack(side=tk.TOP, anchor=tk.W)
 
-draw_vel_trace = IntVar()
-chk_draw_vel_trace = Checkbutton(control_frame, text="Draw Vel. Trace", variable=draw_vel_trace)
-chk_draw_vel_trace.pack(side=TOP, anchor=W)
+draw_vel_trace = tk.IntVar()
+chk_draw_vel_trace = tk.Checkbutton(frm_control, text="Draw Vel. Trace", variable=draw_vel_trace)
+chk_draw_vel_trace.pack(side=tk.TOP, anchor=tk.W)
 
-draw_acc_trace = IntVar()
-chk_draw_acc_trace = Checkbutton(control_frame, text="Draw Accel. Trace", variable=draw_acc_trace)
-chk_draw_acc_trace.pack(side=TOP, anchor=W)
+draw_acc_trace = tk.IntVar()
+chk_draw_acc_trace = tk.Checkbutton(frm_control, text="Draw Accel. Trace", variable=draw_acc_trace)
+chk_draw_acc_trace.pack(side=tk.TOP, anchor=tk.W)
 
-draw_tangent_trace = IntVar()
-chk_draw_tangent_trace = Checkbutton(control_frame, text="Draw Tangent Trace", variable=draw_tangent_trace)
-chk_draw_tangent_trace.pack(side=TOP, anchor=W)
+draw_tangent_trace = tk.IntVar()
+chk_draw_tangent_trace = tk.Checkbutton(frm_control, text="Draw Tangent Trace", variable=draw_tangent_trace)
+chk_draw_tangent_trace.pack(side=tk.TOP, anchor=tk.W)
 
-draw_normal_trace = IntVar()
-chk_draw_normal_trace = Checkbutton(control_frame, text="Draw Normal Trace", variable=draw_normal_trace)
-chk_draw_normal_trace.pack(side=TOP, anchor=W)
+draw_normal_trace = tk.IntVar()
+chk_draw_normal_trace = tk.Checkbutton(frm_control, text="Draw Normal Trace", variable=draw_normal_trace)
+chk_draw_normal_trace.pack(side=tk.TOP, anchor=tk.W)
 
-draw_acc_times_tangent_trace = IntVar()
-chk_draw_acc_times_tangent_trace = Checkbutton(control_frame, text="Draw Acc. x Tangent Trace",
-                                               variable=draw_acc_times_tangent_trace)
-chk_draw_acc_times_tangent_trace.pack(side=TOP, anchor=W)
+draw_acc_times_tangent_trace = tk.IntVar()
+chk_draw_acc_times_tangent_trace = tk.Checkbutton(frm_control, text="Draw Acc. x Tangent Trace",
+                                                  variable=draw_acc_times_tangent_trace)
+chk_draw_acc_times_tangent_trace.pack(side=tk.TOP, anchor=tk.W)
 
-draw_acc_times_normal_trace = IntVar()
-chk_draw_acc_times_normal_trace = Checkbutton(control_frame, text="Draw Acc. x Normal Trace",
-                                              variable=draw_acc_times_normal_trace)
-chk_draw_acc_times_normal_trace.pack(side=TOP, anchor=W)
+draw_acc_times_normal_trace = tk.IntVar()
+chk_draw_acc_times_normal_trace = tk.Checkbutton(frm_control, text="Draw Acc. x Normal Trace",
+                                                 variable=draw_acc_times_normal_trace)
+chk_draw_acc_times_normal_trace.pack(side=tk.TOP, anchor=tk.W)
 
-sep_hor_2 = Frame(control_frame, height=2, bd=1, relief=SUNKEN)
-sep_hor_2.pack(fill=X, padx=5, pady=5)
+sep_hor_2 = tk.Frame(frm_control, height=2, bd=1, relief=tk.SUNKEN)
+sep_hor_2.pack(fill=tk.X, padx=5, pady=5)
 
-draw_vel_vec = IntVar()
-chk_draw_vel_vec = Checkbutton(control_frame, text="Draw Vel. Vec.", variable=draw_vel_vec)
-chk_draw_vel_vec.pack(side=TOP, anchor=W)
+draw_vel_vec = tk.IntVar()
+chk_draw_vel_vec = tk.Checkbutton(frm_control, text="Draw Vel. Vec.", variable=draw_vel_vec)
+chk_draw_vel_vec.pack(side=tk.TOP, anchor=tk.W)
 
-draw_acc_vec = IntVar()
-chk_draw_acc_vec = Checkbutton(control_frame, text="Draw Accel. Vec.", variable=draw_acc_vec)
-chk_draw_acc_vec.pack(side=TOP, anchor=W)
+draw_acc_vec = tk.IntVar()
+chk_draw_acc_vec = tk.Checkbutton(frm_control, text="Draw Accel. Vec.", variable=draw_acc_vec)
+chk_draw_acc_vec.pack(side=tk.TOP, anchor=tk.W)
 
-sep_hor_3 = Frame(control_frame, height=2, bd=1, relief=SUNKEN)
-sep_hor_3.pack(fill=X, padx=5, pady=5)
+sep_hor_3 = tk.Frame(frm_control, height=2, bd=1, relief=tk.SUNKEN)
+sep_hor_3.pack(fill=tk.X, padx=5, pady=5)
 
-draw_tangent = IntVar()
-chk_draw_tangent = Checkbutton(control_frame, text="Draw Tangent", variable=draw_tangent)
-chk_draw_tangent.pack(side=TOP, anchor=W)
+draw_tangent = tk.IntVar()
+chk_draw_tangent = tk.Checkbutton(frm_control, text="Draw Tangent", variable=draw_tangent)
+chk_draw_tangent.pack(side=tk.TOP, anchor=tk.W)
 
-draw_normal = IntVar()
-chk_draw_normal = Checkbutton(control_frame, text="Draw Normal", variable=draw_normal)
-chk_draw_normal.pack(side=TOP, anchor=W)
+draw_normal = tk.IntVar()
+chk_draw_normal = tk.Checkbutton(frm_control, text="Draw Normal", variable=draw_normal)
+chk_draw_normal.pack(side=tk.TOP, anchor=tk.W)
 
 
-# The canvas frame on the bottom right
+# The canvas tk.Frame on the bottom right
 # ------------------------------------
-canvas_frame = Frame(root)
-canvas_frame.pack(side=TOP)
+frm_canvas = tk.Frame(root)
+frm_canvas.pack(expand=True, fill=tk.BOTH, side=tk.TOP)
 
-canvas = Canvas(canvas_frame, width=canvas_width, height=canvas_height)
-canvas.pack()
+canvas = tk.Canvas(frm_canvas, width=canvas_width, height=canvas_height)
+canvas.pack(expand=True, fill=tk.BOTH)
+
 
 # Non-GUI initialization
 # ----------------------
 v = Vehicle("Vehicle", 300.0, 9.0)
-cd = CanvasDrawer(v, canvas, canvas_width, canvas_height, 0.01, trace_length_max=100)
+cd = CanvasDrawer(v, canvas, canvas_width, canvas_height, 0.01, trace_length_max=trace_length_max)
+canvas.bind('<Configure>', cb_canvas_configure)
 t = 0.0
+
 
 while True:
     if play:

@@ -1,2 +1,4 @@
 * canvas_drawer.py: Don't use only a single vehicle, but use a list instead, allow to add more vehicles and iterate through all vehicles.
-* gui.py: Check, if it would make sense to use a Grid for placing the GUI elements
+* gui.py: Check, if it would make sense to use a Grid for placing the GUI elements.
+* canvas_drawer.py: Introduce global scaling in a way, that the scaling factor only needs to be touched once.
+* canvas_drawer.py: Inherit from the Canvas class and add functions to set origin and scaling (and probably as a separate parameter invert_y) and write (or overwrite) the create_line() function with passing through all named arguments.

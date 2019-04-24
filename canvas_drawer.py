@@ -20,6 +20,12 @@ class CanvasDrawer:
         self.trace_acc_times_tangent = []
         self.trace_acc_times_normal = []
 
+    def set_canvas_width(self, canvas_width):
+        self.canvas_width = canvas_width
+
+    def set_canvas_height(self, canvas_height):
+        self.canvas_height = canvas_height
+
     def scale_for_canvas(self, v):
         return v * self.scale_factor * np.asarray([1.0, -1.0]) +\
                np.asarray([self.canvas_width / 2, self.canvas_height / 2])
@@ -47,31 +53,43 @@ class CanvasDrawer:
 
     # Update tangent trace array
     def add_cur_tangent_to_trace(self):
-        self.trace_tangent.append(self.scale_for_canvas(self.vehicle.rdtn * 10000.0))
+        self.trace_tangent.append(self.scale_for_canvas(self.vehicle.rdt * 10000.0))
 
         if len(self.trace_tangent) > self.trace_length_max:  # Limit trace array length
             self.trace_tangent.pop(0)
 
     # Update normal trace array
     def add_cur_normal_to_trace(self):
-        self.trace_normal.append(self.scale_for_canvas(self.vehicle.rdnn * 10000.0))
+        self.trace_normal.append(self.scale_for_canvas(self.vehicle.rdn * 10000.0))
 
         if len(self.trace_normal) > self.trace_length_max:  # Limit trace array length
             self.trace_normal.pop(0)
 
     # Update acc times tangent trace array
     def add_cur_acc_times_tangent_to_trace(self):
-        self.trace_acc_times_tangent.append(self.scale_for_canvas(self.vehicle.rdtn * 10000.0))
+        self.trace_acc_times_tangent.append(self.scale_for_canvas(self.vehicle.rddxrdt * 1000.0))
 
         if len(self.trace_acc_times_tangent) > self.trace_length_max:  # Limit trace array length
             self.trace_acc_times_tangent.pop(0)
 
     # Update acc times normal trace array
     def add_cur_acc_times_normal_to_trace(self):
-        self.trace_acc_times_normal.append(self.scale_for_canvas(self.vehicle.rdnn * 10000.0))
+        self.trace_acc_times_normal.append(self.scale_for_canvas(self.vehicle.rddxrdn * 1000.0))
 
         if len(self.trace_acc_times_normal) > self.trace_length_max:  # Limit trace array length
             self.trace_acc_times_normal.pop(0)
+
+    def reset_traces(self):
+        self.trace_pos.clear()
+        self.trace_vel.clear()
+        self.trace_acc.clear()
+        self.trace_tangent.clear()
+        self.trace_normal.clear()
+        self.trace_acc_times_tangent.clear()
+        self.trace_acc_times_normal.clear()
+
+    def clear(self):
+        self.canvas.delete("all")
 
     def draw(self, draw_pos_trace=True, draw_vel_trace=True, draw_acc_trace=True, draw_tangent_trace=True,
              draw_normal_trace=True, draw_acc_times_tangent_trace=True, draw_acc_times_normal_trace=True,
@@ -84,92 +102,107 @@ class CanvasDrawer:
         # -----------------
         # Draw pos trace array
         if draw_pos_trace:
-            for step in range(1, len(self.trace_pos)):
+            num_steps = len(self.trace_pos)
+            for step in range(1, num_steps):
                 x = step / float(self.trace_length_max - 1)
                 self.canvas.create_line(self.trace_pos[step - 1][0],
                                         self.trace_pos[step - 1][1],
                                         self.trace_pos[step][0],
                                         self.trace_pos[step][1],
                                         width=5.0, capstyle=ROUND,
-                                        fill="#{0:02x}00{1:02x}".format(int(x * 255), int((1 - x) * 255)))
+                                        fill="#{0:02x}00{1:02x}".format(int(x * 255), int((1 - x) * 255)),
+                                        arrow=(LAST if step == num_steps-1 else None),
+                                        arrowshape=(16, 20, 6))
             # end for
         # end if
 
         # Draw vel trace array
         if draw_vel_trace:
-            for step in range(1, len(self.trace_vel)):
+            num_steps = len(self.trace_vel)
+            for step in range(1, num_steps):
                 x = step / float(self.trace_length_max - 1)
                 self.canvas.create_line(self.trace_vel[step - 1][0],
                                         self.trace_vel[step - 1][1],
                                         self.trace_vel[step][0],
                                         self.trace_vel[step][1],
                                         width=2.0, capstyle=ROUND,
-                                        fill="#{0:02x}{1:02x}{1:02x}".format(int(x * 255), int((1 - x) * 255)))
+                                        fill="#{0:02x}{1:02x}{1:02x}".format(int(x * 255), int((1 - x) * 255)),
+                                        arrow=(LAST if step == num_steps-1 else None))
             # end for
         # end if
 
         # Draw acc trace array
         if draw_acc_trace:
-            for step in range(1, len(self.trace_acc)):
+            num_steps = len(self.trace_acc)
+            for step in range(1, num_steps):
                 x = step / float(self.trace_length_max - 1)
                 self.canvas.create_line(self.trace_acc[step - 1][0],
                                         self.trace_acc[step - 1][1],
                                         self.trace_acc[step][0],
                                         self.trace_acc[step][1],
                                         width=2.0, capstyle=ROUND,
-                                        fill="#{0:02x}0000".format(int(x * 255), int((1 - x) * 255)))
+                                        fill="#{0:02x}0000".format(int(x * 255), int((1 - x) * 255)),
+                                        arrow=(LAST if step == num_steps-1 else None))
             # end for
         # end if
 
         # Draw tangent trace array
         if draw_tangent_trace:
-            for step in range(1, len(self.trace_tangent)):
+            num_steps = len(self.trace_tangent)
+            for step in range(1, num_steps):
                 x = step / float(self.trace_length_max - 1)
                 self.canvas.create_line(self.trace_tangent[step - 1][0],
                                         self.trace_tangent[step - 1][1],
                                         self.trace_tangent[step][0],
                                         self.trace_tangent[step][1],
                                         width=2.0, capstyle=ROUND,
-                                        fill="#{0:02x}{0:02x}{0:02x}".format(int(x * 255), int((1 - x) * 255)))
+                                        fill="#{0:02x}{0:02x}{0:02x}".format(int(x * 255), int((1 - x) * 255)),
+                                        arrow=(LAST if step == num_steps-1 else None))
             # end for
         # end if
 
         # Draw normal trace array
         if draw_normal_trace:
-            for step in range(1, len(self.trace_normal)):
+            num_steps = len(self.trace_normal)
+            for step in range(1, num_steps):
                 x = step / float(self.trace_length_max - 1)
                 self.canvas.create_line(self.trace_normal[step - 1][0],
                                         self.trace_normal[step - 1][1],
                                         self.trace_normal[step][0],
                                         self.trace_normal[step][1],
                                         width=2.0, capstyle=ROUND,
-                                        fill="#{1:02x}{1:02x}{1:02x}".format(int(x * 255), int((1 - x) * 255)))
+                                        fill="#{1:02x}{1:02x}{1:02x}".format(int(x * 255), int((1 - x) * 255)),
+                                        arrow=(LAST if step == num_steps-1 else None))
             # end for
         # end if
 
         # Draw acc times tangent trace array
         if draw_acc_times_tangent_trace:
-            for step in range(1, len(self.trace_acc_times_tangent)):
+            num_steps = len(self.trace_acc_times_tangent)
+            for step in range(1, num_steps):
                 x = step / float(self.trace_length_max - 1)
                 self.canvas.create_line(self.trace_acc_times_tangent[step - 1][0],
                                         self.trace_acc_times_tangent[step - 1][1],
                                         self.trace_acc_times_tangent[step][0],
                                         self.trace_acc_times_tangent[step][1],
                                         width=2.0, capstyle=ROUND,
-                                        fill="#{0:02x}{0:02x}{1:02x}".format(int(x * 255), int((1 - x) * 255)))
+                                        fill="#{0:02x}{0:02x}{1:02x}".format(int(x * 255), int((1 - x) * 255)),
+                                        arrow=(LAST if step == num_steps-1 else None))
             # end for
         # end if
 
         # Draw acc times normal trace array
         if draw_acc_times_normal_trace:
-            for step in range(1, len(self.trace_acc_times_normal)):
+            num_steps = len(self.trace_acc_times_normal)
+            for step in range(1, num_steps):
                 x = step / float(self.trace_length_max - 1)
                 self.canvas.create_line(self.trace_acc_times_normal[step - 1][0],
                                         self.trace_acc_times_normal[step - 1][1],
                                         self.trace_acc_times_normal[step][0],
                                         self.trace_acc_times_normal[step][1],
                                         width=2.0, capstyle=ROUND,
-                                        fill="#{1:02x}{1:02x}{0:02x}".format(int(x * 255), int((1 - x) * 255)))
+                                        fill="#{1:02x}{1:02x}{0:02x}".format(int(x * 255), int((1 - x) * 255)),
+                                        arrow=(LAST if step == num_steps-1 else None))
             # end for
         # end if
 
@@ -182,26 +215,28 @@ class CanvasDrawer:
         if draw_vel_vec:
             rd = v.rd * np.asarray([1.0, -1.0]) * 0.5
             self.canvas.create_line(r[0], r[1], r[0] + rd[0], r[1] + rd[1],
-                                    width=2.0, capstyle=ROUND, fill="#000000")
+                                    width=2.0, capstyle=ROUND, fill="#000000", arrow=LAST)
         # end if
 
         # Draw acceleration vector
         if draw_acc_vec:
             rdd = v.rdd * np.asarray([1.0, -1.0]) * 5.0
             self.canvas.create_line(r[0], r[1], r[0] + rdd[0], r[1] + rdd[1],
-                                    width=2.0, capstyle=ROUND, fill="#00FF00")
+                                    width=2.0, capstyle=ROUND, fill="#00FF00", arrow=LAST)
         # end if
 
         # Draw tangent vector
         if draw_tangent:
-            rdtn = v.rdtn * np.asarray([1.0, -1.0]) * 100.0
-            self.canvas.create_line(r[0], r[1], r[0] + rdtn[0], r[1] + rdtn[1],
-                                    width=2.0, capstyle=ROUND, fill="#000000")
+            rdt = v.rdt * np.asarray([1.0, -1.0]) * 100.0
+            self.canvas.create_line(r[0] - rdt[0] / 2.0, r[1] - rdt[1] / 2.0,
+                                    r[0] + rdt[0] / 2.0, r[1] + rdt[1] / 2.0,
+                                    width=2.0, capstyle=ROUND, fill="#7777FF", arrow=LAST)
         # end if
 
         # Draw normal vector
         if draw_normal:
-            rdnn = v.rdnn * np.asarray([1.0, -1.0]) * 100.0
-            self.canvas.create_line(r[0], r[1], r[0] + rdnn[0], r[1] + rdnn[1],
-                                    width=2.0, capstyle=ROUND, fill="#000000")
+            rdn = v.rdn * np.asarray([1.0, -1.0]) * 100.0
+            self.canvas.create_line(r[0] - rdn[0] / 2.0, r[1] - rdn[1] / 2.0,
+                                    r[0] + rdn[0] / 2.0, r[1] + rdn[1] / 2.0,
+                                    width=2.0, capstyle=ROUND, fill="#000000", arrow=LAST)
         # end if

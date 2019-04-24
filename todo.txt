@@ -2,3 +2,5 @@
 * gui.py: Check, if it would make sense to use a Grid for placing the GUI elements.
 * canvas_drawer.py: Introduce global scaling in a way, that the scaling factor only needs to be touched once.
 * canvas_drawer.py: Inherit from the Canvas class and add functions to set origin and scaling (and probably as a separate parameter invert_y) and write (or overwrite) the create_line() function with passing through all named arguments.
+* scalable_canvas.py: Make scaling relative to the widgets size (depending on the ratio of width and height)
+* scalable_canvas.py: Make Setter functions for width, height, etc. and update these values when resizing the canvas. Attention on handling the update of values derived from these changed values, e.g. the scale_factor.

@@ -2,6 +2,7 @@ import tkinter as tk
 from vehicle import Vehicle
 from canvas_drawer import CanvasDrawer
 from time import sleep
+from scalable_canvas import ScalableCanvas
 
 
 canvas_width = 800
@@ -28,12 +29,6 @@ def cb_play_pause():
 
 def cb_canvas_configure(event):
     global play
-
-    # print("{:04d} : {:04d}".format(event.width, event.height))
-
-    # cb_play_pause()
-    # play = False
-    # btn_play_pause.config(text="Play")
 
     cd.reset_traces()
     cd.clear()
@@ -184,15 +179,16 @@ chk_draw_normal.pack(side=tk.TOP, anchor=tk.W)
 frm_canvas = tk.Frame(root)
 frm_canvas.pack(expand=True, fill=tk.BOTH, side=tk.TOP)
 
-canvas = tk.Canvas(frm_canvas, width=canvas_width, height=canvas_height)
+canvas = ScalableCanvas(frm_canvas, width=canvas_width, height=canvas_height, scale_factor=1.0e-4, scale_ratio=1.0,
+                        invert_y=True, center_origin=True, offset_x=0, offset_y=0)
 canvas.pack(expand=True, fill=tk.BOTH)
+canvas.bind('<Configure>', cb_canvas_configure)
 
 
 # Non-GUI initialization
 # ----------------------
 v = Vehicle("Vehicle", 300.0, 9.0)
-cd = CanvasDrawer(v, canvas, canvas_width, canvas_height, 0.01, trace_length_max=trace_length_max)
-canvas.bind('<Configure>', cb_canvas_configure)
+cd = CanvasDrawer(v, canvas, canvas_width, canvas_height, trace_length_max=trace_length_max)
 t = 0.0
 
 

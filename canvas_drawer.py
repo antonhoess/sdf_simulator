@@ -4,11 +4,9 @@ import numpy as np
 
 class CanvasDrawer:
 
-    def __init__(self, vehicle, canvas, canvas_width, canvas_height, trace_length_max=10):
+    def __init__(self, vehicle, canvas, trace_length_max=10):
         self.vehicle = vehicle
         self.canvas = canvas
-        self.canvas_width = canvas_width
-        self.canvas_height = canvas_height
         self.trace_length_max = trace_length_max
 
         self.trace_pos = []
@@ -18,12 +16,6 @@ class CanvasDrawer:
         self.trace_normal = []
         self.trace_acc_times_tangent = []
         self.trace_acc_times_normal = []
-
-    def set_canvas_width(self, canvas_width):
-        self.canvas_width = canvas_width
-
-    def set_canvas_height(self, canvas_height):
-        self.canvas_height = canvas_height
 
     # Update pos trace array
     def add_cur_pos_to_trace(self):
@@ -91,7 +83,7 @@ class CanvasDrawer:
              draw_vel_vec=True, draw_acc_vec=True, draw_tangent=True, draw_normal=True):
 
         # Clear canvas
-        self.canvas.delete("all")
+        self.clear()
 
         # Draw trace arrays
         # -----------------
@@ -204,25 +196,26 @@ class CanvasDrawer:
         # Draw vectors
         # ------------
         v = self.vehicle
-        r = v.r
+        r = self.trace_pos[-1]
+        rd = self.trace_vel[-1]
+        rdd = self.trace_acc[-1]
+        rdt = self.trace_tangent[-1]
+        rdn = self.trace_normal[-1]
 
         # Draw velocity vector
         if draw_vel_vec:
-            rd = v.rd * 20.0
             self.canvas.create_line(r[0], r[1], r[0] + rd[0], r[1] + rd[1],
                                     width=2.0, capstyle=ROUND, fill="#000000", arrow=LAST)
         # end if
 
         # Draw acceleration vector
         if draw_acc_vec:
-            rdd = v.rdd * 1000.0
             self.canvas.create_line(r[0], r[1], r[0] + rdd[0], r[1] + rdd[1],
                                     width=2.0, capstyle=ROUND, fill="#00FF00", arrow=LAST)
         # end if
 
         # Draw tangent vector
         if draw_tangent:
-            rdt = v.rdt * 10000.0
             self.canvas.create_line(r[0] - rdt[0] / 2.0, r[1] - rdt[1] / 2.0,
                                     r[0] + rdt[0] / 2.0, r[1] + rdt[1] / 2.0,
                                     width=2.0, capstyle=ROUND, fill="#7777FF", arrow=LAST)
@@ -230,7 +223,6 @@ class CanvasDrawer:
 
         # Draw normal vector
         if draw_normal:
-            rdn = v.rdn * 10000.0
             self.canvas.create_line(r[0] - rdn[0] / 2.0, r[1] - rdn[1] / 2.0,
                                     r[0] + rdn[0] / 2.0, r[1] + rdn[1] / 2.0,
                                     width=2.0, capstyle=ROUND, fill="#000000", arrow=LAST)

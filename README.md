@@ -8,7 +8,7 @@ Exercises for the SDF Introduction Lecture in the summer semester 2019
 * sudo apt install python3-pip
 * sudo pip3 install numpy
 
-Nomenclature
+# Nomenclature
 * r = position
 * rd (r') = velocity
 * rdd (r'') = acceleration

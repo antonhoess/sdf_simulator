@@ -4,7 +4,7 @@ import math
 
 class Vehicle:
 
-    def __init__(self, name, v=300, q=9):
+    def __init__(self, name, v=100., q=10.):
         self.name = name
         self.v = v
         self.q = q
@@ -13,12 +13,12 @@ class Vehicle:
         self.omega = q / (2 * v)
 
         self.r = np.zeros(2)
-        self.rd = np.zeros(2)    # r'(t)  -> velocity
-        self.rdd = np.zeros(2)   # r''(t) -> acceleration
-        self.rdt = np.zeros(2)  # t(t)   -> tangent (normalized)
-        self.rdn = np.zeros(2)  # n(t)   -> normal (normalized)
-        self.rddxrdt = np.zeros(2)  # r''(t) x t(t) acceleration x tangent (normalized)
-        self.rddxrdn = np.zeros(2)  # r''(t) x n(t) acceleration x normal (normalized)
+        self.rd = np.zeros(2)       # r'(t)         -> velocity
+        self.rdd = np.zeros(2)      # r''(t)        -> acceleration
+        self.rdt = np.zeros(2)      # t(t)          -> tangent (normalized)
+        self.rdn = np.zeros(2)      # n(t)          -> normal (normalized)
+        self.rddxrdt = np.zeros(2)  # r''(t) x t(t) -> acceleration x tangent (normalized)
+        self.rddxrdn = np.zeros(2)  # r''(t) x n(t) -> acceleration x normal (normalized)
 
     def __str__(self):
         return "{}: vel={}, accel={}, pos=({:10.4f} {:10.4f})".format(self.name, self.v, self.q, self.r[0], self.r[1])

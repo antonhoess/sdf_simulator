@@ -1,2 +1,6 @@
 * canvas_drawer.py: Don't use only a single vehicle, but use a list instead, allow to add more vehicles and iterate through all vehicles.
 * gui.py: Check, if it would make sense to use a Grid for placing the GUI elements.
+* gui.py: Add switch to allow plotting over time instead of 2D - but how to separate the components x and y? Make two graphs for each 2D graph?
+* gui.py: Add slider for speed and for step width (t increment) and show the current values on a label.
+* gui.py: Allow to move the canvas content by moving with the mouse and allow zooming with the mousewheel. Also add a reset button for position and zoom and probably even more values os the time increment e.g.
+* Check, if it makes sense to use canvas-functions as xview(), xview_scroll(), canvasx() and it's y-counterparts - probalby they are only interesting, if all items stay on the canvas and not when deleting all items in each cycle.

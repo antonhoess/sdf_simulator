@@ -7,6 +7,8 @@ from scalable_canvas import ScalableCanvas
 
 canvas_width = 800
 canvas_height = 400
+scale_factor = .8e-4  # Set to a fixed value that is good for zoom=1.
+zoom_factor = 1.
 
 t_incr = 1.0  # Time increase per tick
 t_tick = 0.01  # Sleep [s] per tick
@@ -22,17 +24,38 @@ def cb_play_pause():
     play = not play
 
     if play:
+        btn_single_step.config(state=tk.DISABLED)
         btn_play_pause.config(text="Pause")
     else:
         btn_play_pause.config(text="Play")
+        btn_single_step.config(state=tk.NORMAL)
+
+
+# Single step button
+def cb_single_step():
+    step()
 
 
 def cb_canvas_configure(event):
     global play
 
-    cd.clear()
+    draw()
 
     return
+
+
+def cb_mouse_wheel(event):
+    global zoom_factor
+
+    # Respond to Linux or Windows wheel event
+    if event.num == 4 or event.delta == 120:
+        zoom_factor *= 1.1
+    elif event.num == 5 or event.delta == -120:
+        zoom_factor /= 1.1
+
+    lbl_zoom_val.config(text="{:.2f}".format(zoom_factor * 100.))
+    canvas.zoom(zoom_factor)
+    draw()
 
 
 master = tk.Tk()
@@ -117,6 +140,10 @@ frm_control.pack(expand=False, fill=tk.Y, side=tk.LEFT)
 btn_play_pause = tk.Button(frm_control, text="Pause", width=10, bg="lightblue", command=cb_play_pause)
 btn_play_pause.pack(fill=tk.X, side=tk.TOP)
 
+btn_single_step = tk.Button(frm_control, text="Step", width=10, bg="green", command=cb_single_step)
+btn_single_step.pack(fill=tk.X, side=tk.TOP)
+btn_single_step.config(state=tk.DISABLED)
+
 draw_pos_trace = tk.IntVar()
 draw_pos_trace.set(1)
 chk_draw_pos_trace = tk.Checkbutton(frm_control, text="Draw Pos. Trace", variable=draw_pos_trace)
@@ -170,17 +197,28 @@ draw_normal = tk.IntVar()
 chk_draw_normal = tk.Checkbutton(frm_control, text="Draw Normal", variable=draw_normal)
 chk_draw_normal.pack(side=tk.TOP, anchor=tk.W)
 
+sep_hor_4 = tk.Frame(frm_control, height=2, bd=1, relief=tk.SUNKEN)
+sep_hor_4.pack(fill=tk.X, padx=5, pady=5)
+
+frm_zoom = tk.Frame(frm_control)
+frm_zoom.pack(fill=tk.X, side=tk.TOP, padx=5)
+lbl_zoom = tk.Label(frm_zoom, text="Zoom [%]:", width=9, anchor=tk.W)
+lbl_zoom.pack(fill=tk.X, side=tk.LEFT)
+lbl_zoom_val = tk.Label(frm_zoom, text="{:.2f}".format(zoom_factor * 100.), bg="white", anchor=tk.E)
+lbl_zoom_val.pack(expand=True, fill=tk.X, side=tk.LEFT)
+
 
 # The canvas tk.Frame on the bottom right
 # ------------------------------------
 frm_canvas = tk.Frame(root)
 frm_canvas.pack(expand=True, fill=tk.BOTH, side=tk.TOP)
 
-canvas = ScalableCanvas(frm_canvas, width=canvas_width, height=canvas_height, scale_factor=.8e-4, scale_ratio=1.,
-                        invert_y=True, center_origin=True, offset_x=0, offset_y=0)
+canvas = ScalableCanvas(frm_canvas, width=canvas_width, height=canvas_height, scale_factor=scale_factor,
+                        scale_ratio=1., invert_y=True, center_origin=True, offset_x=0, offset_y=0)
 canvas.pack(expand=True, fill=tk.BOTH)
 canvas.bind('<Configure>', cb_canvas_configure)
-
+canvas.bind('<Button-4>', cb_mouse_wheel)
+canvas.bind('<Button-5>', cb_mouse_wheel)
 
 # Non-GUI initialization
 # ----------------------
@@ -189,40 +227,50 @@ cd = CanvasDrawer(v, canvas, trace_length_max=trace_length_max)
 t = 0.0
 
 
+def draw():
+    cd.draw(draw_pos_trace=draw_pos_trace.get(), draw_vel_trace=draw_vel_trace.get(),
+            draw_acc_trace=draw_acc_trace.get(), draw_tangent_trace=draw_tangent_trace.get(),
+            draw_normal_trace=draw_normal_trace.get(),
+            draw_acc_times_tangent_trace=draw_acc_times_tangent_trace.get(),
+            draw_acc_times_normal_trace=draw_acc_times_normal_trace.get(),
+            draw_vel_vec=draw_vel_vec.get(),
+            draw_acc_vec=draw_acc_vec.get(), draw_tangent=draw_tangent.get(), draw_normal=draw_normal.get())
+
+
+def step():
+    global t
+
+    # Update vehicle position
+    v.update(t)
+
+    # Update gui elements with current values
+    lbl_pos_x_val.config(text="{:.4f}".format(v.r[0]))
+    lbl_pos_y_val.config(text="{:.4f}".format(v.r[1]))
+
+    lbl_vel_x_val.config(text="{:.4f}".format(v.rd[0]))
+    lbl_vel_y_val.config(text="{:.4f}".format(v.rd[1]))
+
+    lbl_acc_x_val.config(text="{:.4f}".format(v.rdd[0]))
+    lbl_acc_y_val.config(text="{:.4f}".format(v.rdd[1]))
+
+    # Visualization in canvas
+    # -----------------------
+    cd.add_cur_pos_to_trace()
+    cd.add_cur_vel_to_trace()
+    cd.add_cur_acc_to_trace()
+    cd.add_cur_tangent_to_trace()
+    cd.add_cur_normal_to_trace()
+    cd.add_cur_acc_times_tangent_to_trace()
+    cd.add_cur_acc_times_normal_to_trace()
+
+    draw()
+
+    t += t_incr
+
+
 while True:
     if play:
-        # Update vehicle position
-        v.update(t)
-
-        # Update gui elements with current values
-        lbl_pos_x_val.config(text="{:.4f}".format(v.r[0]))
-        lbl_pos_y_val.config(text="{:.4f}".format(v.r[1]))
-
-        lbl_vel_x_val.config(text="{:.4f}".format(v.rd[0]))
-        lbl_vel_y_val.config(text="{:.4f}".format(v.rd[1]))
-
-        lbl_acc_x_val.config(text="{:.4f}".format(v.rdd[0]))
-        lbl_acc_y_val.config(text="{:.4f}".format(v.rdd[1]))
-
-        # Visualization in canvas
-        # -----------------------
-        cd.add_cur_pos_to_trace()
-        cd.add_cur_vel_to_trace()
-        cd.add_cur_acc_to_trace()
-        cd.add_cur_tangent_to_trace()
-        cd.add_cur_normal_to_trace()
-        cd.add_cur_acc_times_tangent_to_trace()
-        cd.add_cur_acc_times_normal_to_trace()
-
-        cd.draw(draw_pos_trace=draw_pos_trace.get(), draw_vel_trace=draw_vel_trace.get(),
-                draw_acc_trace=draw_acc_trace.get(), draw_tangent_trace=draw_tangent_trace.get(),
-                draw_normal_trace=draw_normal_trace.get(),
-                draw_acc_times_tangent_trace=draw_acc_times_tangent_trace.get(),
-                draw_acc_times_normal_trace=draw_acc_times_normal_trace.get(),
-                draw_vel_vec=draw_vel_vec.get(),
-                draw_acc_vec=draw_acc_vec.get(), draw_tangent=draw_tangent.get(), draw_normal=draw_normal.get())
-
-        t += t_incr
+        step()
     # end if
 
     # Several updates

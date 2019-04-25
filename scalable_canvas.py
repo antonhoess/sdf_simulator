@@ -15,6 +15,11 @@ class ScalableCanvas(tk.Canvas):
         self._offset_x = offset_x
         self._offset_y = offset_y
 
+        self._zoom = 1.
+
+    def zoom(self, zoom=1.):
+        self._zoom = zoom
+
     def _create(self, *args, **kwargs):
         x = super()._create(*args, **kwargs)
 
@@ -36,6 +41,8 @@ class ScalableCanvas(tk.Canvas):
             self.scale(x, 0., 0., 1., -1.)
 
         self.scale(x, 0., 0., self._scale_factor, self._scale_factor)
+
+        self.scale(x, 0., 0., self._zoom, self._zoom)
 
         if self._center_origin:
             self.move(x, width / 2, height / 2)

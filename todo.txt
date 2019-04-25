@@ -3,4 +3,6 @@
 * gui.py: Add switch to allow plotting over time instead of 2D - but how to separate the components x and y? Make two graphs for each 2D graph?
 * gui.py: Add slider for speed and for step width (t increment) and show the current values on a label.
 * gui.py: Allow to move the canvas content by moving with the mouse and allow zooming with the mousewheel. Also add a reset button for position and zoom and probably even more values os the time increment e.g.
+  -> Added zoom, translate and reset. But when zooming it might be nice if the zoom is centered around the current mouse position.
 * Check, if it makes sense to use canvas-functions as xview(), xview_scroll(), canvasx() and it's y-counterparts - probalby they are only interesting, if all items stay on the canvas and not when deleting all items in each cycle.
+* Check, if it is feasible to keep track of all elements created (drawn) on the canvas and update them instead of deleting all and creating them anew.

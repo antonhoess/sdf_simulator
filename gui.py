@@ -64,11 +64,21 @@ def do_zoom():
 def cb_mouse_wheel(event):
     global zoom_factor
 
+    zoom_diff = .1  # 10%
+    zoom_factor_update = 1.
+
+    offset_x, offset_y = canvas.get_offset()
+
     # Respond to Linux or Windows wheel event
     if event.num == 4 or event.delta == 120:
-        zoom_factor *= 1.1
+        zoom_factor_update = 1. * (1 + zoom_diff)
+        canvas.set_offset(offset_x + (event.x - (offset_x + canvas.winfo_width() / 2.)) * zoom_diff / 2.,
+                          offset_y + (event.y - (offset_y + canvas.winfo_height() / 2.)) * zoom_diff / 2.)
     elif event.num == 5 or event.delta == -120:
-        zoom_factor /= 1.1
+        zoom_factor_update = 1. / (1 + zoom_diff)
+
+    zoom_factor *= zoom_factor_update
+
 
     do_zoom()
 
@@ -88,9 +98,6 @@ def cb_motion(event):
     global move_origin
 
     if move_mode:
-        x, y = event.x, event.y
-        print('{}, {}'.format(move_origin[0]-x, move_origin[1]-y))
-
         canvas.set_offset(move_origin_canvas[0] + (event.x - move_origin[0]),
                           move_origin_canvas[1] + (event.y - move_origin[1]))
         draw()
@@ -101,6 +108,10 @@ def cb_left_click_release(event):
     global move_mode
 
     move_mode = False
+
+
+def cb_key(event):
+    x = 10
 
 
 master = tk.Tk()
@@ -185,7 +196,7 @@ frm_control.pack(expand=False, fill=tk.Y, side=tk.LEFT)
 btn_play_pause = tk.Button(frm_control, text="Pause", width=10, bg="lightblue", command=cb_play_pause)
 btn_play_pause.pack(fill=tk.X, side=tk.TOP)
 
-btn_single_step = tk.Button(frm_control, text="Step", width=10, bg="green", command=cb_single_step)
+btn_single_step = tk.Button(frm_control, text="Step", width=10, bg="lightgreen", command=cb_single_step)
 btn_single_step.pack(fill=tk.X, side=tk.TOP)
 btn_single_step.config(state=tk.DISABLED)
 
@@ -267,11 +278,13 @@ canvas = ScalableCanvas(frm_canvas, width=canvas_width, height=canvas_height, sc
                         scale_ratio=1., invert_y=True, center_origin=True, offset_x=0, offset_y=0)
 canvas.pack(expand=True, fill=tk.BOTH)
 canvas.bind('<Configure>', cb_canvas_configure)
-canvas.bind('<Button-4>', cb_mouse_wheel)
-canvas.bind('<Button-5>', cb_mouse_wheel)
+canvas.bind("<MouseWheel>", cb_mouse_wheel)  # With Windows OS
+canvas.bind('<Button-4>', cb_mouse_wheel)  # With Linux OS
+canvas.bind('<Button-5>', cb_mouse_wheel)  # "
 canvas.bind('<Shift-Button-1>', cb_left_click_shift)
 canvas.bind('<B1-Shift-Motion>', cb_motion)
 canvas.bind('<ButtonRelease-1>', cb_left_click_release)
+canvas.bind('<Key>', cb_key)
 
 
 # Non-GUI initialization

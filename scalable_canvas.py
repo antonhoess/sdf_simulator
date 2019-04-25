@@ -17,6 +17,13 @@ class ScalableCanvas(tk.Canvas):
 
         self._zoom = 1.
 
+    def get_offset(self):
+        return self._offset_x, self._offset_y
+
+    def set_offset(self, offset_x, offset_y):
+        self._offset_x = offset_x
+        self._offset_y = offset_y
+
     def zoom(self, zoom=1.):
         self._zoom = zoom
 

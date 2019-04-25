@@ -7,7 +7,7 @@ from scalable_canvas import ScalableCanvas
 
 canvas_width = 800
 canvas_height = 400
-scale_factor = .8e-4  # Set to a fixed value that is good for zoom=1.
+scale_factor = .8e-4  # Set to a fixed value that is good for zoom == 1.0
 zoom_factor = 1.
 
 t_incr = 1.0  # Time increase per tick
@@ -15,6 +15,10 @@ t_tick = 0.01  # Sleep [s] per tick
 trace_length_max = int(100.0 / t_incr)  # Max. length of the trace
 
 play = True
+
+move_mode = False
+move_origin = [-1, -1]
+move_origin_canvas = [-1, -1]
 
 
 # Play / pause button
@@ -36,12 +40,25 @@ def cb_single_step():
     step()
 
 
+def cb_reset_transformations():
+    global zoom_factor
+
+    zoom_factor = 1.
+    do_zoom()
+    canvas.set_offset(0, 0)
+    draw()
+
+
 def cb_canvas_configure(event):
     global play
 
     draw()
 
-    return
+
+def do_zoom():
+    lbl_zoom_val.config(text="{:.2f}".format(zoom_factor * 100.))
+    canvas.zoom(zoom_factor)
+    draw()
 
 
 def cb_mouse_wheel(event):
@@ -53,9 +70,37 @@ def cb_mouse_wheel(event):
     elif event.num == 5 or event.delta == -120:
         zoom_factor /= 1.1
 
-    lbl_zoom_val.config(text="{:.2f}".format(zoom_factor * 100.))
-    canvas.zoom(zoom_factor)
-    draw()
+    do_zoom()
+
+
+def cb_left_click_shift(event):
+    global move_mode
+    global move_origin
+    global move_origin_canvas
+
+    move_origin = [event.x, event.y]
+    move_origin_canvas = canvas.get_offset()
+    move_mode = True
+
+
+def cb_motion(event):
+    global move_mode
+    global move_origin
+
+    if move_mode:
+        x, y = event.x, event.y
+        print('{}, {}'.format(move_origin[0]-x, move_origin[1]-y))
+
+        canvas.set_offset(move_origin_canvas[0] + (event.x - move_origin[0]),
+                          move_origin_canvas[1] + (event.y - move_origin[1]))
+        draw()
+    # end if
+
+
+def cb_left_click_release(event):
+    global move_mode
+
+    move_mode = False
 
 
 master = tk.Tk()
@@ -144,6 +189,11 @@ btn_single_step = tk.Button(frm_control, text="Step", width=10, bg="green", comm
 btn_single_step.pack(fill=tk.X, side=tk.TOP)
 btn_single_step.config(state=tk.DISABLED)
 
+btn_cb_reset_transformations = tk.Button(frm_control, text="Reset\nTransformations", width=10, bg="orange",
+                                command=cb_reset_transformations)
+btn_cb_reset_transformations.pack(fill=tk.X, side=tk.TOP)
+
+
 draw_pos_trace = tk.IntVar()
 draw_pos_trace.set(1)
 chk_draw_pos_trace = tk.Checkbutton(frm_control, text="Draw Pos. Trace", variable=draw_pos_trace)
@@ -219,6 +269,10 @@ canvas.pack(expand=True, fill=tk.BOTH)
 canvas.bind('<Configure>', cb_canvas_configure)
 canvas.bind('<Button-4>', cb_mouse_wheel)
 canvas.bind('<Button-5>', cb_mouse_wheel)
+canvas.bind('<Shift-Button-1>', cb_left_click_shift)
+canvas.bind('<B1-Shift-Motion>', cb_motion)
+canvas.bind('<ButtonRelease-1>', cb_left_click_release)
+
 
 # Non-GUI initialization
 # ----------------------

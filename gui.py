@@ -79,7 +79,6 @@ def cb_mouse_wheel(event):
 
     zoom_factor *= zoom_factor_update
 
-
     do_zoom()
 
 

@@ -8,7 +8,8 @@ from scalable_canvas import ScalableCanvas
 canvas_width = 800
 canvas_height = 400
 scale_factor = .8e-4  # Set to a fixed value that is good for zoom == 1.0
-zoom_factor = 1.
+zoom_value = 1.  # Start value
+zoom_factor = 1.1  # Const
 
 t_incr = 1.0  # Time increase per tick
 t_tick = 0.01  # Sleep [s] per tick
@@ -41,9 +42,9 @@ def cb_single_step():
 
 
 def cb_reset_transformations():
-    global zoom_factor
+    global zoom_value
 
-    zoom_factor = 1.
+    zoom_value = 1.
     do_zoom()
     canvas.set_offset(0, 0)
     draw()
@@ -56,28 +57,30 @@ def cb_canvas_configure(event):
 
 
 def do_zoom():
-    lbl_zoom_val.config(text="{:.2f}".format(zoom_factor * 100.))
-    canvas.zoom(zoom_factor)
+    lbl_zoom_val.config(text="{:.2f}".format(zoom_value * 100.))
+    canvas.zoom(zoom_value)
     draw()
 
 
 def cb_mouse_wheel(event):
+    global zoom_value
     global zoom_factor
-
-    zoom_diff = .1  # 10%
-    zoom_factor_update = 1.
 
     offset_x, offset_y = canvas.get_offset()
 
     # Respond to Linux or Windows wheel event
     if event.num == 4 or event.delta == 120:
-        zoom_factor_update = 1. * (1 + zoom_diff)
-        canvas.set_offset(offset_x + (event.x - (offset_x + canvas.winfo_width() / 2.)) * zoom_diff / 2.,
-                          offset_y + (event.y - (offset_y + canvas.winfo_height() / 2.)) * zoom_diff / 2.)
+        zoom_factor_update = 1. * zoom_factor
+        zoom_factor_diff = abs(zoom_factor_update - 1)
+        canvas.set_offset(offset_x - (event.x - (offset_x + (canvas.winfo_width() / 2. if canvas.get_center_origin() else 0.))) * zoom_factor_diff,
+                          offset_y - (event.y - (offset_y + (canvas.winfo_height() / 2. if canvas.get_center_origin() else 0.))) * zoom_factor_diff)
     elif event.num == 5 or event.delta == -120:
-        zoom_factor_update = 1. / (1 + zoom_diff)
+        zoom_factor_update = 1. / zoom_factor
+        zoom_factor_diff = abs(zoom_factor_update - 1)
+        canvas.set_offset(offset_x + (event.x - (offset_x + (canvas.winfo_width() / 2. if canvas.get_center_origin() else 0.))) * zoom_factor_diff,
+                          offset_y + (event.y - (offset_y + (canvas.winfo_height() / 2. if canvas.get_center_origin() else 0.))) * zoom_factor_diff)
 
-    zoom_factor *= zoom_factor_update
+    zoom_value *= zoom_factor_update
 
     do_zoom()
 
@@ -92,7 +95,7 @@ def cb_left_click_shift(event):
     move_mode = True
 
 
-def cb_motion(event):
+def cb_shift_motion(event):
     global move_mode
     global move_origin
 
@@ -103,14 +106,22 @@ def cb_motion(event):
     # end if
 
 
+def cb_motion_scaled(event):
+    lbl_cursor_pos_val.config(text="{:5.2f}; {:5.2f}".format(event.x, event.y))
+
+
 def cb_left_click_release(event):
     global move_mode
 
     move_mode = False
 
 
-def cb_key(event):
+def cb_key(event):  # XXX to check the keynumber of the toggle button in the center of the touchpad
     x = 10
+
+
+def cb_draw():
+    draw()
 
 
 master = tk.Tk()
@@ -129,63 +140,78 @@ frm_pos = tk.Frame(frm_view)
 frm_pos.pack(fill=tk.X, side=tk.LEFT, padx=5)
 
 frm_pos_x = tk.Frame(frm_pos)
-frm_pos_x.pack(fill=tk.X, side=tk.TOP, padx=5)
+frm_pos_x.pack(side=tk.TOP, padx=5)
 lbl_pos_x = tk.Label(frm_pos_x, text="pos x [m]:", width=9, anchor=tk.W)
-lbl_pos_x.pack(fill=tk.X, side=tk.LEFT)
+lbl_pos_x.pack(side=tk.LEFT)
 lbl_pos_x_val = tk.Label(frm_pos_x, text="", width=10, bg="yellow", anchor=tk.E)
-lbl_pos_x_val.pack(fill=tk.X, side=tk.LEFT)
+lbl_pos_x_val.pack(side=tk.LEFT)
 
 frm_pos_y = tk.Frame(frm_pos)
-frm_pos_y.pack(fill=tk.X, side=tk.TOP, padx=5)
+frm_pos_y.pack(side=tk.TOP, padx=5)
 lbl_pos_y = tk.Label(frm_pos_y, text="pos y [m]:", width=9, anchor=tk.W)
-lbl_pos_y.pack(fill=tk.X, side=tk.LEFT)
+lbl_pos_y.pack(side=tk.LEFT)
 lbl_pos_y_val = tk.Label(frm_pos_y, text="", width=10, bg="yellow", anchor=tk.E)
-lbl_pos_y_val.pack(fill=tk.X, side=tk.LEFT)
+lbl_pos_y_val.pack(side=tk.LEFT)
 
 # Velocity
-sep_ver_ctrl_1 = tk.Frame(frm_view, width=2, bd=1, relief=tk.SUNKEN)
-sep_ver_ctrl_1.pack(fill=tk.Y, side=tk.LEFT, padx=0)
+sep_ver = tk.Frame(frm_view, width=2, bd=1, relief=tk.SUNKEN)
+sep_ver.pack(fill=tk.Y, side=tk.LEFT, padx=0)
 
 frm_vel = tk.Frame(frm_view)
 frm_vel.pack(fill=tk.X, side=tk.LEFT, padx=5)
 
 frm_vel_x = tk.Frame(frm_vel)
-frm_vel_x.pack(fill=tk.X, side=tk.TOP, padx=5)
+frm_vel_x.pack(side=tk.TOP, padx=5)
 lbl_vel_x = tk.Label(frm_vel_x, text="vel. x [m/s]:", width=10, anchor=tk.W)
-lbl_vel_x.pack(fill=tk.X, side=tk.LEFT)
+lbl_vel_x.pack(side=tk.LEFT)
 lbl_vel_x_val = tk.Label(frm_vel_x, text="", width=10, bg="orange", anchor=tk.E)
-lbl_vel_x_val.pack(fill=tk.X, side=tk.LEFT)
+lbl_vel_x_val.pack(side=tk.LEFT)
 
 frm_vel_y = tk.Frame(frm_vel)
-frm_vel_y.pack(fill=tk.X, side=tk.TOP, padx=5)
+frm_vel_y.pack(side=tk.TOP, padx=5)
 lbl_vel_y = tk.Label(frm_vel_y, text="vel. y [m/s]:", width=10, anchor=tk.W)
-lbl_vel_y.pack(fill=tk.X, side=tk.LEFT)
+lbl_vel_y.pack(side=tk.LEFT)
 lbl_vel_y_val = tk.Label(frm_vel_y, text="", width=10, bg="orange", anchor=tk.E)
-lbl_vel_y_val.pack(fill=tk.X, side=tk.LEFT)
+lbl_vel_y_val.pack(side=tk.LEFT)
 
 # Acceleration
-sep_ver_ctrl_2 = tk.Frame(frm_view, width=2, bd=1, relief=tk.SUNKEN)
-sep_ver_ctrl_2.pack(fill=tk.Y, side=tk.LEFT, padx=0)
+sep_ver = tk.Frame(frm_view, width=2, bd=1, relief=tk.SUNKEN)
+sep_ver.pack(fill=tk.Y, side=tk.LEFT, padx=0)
 
 frm_acc = tk.Frame(frm_view)
-frm_acc.pack(fill=tk.X, side=tk.LEFT, padx=5)
+frm_acc.pack(side=tk.LEFT, padx=5)
 
 frm_acc_x = tk.Frame(frm_acc)
-frm_acc_x.pack(fill=tk.X, side=tk.TOP, padx=5)
+frm_acc_x.pack(side=tk.TOP, padx=5)
 lbl_acc_x = tk.Label(frm_acc_x, text="accel. x [m/s²]:", width=13, anchor=tk.W)
-lbl_acc_x.pack(fill=tk.X, side=tk.LEFT)
+lbl_acc_x.pack(side=tk.LEFT)
 lbl_acc_x_val = tk.Label(frm_acc_x, text="", width=10, bg="red", anchor=tk.E)
-lbl_acc_x_val.pack(fill=tk.X, side=tk.LEFT)
+lbl_acc_x_val.pack(side=tk.LEFT)
 
 frm_acc_y = tk.Frame(frm_acc)
-frm_acc_y.pack(fill=tk.X, side=tk.TOP, padx=5)
+frm_acc_y.pack(side=tk.TOP, padx=5)
 lbl_acc_y = tk.Label(frm_acc_y, text="accel. y [m/s²]:", width=13, anchor=tk.W)
-lbl_acc_y.pack(fill=tk.X, side=tk.LEFT)
+lbl_acc_y.pack(side=tk.LEFT)
 lbl_acc_y_val = tk.Label(frm_acc_y, text="", width=10, bg="red", anchor=tk.E)
-lbl_acc_y_val.pack(fill=tk.X, side=tk.LEFT)
+lbl_acc_y_val.pack(side=tk.LEFT)
 
-sep_hor_1 = tk.Frame(root, height=2, bd=1, relief=tk.SUNKEN)
-sep_hor_1.pack(fill=tk.X, padx=5, pady=5)
+sep_hor = tk.Frame(root, height=2, bd=1, relief=tk.SUNKEN)
+sep_hor.pack(fill=tk.X, padx=5, pady=5)
+
+# Status bar at the bottom
+frm_status = tk.Frame(root)
+frm_status.pack(expand=False, fill=tk.X, side=tk.BOTTOM)
+
+sep_hor = tk.Frame(root, height=2, bd=1, relief=tk.SUNKEN)
+sep_hor.pack(fill=tk.X, padx=5, pady=5, side=tk.BOTTOM)
+
+# Cursor position (scaled)
+frm_cursor_pos = tk.Frame(frm_status)
+frm_cursor_pos.pack(fill=tk.X, side=tk.LEFT, pady=5)
+lbl_cursor_pos = tk.Label(frm_cursor_pos, text="cursor pos (x, y):", width=14, anchor=tk.W)
+lbl_cursor_pos.pack(fill=tk.X, side=tk.LEFT)
+lbl_cursor_pos_val = tk.Label(frm_cursor_pos, text="0; 0", width=20, bg="yellow")
+lbl_cursor_pos_val.pack(fill=tk.X, side=tk.LEFT)
 
 # The control tk.Frame on the left
 # -----------------------------
@@ -203,70 +229,74 @@ btn_cb_reset_transformations = tk.Button(frm_control, text="Reset\nTransformatio
                                 command=cb_reset_transformations)
 btn_cb_reset_transformations.pack(fill=tk.X, side=tk.TOP)
 
+sep_hor = tk.Frame(frm_control, height=2, bd=1, relief=tk.SUNKEN)
+sep_hor.pack(fill=tk.X, padx=5, pady=5)
 
 draw_pos_trace = tk.IntVar()
 draw_pos_trace.set(1)
-chk_draw_pos_trace = tk.Checkbutton(frm_control, text="Draw Pos. Trace", variable=draw_pos_trace)
+chk_draw_pos_trace = tk.Checkbutton(frm_control, text="Draw Pos. Trace", variable=draw_pos_trace, command=cb_draw)
 chk_draw_pos_trace.pack(side=tk.TOP, anchor=tk.W)
 
 draw_vel_trace = tk.IntVar()
-chk_draw_vel_trace = tk.Checkbutton(frm_control, text="Draw Vel. Trace", variable=draw_vel_trace)
+chk_draw_vel_trace = tk.Checkbutton(frm_control, text="Draw Vel. Trace", variable=draw_vel_trace, command=cb_draw)
 chk_draw_vel_trace.pack(side=tk.TOP, anchor=tk.W)
 
 draw_acc_trace = tk.IntVar()
-chk_draw_acc_trace = tk.Checkbutton(frm_control, text="Draw Accel. Trace", variable=draw_acc_trace)
+chk_draw_acc_trace = tk.Checkbutton(frm_control, text="Draw Accel. Trace", variable=draw_acc_trace, command=cb_draw)
 chk_draw_acc_trace.pack(side=tk.TOP, anchor=tk.W)
 
 draw_tangent_trace = tk.IntVar()
-chk_draw_tangent_trace = tk.Checkbutton(frm_control, text="Draw Tangent Trace", variable=draw_tangent_trace)
+chk_draw_tangent_trace = tk.Checkbutton(frm_control, text="Draw Tangent Trace", variable=draw_tangent_trace, command=cb_draw)
 chk_draw_tangent_trace.pack(side=tk.TOP, anchor=tk.W)
 
 draw_normal_trace = tk.IntVar()
-chk_draw_normal_trace = tk.Checkbutton(frm_control, text="Draw Normal Trace", variable=draw_normal_trace)
+chk_draw_normal_trace = tk.Checkbutton(frm_control, text="Draw Normal Trace", variable=draw_normal_trace, command=cb_draw)
 chk_draw_normal_trace.pack(side=tk.TOP, anchor=tk.W)
 
 draw_acc_times_tangent_trace = tk.IntVar()
 chk_draw_acc_times_tangent_trace = tk.Checkbutton(frm_control, text="Draw Acc. x Tangent Trace",
-                                                  variable=draw_acc_times_tangent_trace)
+                                                  variable=draw_acc_times_tangent_trace, command=cb_draw)
 chk_draw_acc_times_tangent_trace.pack(side=tk.TOP, anchor=tk.W)
 
 draw_acc_times_normal_trace = tk.IntVar()
 chk_draw_acc_times_normal_trace = tk.Checkbutton(frm_control, text="Draw Acc. x Normal Trace",
-                                                 variable=draw_acc_times_normal_trace)
+                                                 variable=draw_acc_times_normal_trace, command=cb_draw)
 chk_draw_acc_times_normal_trace.pack(side=tk.TOP, anchor=tk.W)
 
-sep_hor_2 = tk.Frame(frm_control, height=2, bd=1, relief=tk.SUNKEN)
-sep_hor_2.pack(fill=tk.X, padx=5, pady=5)
+# Vectors
+sep_hor = tk.Frame(frm_control, height=2, bd=1, relief=tk.SUNKEN)
+sep_hor.pack(fill=tk.X, padx=5, pady=5)
 
 draw_vel_vec = tk.IntVar()
-chk_draw_vel_vec = tk.Checkbutton(frm_control, text="Draw Vel. Vec.", variable=draw_vel_vec)
+chk_draw_vel_vec = tk.Checkbutton(frm_control, text="Draw Vel. Vec.", variable=draw_vel_vec, command=cb_draw)
 chk_draw_vel_vec.pack(side=tk.TOP, anchor=tk.W)
 
 draw_acc_vec = tk.IntVar()
-chk_draw_acc_vec = tk.Checkbutton(frm_control, text="Draw Accel. Vec.", variable=draw_acc_vec)
+chk_draw_acc_vec = tk.Checkbutton(frm_control, text="Draw Accel. Vec.", variable=draw_acc_vec, command=cb_draw)
 chk_draw_acc_vec.pack(side=tk.TOP, anchor=tk.W)
 
-sep_hor_3 = tk.Frame(frm_control, height=2, bd=1, relief=tk.SUNKEN)
-sep_hor_3.pack(fill=tk.X, padx=5, pady=5)
+# Tangent and normal
+sep_hor = tk.Frame(frm_control, height=2, bd=1, relief=tk.SUNKEN)
+sep_hor.pack(fill=tk.X, padx=5, pady=5)
 
 draw_tangent = tk.IntVar()
-chk_draw_tangent = tk.Checkbutton(frm_control, text="Draw Tangent", variable=draw_tangent)
+chk_draw_tangent = tk.Checkbutton(frm_control, text="Draw Tangent", variable=draw_tangent, command=cb_draw)
 chk_draw_tangent.pack(side=tk.TOP, anchor=tk.W)
 
 draw_normal = tk.IntVar()
-chk_draw_normal = tk.Checkbutton(frm_control, text="Draw Normal", variable=draw_normal)
+chk_draw_normal = tk.Checkbutton(frm_control, text="Draw Normal", variable=draw_normal, command=cb_draw)
 chk_draw_normal.pack(side=tk.TOP, anchor=tk.W)
 
-sep_hor_4 = tk.Frame(frm_control, height=2, bd=1, relief=tk.SUNKEN)
-sep_hor_4.pack(fill=tk.X, padx=5, pady=5)
+# Zoom
+sep_hor = tk.Frame(frm_control, height=2, bd=1, relief=tk.SUNKEN)
+sep_hor.pack(fill=tk.X, padx=5, pady=5)
 
 frm_zoom = tk.Frame(frm_control)
 frm_zoom.pack(fill=tk.X, side=tk.TOP, padx=5)
 lbl_zoom = tk.Label(frm_zoom, text="Zoom [%]:", width=9, anchor=tk.W)
 lbl_zoom.pack(fill=tk.X, side=tk.LEFT)
-lbl_zoom_val = tk.Label(frm_zoom, text="{:.2f}".format(zoom_factor * 100.), bg="white", anchor=tk.E)
+lbl_zoom_val = tk.Label(frm_zoom, text="{:.2f}".format(zoom_value * 100.), bg="white", anchor=tk.E)
 lbl_zoom_val.pack(expand=True, fill=tk.X, side=tk.LEFT)
-
 
 # The canvas tk.Frame on the bottom right
 # ------------------------------------
@@ -281,8 +311,9 @@ canvas.bind("<MouseWheel>", cb_mouse_wheel)  # With Windows OS
 canvas.bind('<Button-4>', cb_mouse_wheel)  # With Linux OS
 canvas.bind('<Button-5>', cb_mouse_wheel)  # "
 canvas.bind('<Shift-Button-1>', cb_left_click_shift)
-canvas.bind('<B1-Shift-Motion>', cb_motion)
+canvas.bind('<B1-Shift-Motion>', cb_shift_motion)
 canvas.bind('<ButtonRelease-1>', cb_left_click_release)
+canvas.bind('<<MotionScaled>>', cb_motion_scaled)
 canvas.bind('<Key>', cb_key)
 
 

@@ -2,7 +2,12 @@
 * gui.py: Check, if it would make sense to use a Grid for placing the GUI elements.
 * gui.py: Add switch to allow plotting over time instead of 2D - but how to separate the components x and y? Make two graphs for each 2D graph?
 * gui.py: Add slider for speed and for step width (t increment) and show the current values on a label.
-* gui.py: Allow to move the canvas content by moving with the mouse and allow zooming with the mousewheel. Also add a reset button for position and zoom and probably even more values os the time increment e.g.
-  -> Added zoom, translate and reset. But when zooming it might be nice if the zoom is centered around the current mouse position.
+* gui.py: Add to the reset button probably even more values os the time increment e.g.
 * Check, if it makes sense to use canvas-functions as xview(), xview_scroll(), canvasx() and it's y-counterparts - probalby they are only interesting, if all items stay on the canvas and not when deleting all items in each cycle.
 * Check, if it is feasible to keep track of all elements created (drawn) on the canvas and update them instead of deleting all and creating them anew.
+* Unify all function and variable names and also structure them more, e.g. pack them in classes if useful.
+* scalable_canvas.py: Try to unify the two functions that scale coordinates (for creating drawing elements and for the sclaed motion event) - attention: the order of multiplication and addition is changed and the mathematical inverse operator is used except for the invert_y.
+* scalable_canvas.py: Instead of get_* and set_* use real getters and setters
+* gui.py: Introduce if __name__ == "__main__": and restructure the code.
+* gui.py: Put all Widget stuff in a separate class if possible.
+* Put more comments in the code.

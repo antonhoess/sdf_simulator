@@ -6,7 +6,7 @@ class ScalableCanvas(tk.Canvas):
 
     # scale_ratio = width / height
     def __init__(self, widget, scale_factor=1.0, scale_ratio=None, invert_y=False,
-                 center_origin=False, offset_x=0, offset_y=0, **kwargs):
+                 center_origin=False, offset_x=0, offset_y=0, zoom_factor=1., **kwargs):
         super().__init__(widget, **kwargs)
 
         self._scale_factor = scale_factor
@@ -15,6 +15,7 @@ class ScalableCanvas(tk.Canvas):
         self._center_origin = center_origin
         self._offset_x = offset_x
         self._offset_y = offset_y
+        self._zoom_factor = zoom_factor
 
         self._zoom = 1.
 
@@ -22,7 +23,29 @@ class ScalableCanvas(tk.Canvas):
 
     def cb_motion(self, event):
         x, y = self.scale_point(event.x, event.y)
-        self.event_generate("<<MotionScaled>>", x=x, y=y)
+
+        e = {
+            'x': x,
+            'y': y
+        }
+
+        # We only need to update x and y, since all other values of event are automatically generated.
+        # It's not possible to add new key-names
+        self.event_generate("<<MotionScaled>>", **e)
+
+    def zoom_in(self):
+        zoom_factor_update = 1. * self._zoom_factor
+        zoom_factor_diff = abs(zoom_factor_update - 1)
+        self._zoom *= self._zoom_factor
+        self.set_offset(self._offset_x - (self.winfo_pointerx() - self.winfo_rootx() - (self._offset_x + (self.winfo_width() / 2. if self.get_center_origin() else 0.))) * zoom_factor_diff,
+                        self._offset_y - (self.winfo_pointery() - self.winfo_rooty() - (self._offset_y + (self.winfo_height() / 2. if self.get_center_origin() else 0.))) * zoom_factor_diff)
+
+    def zoom_out(self):
+        zoom_factor_update = 1. / self._zoom_factor
+        zoom_factor_diff = abs(zoom_factor_update - 1)
+        self._zoom /= self._zoom_factor
+        self.set_offset(self._offset_x + (self.winfo_pointerx() - self.winfo_rootx() - (self._offset_x + (self.winfo_width() / 2. if self.get_center_origin() else 0.))) * zoom_factor_diff,
+                        self._offset_y + (self.winfo_pointery() - self.winfo_rooty() - (self._offset_y + (self.winfo_height() / 2. if self.get_center_origin() else 0.))) * zoom_factor_diff)
 
     def get_offset(self):
         return self._offset_x, self._offset_y
@@ -36,6 +59,9 @@ class ScalableCanvas(tk.Canvas):
 
     def zoom(self, zoom=1.):
         self._zoom = zoom
+
+    def get_zoom(self):
+        return self._zoom
 
     def scale_point(self, x, y):
         p = np.asarray([x, y], dtype=np.float)

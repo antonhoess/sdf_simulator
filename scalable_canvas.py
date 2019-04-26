@@ -1,4 +1,5 @@
 import tkinter as tk
+import numpy as np
 
 
 class ScalableCanvas(tk.Canvas):
@@ -17,6 +18,12 @@ class ScalableCanvas(tk.Canvas):
 
         self._zoom = 1.
 
+        self.bind("<Motion>", self.cb_motion)
+
+    def cb_motion(self, event):
+        x, y = self.scale_point(event.x, event.y)
+        self.event_generate("<<MotionScaled>>", x=x, y=y)
+
     def get_offset(self):
         return self._offset_x, self._offset_y
 
@@ -24,8 +31,42 @@ class ScalableCanvas(tk.Canvas):
         self._offset_x = offset_x
         self._offset_y = offset_y
 
+    def get_center_origin(self):
+        return self._center_origin
+
     def zoom(self, zoom=1.):
         self._zoom = zoom
+
+    def scale_point(self, x, y):
+        p = np.asarray([x, y], dtype=np.float)
+
+        width = self.winfo_width()
+        height = self.winfo_height()
+
+        if self._center_origin:
+            p -= np.asarray([width / 2, height / 2])
+
+        p -= np.asarray([self._offset_x, self._offset_y])
+
+        if self._scale_ratio is not None:
+            ratio = width / height
+
+            if ratio < self._scale_ratio:
+                ratio_scale_factor = (width / 2.0 * self._scale_ratio)
+            else:
+                ratio_scale_factor = (height / 2.0 * self._scale_ratio)
+
+            p /= ratio_scale_factor
+        # end if
+
+        if self._invert_y:
+            p *= np.asarray([1., -1.])
+
+        p /= self._scale_factor
+
+        p /= self._zoom
+
+        return p[0], p[1]
 
     def _create(self, *args, **kwargs):
         x = super()._create(*args, **kwargs)

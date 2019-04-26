@@ -8,7 +8,6 @@ from scalable_canvas import ScalableCanvas
 canvas_width = 800
 canvas_height = 400
 scale_factor = .8e-4  # Set to a fixed value that is good for zoom == 1.0
-zoom_value = 1.  # Start value
 zoom_factor = 1.1  # Const
 
 t_incr = 1.0  # Time increase per tick
@@ -42,45 +41,27 @@ def cb_single_step():
 
 
 def cb_reset_transformations():
-    global zoom_value
-
-    zoom_value = 1.
     do_zoom()
     canvas.set_offset(0, 0)
     draw()
 
 
 def cb_canvas_configure(event):
-    global play
-
     draw()
 
 
 def do_zoom():
-    lbl_zoom_val.config(text="{:.2f}".format(zoom_value * 100.))
-    canvas.zoom(zoom_value)
+    lbl_zoom_val.config(text="{:.2f}".format(canvas.get_zoom() * 100.))
     draw()
 
 
 def cb_mouse_wheel(event):
-    global zoom_value
-    global zoom_factor
-
-    offset_x, offset_y = canvas.get_offset()
-
     # Respond to Linux or Windows wheel event
     if event.num == 4 or event.delta == 120:
-        zoom_factor_update = 1. * zoom_factor
-        zoom_factor_diff = abs(zoom_factor_update - 1)
-        canvas.set_offset(offset_x - (event.x - (offset_x + (canvas.winfo_width() / 2. if canvas.get_center_origin() else 0.))) * zoom_factor_diff,
-                          offset_y - (event.y - (offset_y + (canvas.winfo_height() / 2. if canvas.get_center_origin() else 0.))) * zoom_factor_diff)
-    elif event.num == 5 or event.delta == -120:
-        zoom_factor_update = 1. / zoom_factor
-        zoom_factor_diff = abs(zoom_factor_update - 1)
-        canvas.set_offset(offset_x + (event.x - (offset_x + (canvas.winfo_width() / 2. if canvas.get_center_origin() else 0.))) * zoom_factor_diff,
-                          offset_y + (event.y - (offset_y + (canvas.winfo_height() / 2. if canvas.get_center_origin() else 0.))) * zoom_factor_diff)
+        canvas.zoom_in()
 
-    zoom_value *= zoom_factor_update
+    elif event.num == 5 or event.delta == -120:
+        canvas.zoom_out()
 
     do_zoom()
 
@@ -114,10 +95,6 @@ def cb_left_click_release(event):
     global move_mode
 
     move_mode = False
-
-
-def cb_key(event):  # XXX to check the keynumber of the toggle button in the center of the touchpad
-    x = 10
 
 
 def cb_draw():
@@ -295,7 +272,7 @@ frm_zoom = tk.Frame(frm_control)
 frm_zoom.pack(fill=tk.X, side=tk.TOP, padx=5)
 lbl_zoom = tk.Label(frm_zoom, text="Zoom [%]:", width=9, anchor=tk.W)
 lbl_zoom.pack(fill=tk.X, side=tk.LEFT)
-lbl_zoom_val = tk.Label(frm_zoom, text="{:.2f}".format(zoom_value * 100.), bg="white", anchor=tk.E)
+lbl_zoom_val = tk.Label(frm_zoom, text="{:.2f}".format(1. * 100.), bg="white", anchor=tk.E)
 lbl_zoom_val.pack(expand=True, fill=tk.X, side=tk.LEFT)
 
 # The canvas tk.Frame on the bottom right
@@ -304,7 +281,8 @@ frm_canvas = tk.Frame(root)
 frm_canvas.pack(expand=True, fill=tk.BOTH, side=tk.TOP)
 
 canvas = ScalableCanvas(frm_canvas, width=canvas_width, height=canvas_height, scale_factor=scale_factor,
-                        scale_ratio=1., invert_y=True, center_origin=True, offset_x=0, offset_y=0)
+                        scale_ratio=1., invert_y=True, center_origin=True, offset_x=0, offset_y=0,
+                        zoom_factor=zoom_factor)
 canvas.pack(expand=True, fill=tk.BOTH)
 canvas.bind('<Configure>', cb_canvas_configure)
 canvas.bind("<MouseWheel>", cb_mouse_wheel)  # With Windows OS
@@ -314,7 +292,6 @@ canvas.bind('<Shift-Button-1>', cb_left_click_shift)
 canvas.bind('<B1-Shift-Motion>', cb_shift_motion)
 canvas.bind('<ButtonRelease-1>', cb_left_click_release)
 canvas.bind('<<MotionScaled>>', cb_motion_scaled)
-canvas.bind('<Key>', cb_key)
 
 
 # Non-GUI initialization

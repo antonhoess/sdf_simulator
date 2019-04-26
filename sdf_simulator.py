@@ -1,4 +1,5 @@
 from vehicle import Vehicle
+from sensor import Radar
 from gui import Gui
 
 
@@ -12,7 +13,22 @@ def cb_main_loop():
 
 
 if __name__ == "__main__":
-    gui = Gui(canvas_width=800, canvas_height=400, base_scale_factor=.8e-4, zoom_factor=1.1, trace_length_max=100)
-    gui.add_vehicle(Vehicle("Vehicle1", 300.0, 9.0), "black")
-    gui.add_vehicle(Vehicle("Vehicle2", 200.0, 20.0), "red")
+    gui = Gui(canvas_width=800, canvas_height=400, base_scale_factor=.8e-4, zoom_factor=1.1, trace_length_max=100,
+              meas_buf_max=10)
+
+    # Add vehicles
+    vehicle1 = Vehicle("Vehicle1", 300.0, 9.0)
+    gui.add_vehicle(vehicle1, "black")
+    vehicle2 = Vehicle("Vehicle2", 200.0, 20.0)
+    gui.add_vehicle(vehicle2, "red")
+
+    # Add radars
+    radar1 = Radar("R1", 3000, 8000, 5., cov_r=[[100000, 0], [0, 100000]], cov_rd=[[10000, 0], [0, 10000]],
+                   cov_rdd=[[1000, 0], [0, 10000]])
+    gui.add_sensor(radar1, "orange")
+
+    radar2 = Radar("R1", -9000, -5000, 5., cov_r=[[100000, 0], [0, 100000]], cov_rd=[[10000, 0], [0, 10000]],
+                   cov_rdd=[[1000, 0], [0, 10000]])
+    gui.add_sensor(radar2, "lightblue")
+
     gui.run(cb_main_loop=cb_main_loop)

@@ -12,3 +12,9 @@
 * On the ScalableCanvas <Configure> event the objects can even move out of the window then changing the window size - this seems onyl to happen when the object got moved away from the origin before.
 * How to handle the scale factors (10000., etc.) in vehicle_visu, especially when changing the velocity and acceleration or when adding further vehicles with different parameters.
 * Move all the timing variables hard defined in Gui.__init__() to the main program - find good calculations or define them for each vehicle visualization separately - probably also the trace_length_max parameter.
+* Use a class/object to transport settings where there are so many, e.g. in VehicleVisu.draw(). Put this class inside the VehicleVisu class and can it be accessed from outside?
+* Check if it makes sense to create a parent class for VehicleVisu and Sensor_Visu, since they share some operations, but not many.
+* In the main loop trigger the measurement of the radar if measurement_interval passed.
+* Test, if by choosing the element nearest to the mouse pointer on the canvas and keeping track of the association of the line segment, etc. to the vehicle/sensor, it is possible to select e.g. a sensor and interaxt with it (e.g. show a list of the recent measurements)
+* The sensor needs access to the list of vehicles or pass each vehicle in the measure method?
+* Put vv.add_cur_pos_to_trace() & Co. just inside the VehiclVisu class - at least privide a function, that calls all of that functions?

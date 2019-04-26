@@ -88,36 +88,38 @@ class VehicleVisu:
 
         # Draw vectors
         # ------------
-        r = self._trace_pos[-1]
-        rd = self._trace_vel[-1]
-        rdd = self._trace_acc[-1]
-        rdt = self._trace_tangent[-1]
-        rdn = self._trace_normal[-1]
+        if len(self._trace_pos) > 0:
+            r = self._trace_pos[-1]
+            rd = self._trace_vel[-1]
+            rdd = self._trace_acc[-1]
+            rdt = self._trace_tangent[-1]
+            rdn = self._trace_normal[-1]
 
-        # Draw velocity vector
-        if draw_vel_vec:
-            self.canvas.create_line(r[0], r[1], r[0] + rd[0], r[1] + rd[1],
-                                    width=2.0, capstyle=tk.ROUND, fill="#000000", arrow=tk.LAST)
-        # end if
+            # Draw velocity vector
+            if draw_vel_vec:
+                self.canvas.create_line(r[0], r[1], r[0] + rd[0], r[1] + rd[1],
+                                        width=2.0, capstyle=tk.ROUND, fill="#000000", arrow=tk.LAST)
+            # end if
 
-        # Draw acceleration vector
-        if draw_acc_vec:
-            self.canvas.create_line(r[0], r[1], r[0] + rdd[0], r[1] + rdd[1],
-                                    width=2.0, capstyle=tk.ROUND, fill="#00FF00", arrow=tk.LAST)
-        # end if
+            # Draw acceleration vector
+            if draw_acc_vec:
+                self.canvas.create_line(r[0], r[1], r[0] + rdd[0], r[1] + rdd[1],
+                                        width=2.0, capstyle=tk.ROUND, fill="#00FF00", arrow=tk.LAST)
+            # end if
 
-        # Draw tangent vector
-        if draw_tangent:
-            self.canvas.create_line(r[0] - rdt[0] / 2.0, r[1] - rdt[1] / 2.0,
-                                    r[0] + rdt[0] / 2.0, r[1] + rdt[1] / 2.0,
-                                    width=2.0, capstyle=tk.ROUND, fill="#7777FF", arrow=tk.LAST)
-        # end if
+            # Draw tangent vector
+            if draw_tangent:
+                self.canvas.create_line(r[0] - rdt[0] / 2.0, r[1] - rdt[1] / 2.0,
+                                        r[0] + rdt[0] / 2.0, r[1] + rdt[1] / 2.0,
+                                        width=2.0, capstyle=tk.ROUND, fill="#7777FF", arrow=tk.LAST)
+            # end if
 
-        # Draw normal vector
-        if draw_normal:
-            self.canvas.create_line(r[0] - rdn[0] / 2.0, r[1] - rdn[1] / 2.0,
-                                    r[0] + rdn[0] / 2.0, r[1] + rdn[1] / 2.0,
-                                    width=2.0, capstyle=tk.ROUND, fill="#000000", arrow=tk.LAST)
+            # Draw normal vector
+            if draw_normal:
+                self.canvas.create_line(r[0] - rdn[0] / 2.0, r[1] - rdn[1] / 2.0,
+                                        r[0] + rdn[0] / 2.0, r[1] + rdn[1] / 2.0,
+                                        width=2.0, capstyle=tk.ROUND, fill="#000000", arrow=tk.LAST)
+            # end if
         # end if
 
     def clear(self):

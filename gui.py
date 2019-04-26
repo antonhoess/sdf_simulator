@@ -1,26 +1,29 @@
 import tkinter as tk
 from vehicle_visu import VehicleVisu
+from sensor_visu import SensorVisu
 from scalable_canvas import ScalableCanvas
 from time import sleep
 
 
 class Gui:
     def __init__(self, canvas_width=500, canvas_height=500, base_scale_factor=1.e-2, zoom_factor=1.1,
-                 trace_length_max=100):
+                 trace_length_max=100, meas_buf_max=100):
         self._BASE_SCALE_FACTOR = base_scale_factor  # Set to a fixed value that is good for zoom == 1.0
         self._ZOOM_FACTOR = zoom_factor
 
         self._vv = []  # Vehicle visualizations
+        self._sv = []  # Sensor visualizations
 
         self._t = 0.0       # Absolute time
         self._t_incr = 1.   # Time increase per tick
         self._t_tick = .01  # Sleep [s] per tick
 
         self._trace_length_max = int(trace_length_max / self._t_incr)  # Max. length of the trace
+        self._meas_buf_max = meas_buf_max  # Max. size of measurements
 
         self._is_running = False
 
-        self._play = True
+        self._play = False
         self._enter_command = False
 
         # For shift the objects on the canvas
@@ -118,19 +121,29 @@ class Gui:
         self.lbl_cursor_pos_val = tk.Label(frm_cursor_pos, text="0; 0", width=20, bg="yellow")
         self.lbl_cursor_pos_val.pack(fill=tk.X, side=tk.LEFT)
 
+        # Elapsed time
+        sep_ver = tk.Frame(frm_status, width=2, bd=1, relief=tk.SUNKEN)
+        sep_ver.pack(fill=tk.Y, side=tk.LEFT, padx=5)
+
+        frm_time = tk.Frame(frm_status)
+        frm_time.pack(fill=tk.X, side=tk.LEFT, pady=5)
+        lbl_time = tk.Label(frm_time, text="t =", width=3, anchor=tk.W)
+        lbl_time.pack(fill=tk.X, side=tk.LEFT)
+        self.lbl_time_val = tk.Label(frm_time, text="0.0", width=8, bg="yellow", anchor=tk.E)
+        self.lbl_time_val.pack(fill=tk.X, side=tk.LEFT)
+
         # The control tk.Frame on the left
         # -----------------------------
         frm_control = tk.Frame(root)
         frm_control.pack(expand=False, fill=tk.Y, side=tk.LEFT)
 
-        self.btn_play_pause = tk.Button(frm_control, text="Pause", width=10, bg="lightblue", command=self.cb_play_pause)
+        self.btn_play_pause = tk.Button(frm_control, text="Play", width=10, bg="lightblue", command=self.cb_play_pause)
         self.btn_play_pause.pack(fill=tk.X, side=tk.TOP)
         self.btn_play_pause.bind('<Shift-Button-1>', self.cb_command_callback)
 
         self.btn_single_step = tk.Button(frm_control, text="Step", width=10, bg="lightgreen",
                                          command=self.cb_single_step)
         self.btn_single_step.pack(fill=tk.X, side=tk.TOP)
-        self.btn_single_step.config(state=tk.DISABLED)
 
         btn_cb_reset_transformations = tk.Button(frm_control, text="Reset\nTransformations", width=10, bg="orange",
                                                  command=self.cb_reset_transformations)
@@ -234,10 +247,11 @@ class Gui:
         self.canvas.bind('<Shift-Button-1>', self.cb_left_click_shift)
         self.canvas.bind('<B1-Shift-Motion>', self.cb_shift_motion)
         self.canvas.bind('<ButtonRelease-1>', self.cb_left_click_release)
+        self.canvas.bind_all('<space>', self.cb_play_pause)
         self.canvas.bind('<<MotionScaled>>', self.cb_motion_scaled)
 
     # Play / pause button
-    def cb_play_pause(self):
+    def cb_play_pause(self, _event=None):
         self._play = not self._play
 
         if self._play:
@@ -256,7 +270,7 @@ class Gui:
         self.step()
 
     def cb_reset_transformations(self):
-        self.canvas.zoom()
+        self.canvas.zoom = 1.
         self.update_zoom_label()
         self.canvas.set_offset(0, 0)
         self.draw()
@@ -299,10 +313,17 @@ class Gui:
     def cb_draw(self):
         self.draw()
 
-    def draw(self):
-        if len(self._vv) > 0:
-            self._vv[0].clear()
+    def clear(self):
+        self.canvas.delete(tk.ALL)
 
+    def draw(self):
+        if len(self._vv) > 0 or len(self._sv) > 0:
+            self.clear()
+
+        self._draw_vehicles()
+        self._draw_sensors()
+
+    def _draw_vehicles(self):
         for vv in self._vv:
             vv.draw(omit_clear=True, draw_pos_trace=self.draw_pos_trace.get(), draw_vel_trace=self.draw_vel_trace.get(),
                     draw_acc_trace=self.draw_acc_trace.get(), draw_tangent_trace=self.draw_tangent_trace.get(),
@@ -312,6 +333,10 @@ class Gui:
                     draw_vel_vec=self.draw_vel_vec.get(),
                     draw_acc_vec=self.draw_acc_vec.get(), draw_tangent=self.draw_tangent.get(),
                     draw_normal=self.draw_normal.get())
+
+    def _draw_sensors(self):
+        for sv in self._sv:
+            sv.draw(omit_clear=True)
 
     def step(self):
         # Update vehicle positions
@@ -346,15 +371,36 @@ class Gui:
             self.draw()
         # end if
 
+        # Make sensor measurements
+        for sv in self._sv:
+            s = sv.sensor
+
+            if self._t > s.last_meas_time + s.meas_interval:
+                s.last_meas_time = self._t - s.last_meas_time + s.meas_interval  # Don't loose the modulo rest
+
+                for vv in self._vv:
+                    v = vv.vehicle
+                    s.measure(v)
+                # end for
+            # end if
+        # end if
+
+        self.lbl_time_val.config(text="{:.1f}".format(self._t))
         self._t += self._t_incr
 
     def add_vehicle(self, v, color=None):
         self._vv.append(VehicleVisu(v, self.canvas, color, trace_length_max=self._trace_length_max))  # Vehicle visu
 
+    def add_sensor(self, s, color=None):
+        self._sv.append(SensorVisu(s, self.canvas, color, meas_buf_max=self._meas_buf_max))  # Sensor visu
+
     # This function accepts a callback, since it's not possible to run tkinter in a non-main thread,
     # but we want to handle inputs from the console
-    def run(self, cb_main_loop=None):
+    def run(self, auto_play=False, cb_main_loop=None):
         if not self._is_running:  # Prevent multiple executions
+            if auto_play:
+                self.cb_play_pause()
+
             while True:
                 if self._play:
                     self.step()

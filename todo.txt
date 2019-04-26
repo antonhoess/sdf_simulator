@@ -1,4 +1,4 @@
-* canvas_drawer.py: Don't use only a single vehicle, but use a list instead, allow to add more vehicles and iterate through all vehicles.
+* vehicle_visu.py: Don't use only a single vehicle, but use a list instead, allow to add more vehicles and iterate through all vehicles.
 * gui.py: Check, if it would make sense to use a Grid for placing the GUI elements.
 * gui.py: Add switch to allow plotting over time instead of 2D - but how to separate the components x and y? Make two graphs for each 2D graph?
 * gui.py: Add slider for speed and for step width (t increment) and show the current values on a label.
@@ -7,7 +7,8 @@
 * Check, if it is feasible to keep track of all elements created (drawn) on the canvas and update them instead of deleting all and creating them anew.
 * Unify all function and variable names and also structure them more, e.g. pack them in classes if useful.
 * scalable_canvas.py: Try to unify the two functions that scale coordinates (for creating drawing elements and for the sclaed motion event) - attention: the order of multiplication and addition is changed and the mathematical inverse operator is used except for the invert_y.
-* scalable_canvas.py: Instead of get_* and set_* use real getters and setters
-* gui.py: Introduce if __name__ == "__main__": and restructure the code.
-* gui.py: Put all Widget stuff in a separate class if possible.
+* scalable_canvas.py: Instead of get_* and set_* use real getters and setters or remove the existing ones, if they are not really needed - also adapt function to return tuples for x and y instead of separate functions.
 * Put more comments in the code.
+* On the ScalableCanvas <Configure> event the objects can even move out of the window then changing the window size - this seems onyl to happen when the object got moved away from the origin before.
+* How to handle the scale factors (10000., etc.) in vehicle_visu, especially when changing the velocity and acceleration or when adding further vehicles with different parameters.
+* Move all the timing variables hard defined in Gui.__init__() to the main program - find good calculations or define them for each vehicle visualization separately - probably also the trace_length_max parameter.

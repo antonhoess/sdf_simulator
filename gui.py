@@ -3,9 +3,22 @@ from vehicle_visu import VehicleVisu
 from sensor_visu import SensorVisu
 from scalable_canvas import ScalableCanvas
 from time import sleep
+from enum import Enum
 
 
 class Gui:
+    class ZoomDir(Enum):
+        IN = 1
+        OUT = 2
+    # end class
+
+    class MoveDir(Enum):
+        LEFT = 1
+        RIGHT = 2
+        UP = 3
+        DOWN = 4
+    # end class
+
     def __init__(self, canvas_width=500, canvas_height=500, base_scale_factor=1.e-2, zoom_factor=1.1,
                  trace_length_max=100, meas_buf_max=100):
         self._BASE_SCALE_FACTOR = base_scale_factor  # Set to a fixed value that is good for zoom == 1.0
@@ -145,9 +158,9 @@ class Gui:
                                          command=self.cb_single_step)
         self.btn_single_step.pack(fill=tk.X, side=tk.TOP)
 
-        btn_cb_reset_transformations = tk.Button(frm_control, text="Reset\nTransformations", width=10, bg="orange",
-                                                 command=self.cb_reset_transformations)
-        btn_cb_reset_transformations.pack(fill=tk.X, side=tk.TOP)
+        btn_reset_transformations = tk.Button(frm_control, text="Reset\nTransformations", width=10, bg="orange",
+                                              command=self.cb_reset_transformations)
+        btn_reset_transformations.pack(fill=tk.X, side=tk.TOP)
 
         sep_hor = tk.Frame(frm_control, height=2, bd=1, relief=tk.SUNKEN)
         sep_hor.pack(fill=tk.X, padx=5, pady=5)
@@ -230,6 +243,14 @@ class Gui:
         self.lbl_zoom_val = tk.Label(frm_zoom, text="{:.2f}".format(1. * 100.), bg="white", anchor=tk.E)
         self.lbl_zoom_val.pack(expand=True, fill=tk.X, side=tk.LEFT)
 
+        btn_zoom_out = tk.Button(frm_zoom, text="-", width=2, bg="lightblue")
+        btn_zoom_out.pack(fill=None, side=tk.LEFT)
+        btn_zoom_out.bind('<Button-1>', lambda event, dir=self.ZoomDir.OUT: self.cb_zoom(event, dir))
+
+        btn_zoom_in = tk.Button(frm_zoom, text="+", width=2, bg="blue")
+        btn_zoom_in.pack(fill=None, side=tk.LEFT)
+        btn_zoom_in.bind('<Button-1>', lambda event, dir=self.ZoomDir.IN: self.cb_zoom(event, dir))
+
         # The canvas tk.Frame on the bottom right
         # ------------------------------------
         frm_canvas = tk.Frame(root)
@@ -249,6 +270,12 @@ class Gui:
         self.canvas.bind('<ButtonRelease-1>', self.cb_left_click_release)
         self.canvas.bind_all('<space>', self.cb_play_pause)
         self.canvas.bind('<<MotionScaled>>', self.cb_motion_scaled)
+        self.canvas.bind_all('<Control-plus>', lambda event, dir=self.ZoomDir.IN: self.cb_zoom(event, dir))
+        self.canvas.bind_all('<Control-minus>', lambda event, dir=self.ZoomDir.OUT: self.cb_zoom(event, dir))
+        self.canvas.bind_all('<Shift-Left>', lambda event, dir=self.MoveDir.LEFT: self.cb_move(event, dir))
+        self.canvas.bind_all('<Shift-Right>', lambda event, dir=self.MoveDir.RIGHT: self.cb_move(event, dir))
+        self.canvas.bind_all('<Shift-Up>', lambda event, dir=self.MoveDir.UP: self.cb_move(event, dir))
+        self.canvas.bind_all('<Shift-Down>', lambda event, dir=self.MoveDir.DOWN: self.cb_move(event, dir))
 
     # Play / pause button
     def cb_play_pause(self, _event=None):
@@ -284,13 +311,10 @@ class Gui:
     def cb_mouse_wheel(self, event):
         # Respond to Linux or Windows wheel event
         if event.num == 4 or event.delta == 120:
-            self.canvas.zoom_in()
+            self.do_zoom(self.ZoomDir.IN)
 
         elif event.num == 5 or event.delta == -120:
-            self.canvas.zoom_out()
-
-        self.update_zoom_label()
-        self.draw()
+            self.do_zoom(self.ZoomDir.OUT)
 
     def cb_left_click_shift(self, event):
         self._move_origin = [event.x, event.y]
@@ -309,6 +333,42 @@ class Gui:
 
     def cb_left_click_release(self, event):
         self._move_mode = False
+
+    def do_zoom(self, dir):
+        if dir == self.ZoomDir.IN:
+            self.canvas.zoom_in()
+        else:
+            self.canvas.zoom_out()
+
+        self.update_zoom_label()
+        self.draw()
+
+    def cb_zoom(self, _event=None, dir=None):
+        if dir == self.ZoomDir.IN:
+            self.do_zoom(self.ZoomDir.IN)
+
+        elif dir == self.ZoomDir.OUT:
+            self.do_zoom(self.ZoomDir.OUT)
+
+    def cb_move(self, _event=None, dir=None):
+        offset_x, offset_y = self.canvas.get_offset()
+
+        if dir == self.MoveDir.LEFT:
+            self.canvas.set_offset(offset_x - self.canvas.winfo_width() / 10., offset_y)
+
+        elif dir == self.MoveDir.RIGHT:
+            self.canvas.set_offset(offset_x + self.canvas.winfo_width() / 10., offset_y)
+
+        elif dir == self.MoveDir.UP:
+            self.canvas.set_offset(offset_x, offset_y - self.canvas.winfo_height() / 10.)
+
+        elif dir == self.MoveDir.DOWN:
+            self.canvas.set_offset(offset_x, offset_y + self.canvas.winfo_height() / 10.)
+
+        else:
+            raise Exception("Invalid movement direction.")
+
+        self.draw()
 
     def cb_draw(self):
         self.draw()
@@ -339,6 +399,7 @@ class Gui:
             sv.draw(omit_clear=True)
 
     def step(self):
+        draw = False
         # Update vehicle positions
         for vv in self._vv:
             v = vv.vehicle
@@ -368,25 +429,30 @@ class Gui:
             self.lbl_acc_x_val.config(text="{:.4f}".format(v.rdd[0]))
             self.lbl_acc_y_val.config(text="{:.4f}".format(v.rdd[1]))
 
-            self.draw()
+            draw = True
         # end if
 
         # Make sensor measurements
         for sv in self._sv:
             s = sv.sensor
 
-            if self._t > s.last_meas_time + s.meas_interval:
-                s.last_meas_time = self._t - s.last_meas_time + s.meas_interval  # Don't loose the modulo rest
+            if self._t >= s.last_meas_time + s.meas_interval:
+                s.last_meas_time += s.meas_interval  # Don't loose the modulo rest
 
                 for vv in self._vv:
                     v = vv.vehicle
                     s.measure(v)
                 # end for
+
+                draw = True
             # end if
         # end if
 
         self.lbl_time_val.config(text="{:.1f}".format(self._t))
         self._t += self._t_incr
+
+        if draw:
+            self.draw()
 
     def add_vehicle(self, v, color=None):
         self._vv.append(VehicleVisu(v, self.canvas, color, trace_length_max=self._trace_length_max))  # Vehicle visu

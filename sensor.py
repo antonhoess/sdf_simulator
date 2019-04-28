@@ -17,9 +17,8 @@ class Sensor:
         self.measurements = []
         self.last_meas_time = 0.
 
-    def measure(self):
+    def measure(self, vehicle):
         raise NotImplementedError("Not implemented yet!")
-        pass
 
 
 class Radar(Sensor):

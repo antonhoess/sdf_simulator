@@ -37,18 +37,38 @@ class ScalableCanvas(tk.Canvas):
         zoom_factor_update = 1. * self.zoom_factor
         zoom_factor_diff = abs(zoom_factor_update - 1)
         self.zoom *= self.zoom_factor
-        self.set_offset(self.offset_x - (self.winfo_pointerx() - self.winfo_rootx() - (
-                self.offset_x + (self.winfo_width() / 2. if self.get_center_origin() else 0.))) * zoom_factor_diff,
-                        self.offset_y - (self.winfo_pointery() - self.winfo_rooty() - (self.offset_y + (
-                            self.winfo_height() / 2. if self.get_center_origin() else 0.))) * zoom_factor_diff)
+
+        # Zoom center around the canvas origin if cursor is outside of the canvas
+        pointerx = self.winfo_pointerx() - self.winfo_rootx()
+        pointery = self.winfo_pointery() - self.winfo_rooty()
+        if pointerx < 0 or pointerx > self.winfo_width() or\
+            pointery < 0 or pointery > self.winfo_height():
+            pointerx = self.winfo_width() / 2.
+            pointery = self.winfo_height() / 2.
+        # end if
+
+        self.set_offset(self.offset_x - (
+        pointerx - (self.offset_x + (self.winfo_width() / 2. if self.get_center_origin() else 0.))) * zoom_factor_diff,
+                        self.offset_y - (pointery - (self.offset_y + (
+                        self.winfo_height() / 2. if self.get_center_origin() else 0.))) * zoom_factor_diff)
 
     def zoom_out(self):
         zoom_factor_update = 1. / self.zoom_factor
         zoom_factor_diff = abs(zoom_factor_update - 1)
         self.zoom /= self.zoom_factor
-        self.set_offset(self.offset_x + (self.winfo_pointerx() - self.winfo_rootx() - (
-                self.offset_x + (self.winfo_width() / 2. if self.get_center_origin() else 0.))) * zoom_factor_diff,
-                        self.offset_y + (self.winfo_pointery() - self.winfo_rooty() - (self.offset_y + (
+
+        # Zoom center around the canvas origin if cursor is outside of the canvas
+        pointerx = self.winfo_pointerx() - self.winfo_rootx()
+        pointery = self.winfo_pointery() - self.winfo_rooty()
+        if pointerx < 0 or pointerx > self.winfo_width() or \
+                        pointery < 0 or pointery > self.winfo_height():
+            pointerx = self.winfo_width() / 2.
+            pointery = self.winfo_height() / 2.
+        # end if
+
+        self.set_offset(self.offset_x + (pointerx - (
+            self.offset_x + (self.winfo_width() / 2. if self.get_center_origin() else 0.))) * zoom_factor_diff,
+                        self.offset_y + (pointery - (self.offset_y + (
                             self.winfo_height() / 2. if self.get_center_origin() else 0.))) * zoom_factor_diff)
 
     def get_offset(self):

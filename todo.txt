@@ -17,6 +17,6 @@
 * In the main loop trigger the measurement of the radar if measurement_interval passed.
 * Test, if by choosing the element nearest to the mouse pointer on the canvas and keeping track of the association of the line segment, etc. to the vehicle/sensor, it is possible to select e.g. a sensor and interaxt with it (e.g. show a list of the recent measurements)
 * The sensor needs access to the list of vehicles or pass each vehicle in the measure method?
-* Put vv.add_cur_pos_to_trace() & Co. just inside the VehiclVisu class - at least privide a function, that calls all of that functions?
-* Check, if complex numbers or a self defined type or tuples might make things easier with the (x, y) pairs. See http://effbot.org/zone/tkinter-complex-canvas.htm.
-* Possibly use a polygon instead of a rectangle to allow a rotation - but this does not help with ellipses e.g. - check, if it possible to manipulate in the depths of tkinter to rotate objects.
+* Put vv.add_cur_pos_to_trace() & Co. just inside the VehiclVisu class - at least provide a function, that calls all of that functions?
+* Check, if complex numbers or a self defined type or tuples might make things easier with the (x, y) pairs.
+* Possibly use a polygon instead of a rectangle to allow a rotation - but this does not help with ellipses e.g. - check, if it possible to manipulate in the depths of tkinter to rotate objects. See http://effbot.org/zone/tkinter-complex-canvas.htm.

@@ -16,7 +16,7 @@ class VehicleVisu:
         self._trace_acc_times_tangent = []
         self._trace_acc_times_normal = []
 
-    # Upodate trace array
+    # Update trace array
     def add_cur_val_to_trace(self, trace, val):
         trace.append(val)
 

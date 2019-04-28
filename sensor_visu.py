@@ -7,7 +7,7 @@ class SensorVisu:
         self.canvas = canvas
         self.color = color
 
-        self._EDGE_LENGHT = 1500
+        self._EDGE_LENGTH = 1500
 
         self._meas_buf_max = meas_buf_max
 
@@ -17,10 +17,10 @@ class SensorVisu:
             self.clear()
 
         # The sensor itself
-        self.canvas.create_rectangle(self.sensor.r[0] - self._EDGE_LENGHT / 2.,
-                                     self.sensor.r[1] - self._EDGE_LENGHT / 2.,
-                                     self.sensor.r[0] + self._EDGE_LENGHT / 2.,
-                                     self.sensor.r[1] + self._EDGE_LENGHT / 2.,
+        self.canvas.create_rectangle(self.sensor.r[0] - self._EDGE_LENGTH / 2.,
+                                     self.sensor.r[1] - self._EDGE_LENGTH / 2.,
+                                     self.sensor.r[0] + self._EDGE_LENGTH / 2.,
+                                     self.sensor.r[1] + self._EDGE_LENGTH / 2.,
                                      fill=self.color, activefill="red")
         self.canvas.create_text(self.sensor.r[0], self.sensor.r[1], text=self.sensor.name, anchor=tk.CENTER)
 

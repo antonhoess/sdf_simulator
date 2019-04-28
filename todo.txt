@@ -20,3 +20,4 @@
 * Put vv.add_cur_pos_to_trace() & Co. just inside the VehiclVisu class - at least provide a function, that calls all of that functions?
 * Check, if complex numbers or a self defined type or tuples might make things easier with the (x, y) pairs.
 * Possibly use a polygon instead of a rectangle to allow a rotation - but this does not help with ellipses e.g. - check, if it possible to manipulate in the depths of tkinter to rotate objects. See http://effbot.org/zone/tkinter-complex-canvas.htm.
+* To correctly drawn the ellipse for a sensor's covariance matrix, the rotation and size needs to be determined from the covariance matrix before.

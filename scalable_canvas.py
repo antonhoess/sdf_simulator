@@ -1,6 +1,6 @@
 import tkinter as tk
 import numpy as np
-
+import math
 
 class ScalableCanvas(tk.Canvas):
 
@@ -80,6 +80,41 @@ class ScalableCanvas(tk.Canvas):
 
     def get_center_origin(self):
         return self.center_origin
+
+    def create_oval_rotated(self, x, y, r1, r2, theta, n_segments=10, *args, **kwargs):
+        coords = []
+
+        # Adapted from https://stackoverflow.com/questions/22694850/approximating-an-ellipse-with-a-polygon
+        # I've removed Nth point calculation, that involves indefinite Tan(Pi/2)
+        # It would better to assign known value 0 to Fi in this point
+        for i in range(-n_segments, n_segments):
+            _theta = math.pi / 2. * i / n_segments
+            phi = math.pi / 2. - math.atan(math.tan(_theta) * r1 / r2)
+            _x = r1 * math.cos(phi)
+            _y = r2 * math.sin(phi)
+            coords.append(np.asarray([_x, _y]))
+        # end for
+
+        # Duplicate the upper half of the ellipse to the bottom (mirrored)
+        for c in range(len(coords) - 1, 0, -1):
+            coords.append(np.copy(coords[c]) * np.asarray([1, -1]))
+
+        # Rotate and translate the ellipse
+        c, s = np.cos(theta), np.sin(theta)
+        R = np.array(((c, -s), (s, c)))  # Rotation matrix
+        O = np.asarray([x, y])  # Offset vector
+
+        for c in range(len(coords)):
+            coords[c] = np.dot(coords[c], R.T) + O
+
+        # Create list with x0, y0, x1, y1, x2, ...
+        _coords = []
+        for c in coords:
+            _coords.append(c[0])
+            _coords.append(c[1])
+        # end for
+
+        return self.create_polygon(_coords, *args, **kwargs)
 
     def _scale_point(self, x, y):
         p = np.asarray([x, y], dtype=np.float)

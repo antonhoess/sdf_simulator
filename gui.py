@@ -330,6 +330,10 @@ class Gui:
 
     def cb_motion_scaled(self, event):
         self.lbl_cursor_pos_val.config(text="{:5.2f}; {:5.2f}".format(event.x, event.y))
+        # XXX remove the following lines
+#        self.clear()
+#        self.draw()
+#        self.canvas.create_oval_rotated(5000, 1000, 8000, 4000, self.canvas.winfo_pointerx()/100., n_segments=100, fill="", outline="blue",)
 
     def cb_left_click_release(self, event):
         self._move_mode = False

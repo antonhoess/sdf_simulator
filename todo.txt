@@ -21,3 +21,7 @@
 * Check, if complex numbers or a self defined type or tuples might make things easier with the (x, y) pairs.
 * Possibly use a polygon instead of a rectangle to allow a rotation - but this does not help with ellipses e.g. - check, if it possible to manipulate in the depths of tkinter to rotate objects. See http://effbot.org/zone/tkinter-complex-canvas.htm.
 * To correctly drawn the ellipse for a sensor's covariance matrix, the rotation and size needs to be determined from the covariance matrix before.
+* Probably create a separate class than build the connection between the sensor and the vehicle, that gets measured. The problem occurs when visualizing the measurements, since the sensor does not know, which vehicle a specific measurement was from.
+  -> Or just adapt the imperfect logic already implemented at SenvorVisu.draw() - handled_vehicles...
+* Add checkbox for drawing measurements
+* Add slider for number of cov ellipses (0..n), where 0 is deactivated

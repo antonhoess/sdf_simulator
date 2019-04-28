@@ -21,8 +21,23 @@ class SensorVisu:
                                      self.sensor.r[1] - self._EDGE_LENGTH / 2.,
                                      self.sensor.r[0] + self._EDGE_LENGTH / 2.,
                                      self.sensor.r[1] + self._EDGE_LENGTH / 2.,
-                                     fill=self.color, activefill="red")
+                                     fill=self.color, activefill="red")  # Better to make a callback on this element and the text and then config the bgcolor to "red"
         self.canvas.create_text(self.sensor.r[0], self.sensor.r[1], text=self.sensor.name, anchor=tk.CENTER)
+
+        handled_vehicles = []
+        for m in range(len(self.sensor.measurements) - 1, 0, -1):
+            meas = self.sensor.measurements[m]
+            if meas.vehicle not in handled_vehicles:  # XXX This only works, if all sensors have the same frequency, otherwise it can stop before all sensors got handled - change logic!
+                handled_vehicles.append(meas.vehicle)
+
+                for sigma in range(1, 3+1):
+                    self.canvas.create_oval_rotated(meas.r_mean[0], meas.r_mean[1],  self.sensor.cov_r_r1 * sigma, self.sensor.cov_r_r2 * sigma, self.sensor.cov_r_theta, n_segments=20, fill="", width=3, outline="black")
+                    self.canvas.create_oval_rotated(meas.r_mean[0], meas.r_mean[1],  self.sensor.cov_r_r1 * sigma, self.sensor.cov_r_r2 * sigma, self.sensor.cov_r_theta, n_segments=20, fill="", width=1, outline=self.color)
+                # end for
+            else:
+                break
+            # end if
+        # end for
 
         self.sensor.measurements = self.sensor.measurements[-self._meas_buf_max:]
 

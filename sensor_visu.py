@@ -17,12 +17,23 @@ class SensorVisu:
             self.clear()
 
         # The sensor itself
-        self.canvas.create_rectangle(self.sensor.r[0] - self._EDGE_LENGTH / 2.,
-                                     self.sensor.r[1] - self._EDGE_LENGTH / 2.,
-                                     self.sensor.r[0] + self._EDGE_LENGTH / 2.,
-                                     self.sensor.r[1] + self._EDGE_LENGTH / 2.,
-                                     fill=self.color, activefill="red")  # Better to make a callback on this element and the text and then config the bgcolor to "red"
-        self.canvas.create_text(self.sensor.r[0], self.sensor.r[1], text=self.sensor.name, anchor=tk.CENTER)
+        def cb_mouse_enter(event, item):
+            event.widget.itemconfig(item, fill="red")
+
+        def cb_mouse_leave(event, item):
+            event.widget.itemconfig(item, fill=self.color)
+
+        rect = self.canvas.create_rectangle(self.sensor.r[0] - self._EDGE_LENGTH / 2.,
+                                            self.sensor.r[1] - self._EDGE_LENGTH / 2.,
+                                            self.sensor.r[0] + self._EDGE_LENGTH / 2.,
+                                            self.sensor.r[1] + self._EDGE_LENGTH / 2.,
+                                            fill=self.color, tag="{:x}".format(id(self.sensor)))
+        self.canvas.create_text(self.sensor.r[0], self.sensor.r[1], text=self.sensor.name, anchor=tk.CENTER,
+                                tag="{:x}".format(id(self.sensor)))
+
+        self.canvas.tag_bind("{:x}".format(id(self.sensor)), '<Enter>',
+                             lambda event, item=rect: cb_mouse_enter(event, item))
+        self.canvas.tag_bind("{:x}".format(id(self.sensor)), '<Leave>', lambda event, item=rect: cb_mouse_leave(event, item))
 
         handled_vehicles = []
         for m in range(len(self.sensor.measurements) - 1, 0, -1):

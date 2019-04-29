@@ -2,8 +2,8 @@ import tkinter as tk
 import numpy as np
 import math
 
-class ScalableCanvas(tk.Canvas):
 
+class ScalableCanvas(tk.Canvas):
     # scale_ratio = width / height
     def __init__(self, widget, scale_factor=1.0, scale_ratio=None, invert_y=False,
                  center_origin=False, offset_x=0, offset_y=0, zoom_factor=1., **kwargs):

@@ -153,15 +153,17 @@ class VehicleVisu:
 
             if draw_arrow and step == num_steps - 1:
                 arrow = tk.LAST
+                capstyle = None
 
                 if self.color is not None:
                     fill = self.color
             else:
                 arrow = None
+                capstyle = tk.ROUND
 
             self.canvas.create_line(trace[step - 1][0],
                                     trace[step - 1][1],
                                     trace[step][0],
                                     trace[step][1],
-                                    fill=fill, capstyle=tk.ROUND, arrow=arrow, **kwargs)
+                                    fill=fill, capstyle=capstyle, arrow=arrow, **kwargs)
         # end for

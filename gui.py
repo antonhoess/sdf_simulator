@@ -2,7 +2,7 @@ import tkinter as tk
 from vehicle_visu import VehicleVisu
 from sensor_visu import SensorVisu
 from scalable_canvas import ScalableCanvas
-from time import sleep
+import time
 from enum import Enum
 
 
@@ -253,7 +253,6 @@ class Gui:
                                    variable=self.cov_ell_cnt, command=self.cb_cov_ell_cnt)
         scl_cov_ell_cnt.pack(expand=True, fill=tk.X, side=tk.LEFT)
 
-
         # Zoom
         sep_hor = tk.Frame(frm_control, height=2, bd=1, relief=tk.SUNKEN)
         sep_hor.pack(fill=tk.X, padx=5, pady=5)
@@ -272,6 +271,36 @@ class Gui:
         btn_zoom_in = tk.Button(frm_zoom, text="+", width=2, bg="blue")
         btn_zoom_in.pack(fill=None, side=tk.LEFT)
         btn_zoom_in.bind('<Button-1>', lambda event, direction=self.ZoomDir.IN: self.cb_zoom(event, direction))
+
+        # Time increment (per step)
+        sep_hor = tk.Frame(frm_control, height=2, bd=1, relief=tk.SUNKEN)
+        sep_hor.pack(fill=tk.X, padx=5, pady=5)
+
+        frm_time_incr = tk.Frame(frm_control)
+        frm_time_incr.pack(fill=tk.X, side=tk.TOP, padx=5)
+        lbl_time_incr = tk.Label(frm_time_incr, text="Time incr.:", width=9, anchor=tk.W)
+        lbl_time_incr.pack(fill=tk.X, side=tk.LEFT)
+        self.lbl_time_incr_val = tk.Label(frm_time_incr, text="1.0", bg="white", anchor=tk.E)
+        self.lbl_time_incr_val.pack(expand=True, fill=tk.X, side=tk.LEFT)
+
+        self.time_incr = tk.DoubleVar()
+        scl_time_incr = tk.Scale(frm_time_incr, orient=tk.HORIZONTAL, showvalue=False, from_=0.1, to=10.0,
+                                 resolution=0.1, variable=self.time_incr, command=self.cb_time_incr)
+        scl_time_incr.set(1.0)
+        scl_time_incr.pack(expand=True, fill=tk.X, side=tk.LEFT)
+
+        # Time tick (sleep duration)
+        frm_time_tick = tk.Frame(frm_control)
+        frm_time_tick.pack(fill=tk.X, side=tk.TOP, padx=5)
+        lbl_time_tick = tk.Label(frm_time_tick, text="Time tick. [s]:", width=11, anchor=tk.W)
+        lbl_time_tick.pack(fill=tk.X, side=tk.LEFT)
+        self.lbl_time_tick_val = tk.Label(frm_time_tick, text="0.00", bg="white", anchor=tk.E)
+        self.lbl_time_tick_val.pack(expand=True, fill=tk.X, side=tk.LEFT)
+
+        self.time_tick = tk.DoubleVar()
+        scl_time_tick = tk.Scale(frm_time_tick, orient=tk.HORIZONTAL, showvalue=False, from_=0.01, to=1.00,
+                                 resolution=0.01, variable=self.time_tick, command=self.cb_time_tick)
+        scl_time_tick.pack(expand=True, fill=tk.X, side=tk.LEFT)
 
         # The canvas tk.Frame on the bottom right
         # ------------------------------------
@@ -316,7 +345,7 @@ class Gui:
         self._enter_command = True
 
     # Single step button
-    def cb_single_step(self, _event):
+    def cb_single_step(self, _event=None):
         self.step()
 
     def cb_reset_transformations(self):
@@ -402,6 +431,14 @@ class Gui:
         self.lbl_cov_ell_cnt_val.config(text=cnt)
 
         self.draw()
+
+    def cb_time_incr(self, _event):
+        self._t_incr = self.time_incr.get()
+        self.lbl_time_incr_val.config(text="{:.1f}".format(self._t_incr))
+
+    def cb_time_tick(self, _event):
+        self._t_tick = self.time_tick.get()
+        self.lbl_time_tick_val.config(text="{:.2f}".format(self._t_tick))
 
     def cb_draw(self):
         self.draw()
@@ -495,12 +532,12 @@ class Gui:
                 self.cb_play_pause()
 
             while True:
+                start = time.time()
+
                 if self._play:
                     self.step()
 
-                # Handle GUI events - used instead of mainloop(),
-                # since latter is blocking and we need to update our stuff
-                self.master.update()
+                # Handle callback into the main program
                 if cb_main_loop is not None:
                     if self._enter_command:
                         if cb_main_loop():
@@ -509,6 +546,18 @@ class Gui:
                         self._enter_command = False
                     # end if
                 # end if
-                sleep(self._t_tick)
+
+                # With this loop prevent the program to freeze
+                # Handle GUI events - used instead of mainloop(),
+                # since latter is blocking and we need to update our stuff
+                while True:
+                    self.master.update()
+                    end = time.time()
+                    if end - start > self._t_tick:
+                        start += self._t_tick
+                        break
+                    # end if
+                    time.sleep(0.01)
+                # end while
             # end while
         # end if

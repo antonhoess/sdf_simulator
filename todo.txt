@@ -1,6 +1,4 @@
 * gui.py: Add switch to allow plotting over time instead of 2D - but how to separate the components x and y? Make two graphs for each 2D graph?
-* gui.py: Add slider for speed and for step width (t increment) and show the current values on a label.
-* gui.py: Add to the reset button probably even more values os the time increment e.g.
 * Check, if it makes sense to use canvas-functions as xview(), xview_scroll(), canvasx() and it's y-counterparts - probalby they are only interesting, if all items stay on the canvas and not when deleting all items in each cycle.
 * Check, if it is feasible to keep track of all elements created (drawn) on the canvas and update them instead of deleting all and creating them anew.
 * Unify all function and variable names and also structure them more, e.g. pack them in classes if useful.
@@ -9,8 +7,8 @@
 * Put more comments in the code.
 * On the ScalableCanvas <Configure> event the objects can even move out of the window then changing the window size - this seems only to happen when the object got moved away from the origin before.
 * How to handle the scale factors (10000., etc.) in vehicle_visu, especially when changing the velocity and acceleration or when adding further vehicles with different parameters.
-* Move all the timing variables hard defined in Gui.__init__() to the main program - find good calculations or define them for each vehicle visualization separately - probably also the trace_length_max parameter.
 * Test, if by choosing the element nearest to the mouse pointer on the canvas and keeping track of the association of the line segment, etc. to the vehicle/sensor, it is possible to select e.g. a sensor and interaxt with it (e.g. show a list of the recent measurements)
 * Check, if complex numbers or a self defined type or tuples might make things easier with the (x, y) pairs. See http://effbot.org/zone/tkinter-complex-canvas.htm.
 * Probably create a separate class than build the connection between the sensor and the vehicle, that gets measured. The problem occurs when visualizing the measurements, since the sensor does not know, which vehicle a specific measurement was from.
   -> Or just adapt the imperfect logic already implemented at SenvorVisu.draw() - handled_vehicles...
+

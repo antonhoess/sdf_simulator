@@ -42,15 +42,16 @@ class ScalableCanvas(tk.Canvas):
         pointerx = self.winfo_pointerx() - self.winfo_rootx()
         pointery = self.winfo_pointery() - self.winfo_rooty()
         if pointerx < 0 or pointerx > self.winfo_width() or\
-            pointery < 0 or pointery > self.winfo_height():
+           pointery < 0 or pointery > self.winfo_height():
             pointerx = self.winfo_width() / 2.
             pointery = self.winfo_height() / 2.
         # end if
 
         self.set_offset(self.offset_x - (
-        pointerx - (self.offset_x + (self.winfo_width() / 2. if self.get_center_origin() else 0.))) * zoom_factor_diff,
+                pointerx - (
+                    self.offset_x + (self.winfo_width() / 2. if self.get_center_origin() else 0.))) * zoom_factor_diff,
                         self.offset_y - (pointery - (self.offset_y + (
-                        self.winfo_height() / 2. if self.get_center_origin() else 0.))) * zoom_factor_diff)
+                            self.winfo_height() / 2. if self.get_center_origin() else 0.))) * zoom_factor_diff)
 
     def zoom_out(self):
         zoom_factor_update = 1. / self.zoom_factor
@@ -61,7 +62,7 @@ class ScalableCanvas(tk.Canvas):
         pointerx = self.winfo_pointerx() - self.winfo_rootx()
         pointery = self.winfo_pointery() - self.winfo_rooty()
         if pointerx < 0 or pointerx > self.winfo_width() or \
-                        pointery < 0 or pointery > self.winfo_height():
+           pointery < 0 or pointery > self.winfo_height():
             pointerx = self.winfo_width() / 2.
             pointery = self.winfo_height() / 2.
         # end if

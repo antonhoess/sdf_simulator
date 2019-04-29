@@ -1,6 +1,7 @@
 from vehicle import Vehicle
 from sensor import Radar
 from gui import Gui
+import numpy as np
 
 
 def cb_main_loop():
@@ -23,11 +24,15 @@ if __name__ == "__main__":
     gui.add_vehicle(vehicle2, "red")
 
     # Add radars
-    radar1 = Radar("R1", 3000, 8000, 5., cov_r=[[100000, 30000], [30000, 100000]], cov_rd=[[10000, 0], [0, 10000]],
+    radar1 = Radar("R1", 3000, 8000, 5.,
+                   cov_r=(np.asarray([[100000, 30000], [30000, 100000]])*1.).tolist(),
+                   cov_rd=[[10000, 0], [0, 10000]],
                    cov_rdd=[[1000, 0], [0, 10000]])
     gui.add_sensor(radar1, "orange")
 
-    radar2 = Radar("R2", -9000, -5000, 5., cov_r=[[100000, 10000], [10000, 100000]], cov_rd=[[10000, 0], [0, 10000]],
+    radar2 = Radar("R2", -9000, -5000, 5.,
+                   cov_r=[[100000, 30000], [30000, 100000]],
+                   cov_rd=[[10000, 0], [0, 10000]],
                    cov_rdd=[[1000, 0], [0, 10000]])
     gui.add_sensor(radar2, "lightblue")
 

@@ -232,6 +232,28 @@ class Gui:
                                          command=self.cb_draw)
         chk_draw_normal.pack(side=tk.TOP, anchor=tk.W)
 
+        # Measurements and covariance ellipses
+        sep_hor = tk.Frame(frm_control, height=2, bd=1, relief=tk.SUNKEN)
+        sep_hor.pack(fill=tk.X, padx=5, pady=5)
+
+        self.draw_meas = tk.IntVar()
+        chk_draw_meas = tk.Checkbutton(frm_control, text="Draw Measurements", variable=self.draw_meas,
+                                       command=self.cb_draw)
+        chk_draw_meas.pack(side=tk.TOP, anchor=tk.W)
+
+        frm_cov_ell_cnt = tk.Frame(frm_control)
+        frm_cov_ell_cnt.pack(fill=tk.X, side=tk.TOP, padx=5)
+        lbl_cov_ell_cnt = tk.Label(frm_cov_ell_cnt, text="# Cov. Ell.:", width=9, anchor=tk.W)
+        lbl_cov_ell_cnt.pack(fill=tk.X, side=tk.LEFT)
+        self.lbl_cov_ell_cnt_val = tk.Label(frm_cov_ell_cnt, text="0", bg="white", anchor=tk.E)
+        self.lbl_cov_ell_cnt_val.pack(expand=True, fill=tk.X, side=tk.LEFT)
+
+        self.cov_ell_cnt = tk.IntVar()
+        scl_cov_ell_cnt = tk.Scale(frm_cov_ell_cnt, orient=tk.HORIZONTAL, showvalue=False, from_=0, to=5, resolution=1,
+                                   variable=self.cov_ell_cnt, command=self.cb_cov_ell_cnt)
+        scl_cov_ell_cnt.pack(expand=True, fill=tk.X, side=tk.LEFT)
+
+
         # Zoom
         sep_hor = tk.Frame(frm_control, height=2, bd=1, relief=tk.SUNKEN)
         sep_hor.pack(fill=tk.X, padx=5, pady=5)
@@ -245,11 +267,11 @@ class Gui:
 
         btn_zoom_out = tk.Button(frm_zoom, text="-", width=2, bg="lightblue")
         btn_zoom_out.pack(fill=None, side=tk.LEFT)
-        btn_zoom_out.bind('<Button-1>', lambda event, dir=self.ZoomDir.OUT: self.cb_zoom(event, dir))
+        btn_zoom_out.bind('<Button-1>', lambda event, direction=self.ZoomDir.OUT: self.cb_zoom(event, direction))
 
         btn_zoom_in = tk.Button(frm_zoom, text="+", width=2, bg="blue")
         btn_zoom_in.pack(fill=None, side=tk.LEFT)
-        btn_zoom_in.bind('<Button-1>', lambda event, dir=self.ZoomDir.IN: self.cb_zoom(event, dir))
+        btn_zoom_in.bind('<Button-1>', lambda event, direction=self.ZoomDir.IN: self.cb_zoom(event, direction))
 
         # The canvas tk.Frame on the bottom right
         # ------------------------------------
@@ -269,13 +291,14 @@ class Gui:
         self.canvas.bind('<B1-Shift-Motion>', self.cb_shift_motion)
         self.canvas.bind('<ButtonRelease-1>', self.cb_left_click_release)
         self.canvas.bind_all('<space>', self.cb_play_pause)
+        self.canvas.bind_all('<Shift-space>', self.cb_single_step)
         self.canvas.bind('<<MotionScaled>>', self.cb_motion_scaled)
-        self.canvas.bind_all('<Control-plus>', lambda event, dir=self.ZoomDir.IN: self.cb_zoom(event, dir))
-        self.canvas.bind_all('<Control-minus>', lambda event, dir=self.ZoomDir.OUT: self.cb_zoom(event, dir))
-        self.canvas.bind_all('<Shift-Left>', lambda event, dir=self.MoveDir.LEFT: self.cb_move(event, dir))
-        self.canvas.bind_all('<Shift-Right>', lambda event, dir=self.MoveDir.RIGHT: self.cb_move(event, dir))
-        self.canvas.bind_all('<Shift-Up>', lambda event, dir=self.MoveDir.UP: self.cb_move(event, dir))
-        self.canvas.bind_all('<Shift-Down>', lambda event, dir=self.MoveDir.DOWN: self.cb_move(event, dir))
+        self.canvas.bind_all('<Control-plus>', lambda event, direction=self.ZoomDir.IN: self.cb_zoom(event, direction))
+        self.canvas.bind_all('<Control-minus>', lambda event, direction=self.ZoomDir.OUT: self.cb_zoom(event, direction))
+        self.canvas.bind_all('<Shift-Left>', lambda event, direction=self.MoveDir.LEFT: self.cb_move(event, direction))
+        self.canvas.bind_all('<Shift-Right>', lambda event, direction=self.MoveDir.RIGHT: self.cb_move(event, direction))
+        self.canvas.bind_all('<Shift-Up>', lambda event, direction=self.MoveDir.UP: self.cb_move(event, direction))
+        self.canvas.bind_all('<Shift-Down>', lambda event, direction=self.MoveDir.DOWN: self.cb_move(event, direction))
 
     # Play / pause button
     def cb_play_pause(self, _event=None):
@@ -288,12 +311,12 @@ class Gui:
             self.btn_play_pause.config(text="Play")
             self.btn_single_step.config(state=tk.NORMAL)
 
-    def cb_command_callback(self, event):
+    def cb_command_callback(self, _event):
         self.cb_play_pause()
         self._enter_command = True
 
     # Single step button
-    def cb_single_step(self):
+    def cb_single_step(self, _event):
         self.step()
 
     def cb_reset_transformations(self):
@@ -302,7 +325,7 @@ class Gui:
         self.canvas.set_offset(0, 0)
         self.draw()
 
-    def cb_canvas_configure(self, event):
+    def cb_canvas_configure(self, _event):
         self.draw()
 
     def update_zoom_label(self):
@@ -343,30 +366,40 @@ class Gui:
         self.update_zoom_label()
         self.draw()
 
-    def cb_zoom(self, _event=None, dir=None):
-        if dir == self.ZoomDir.IN:
+    def cb_zoom(self, _event=None, direction=None):
+        if direction == self.ZoomDir.IN:
             self.do_zoom(self.ZoomDir.IN)
 
-        elif dir == self.ZoomDir.OUT:
+        elif direction == self.ZoomDir.OUT:
             self.do_zoom(self.ZoomDir.OUT)
 
-    def cb_move(self, _event=None, dir=None):
+    def cb_move(self, _event=None, direction=None):
         offset_x, offset_y = self.canvas.get_offset()
 
-        if dir == self.MoveDir.LEFT:
+        if direction == self.MoveDir.LEFT:
             self.canvas.set_offset(offset_x - self.canvas.winfo_width() / 10., offset_y)
 
-        elif dir == self.MoveDir.RIGHT:
+        elif direction == self.MoveDir.RIGHT:
             self.canvas.set_offset(offset_x + self.canvas.winfo_width() / 10., offset_y)
 
-        elif dir == self.MoveDir.UP:
+        elif direction == self.MoveDir.UP:
             self.canvas.set_offset(offset_x, offset_y - self.canvas.winfo_height() / 10.)
 
-        elif dir == self.MoveDir.DOWN:
+        elif direction == self.MoveDir.DOWN:
             self.canvas.set_offset(offset_x, offset_y + self.canvas.winfo_height() / 10.)
 
         else:
             raise Exception("Invalid movement direction.")
+
+        self.draw()
+
+    def cb_cov_ell_cnt(self, _event):
+        cnt = self.cov_ell_cnt.get()
+
+        for sv in range(len(self._vv)):
+            self._sv[sv].cov_ell_cnt = cnt
+
+        self.lbl_cov_ell_cnt_val.config(text=cnt)
 
         self.draw()
 
@@ -396,7 +429,7 @@ class Gui:
 
     def _draw_sensors(self):
         for sv in self._sv:
-            sv.draw(omit_clear=True)
+            sv.draw(omit_clear=True, draw_meas=self.draw_meas.get())
 
     def step(self):
         draw = False
@@ -407,13 +440,7 @@ class Gui:
 
             # Visualization in canvas
             # -----------------------
-            vv.add_cur_pos_to_trace()
-            vv.add_cur_vel_to_trace()
-            vv.add_cur_acc_to_trace()
-            vv.add_cur_tangent_to_trace()
-            vv.add_cur_normal_to_trace()
-            vv.add_cur_acc_times_tangent_to_trace()
-            vv.add_cur_acc_times_normal_to_trace()
+            vv.add_cur_vals_to_traces()
         # end if
 
         # Update gui elements with current values

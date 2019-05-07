@@ -165,6 +165,12 @@ class Gui:
         sep_hor = tk.Frame(frm_control, height=2, bd=1, relief=tk.SUNKEN)
         sep_hor.pack(fill=tk.X, padx=5, pady=5)
 
+        self.draw_origin_cross = tk.IntVar()
+        self.draw_origin_cross.set(1)
+        chk_draw_origin_cross = tk.Checkbutton(frm_control, text="Draw Origin Cross", variable=self.draw_origin_cross,
+                                               command=self.cb_draw)
+        chk_draw_origin_cross.pack(side=tk.TOP, anchor=tk.W)
+
         self.draw_pos_trace = tk.IntVar()
         self.draw_pos_trace.set(1)
         chk_draw_pos_trace = tk.Checkbutton(frm_control, text="Draw Pos. Trace", variable=self.draw_pos_trace,
@@ -232,6 +238,35 @@ class Gui:
                                          command=self.cb_draw)
         chk_draw_normal.pack(side=tk.TOP, anchor=tk.W)
 
+        # Projection
+        sep_hor = tk.Frame(frm_control, height=2, bd=1, relief=tk.SUNKEN)
+        sep_hor.pack(fill=tk.X, padx=5, pady=5)
+
+        self.proj_dim = tk.IntVar()
+        self.proj_dim.set(0)
+        rad_proj_dim_none = tk.Radiobutton(frm_control, text="No projection", variable=self.proj_dim, value=0,
+                                           command=self.cb_draw)
+        rad_proj_dim_none.pack(side=tk.TOP, anchor=tk.W)
+        rad_proj_dim_x_axis = tk.Radiobutton(frm_control, text="Proj. X-axis", variable=self.proj_dim, value=1,
+                                             command=self.cb_draw)
+        rad_proj_dim_x_axis.pack(side=tk.TOP, anchor=tk.W)
+        rad_proj_dim_y_axis = tk.Radiobutton(frm_control, text="Proj. X-axis", variable=self.proj_dim, value=2,
+                                             command=self.cb_draw)
+        rad_proj_dim_y_axis.pack(side=tk.TOP, anchor=tk.W)
+
+        frm_proj_scale = tk.Frame(frm_control)
+        frm_proj_scale.pack(fill=tk.X, side=tk.TOP, padx=5)
+        lbl_proj_scale = tk.Label(frm_proj_scale, text="Proj. Scale", width=9, anchor=tk.W)
+        lbl_proj_scale.pack(fill=tk.X, side=tk.LEFT)
+        self.lbl_proj_scale_val = tk.Label(frm_proj_scale, text="", bg="white", anchor=tk.E)
+        self.lbl_proj_scale_val.pack(expand=True, fill=tk.X, side=tk.LEFT)
+
+        self.proj_scale = tk.IntVar()
+        self.proj_scale.set(100)
+        scl_proj_scale = tk.Scale(frm_proj_scale, orient=tk.HORIZONTAL, showvalue=False, from_=1, to=1000, resolution=1,
+                                  variable=self.proj_scale, command=self.cb_proj_scale)
+        scl_proj_scale.pack(expand=True, fill=tk.X, side=tk.LEFT)
+
         # Measurements and covariance ellipses
         sep_hor = tk.Frame(frm_control, height=2, bd=1, relief=tk.SUNKEN)
         sep_hor.pack(fill=tk.X, padx=5, pady=5)
@@ -245,10 +280,11 @@ class Gui:
         frm_cov_ell_cnt.pack(fill=tk.X, side=tk.TOP, padx=5)
         lbl_cov_ell_cnt = tk.Label(frm_cov_ell_cnt, text="# Cov. Ell.:", width=9, anchor=tk.W)
         lbl_cov_ell_cnt.pack(fill=tk.X, side=tk.LEFT)
-        self.lbl_cov_ell_cnt_val = tk.Label(frm_cov_ell_cnt, text="0", bg="white", anchor=tk.E)
+        self.lbl_cov_ell_cnt_val = tk.Label(frm_cov_ell_cnt, text="", bg="white", anchor=tk.E)
         self.lbl_cov_ell_cnt_val.pack(expand=True, fill=tk.X, side=tk.LEFT)
 
         self.cov_ell_cnt = tk.IntVar()
+        self.cov_ell_cnt.set(0)
         scl_cov_ell_cnt = tk.Scale(frm_cov_ell_cnt, orient=tk.HORIZONTAL, showvalue=False, from_=0, to=5, resolution=1,
                                    variable=self.cov_ell_cnt, command=self.cb_cov_ell_cnt)
         scl_cov_ell_cnt.pack(expand=True, fill=tk.X, side=tk.LEFT)
@@ -432,6 +468,13 @@ class Gui:
 
         self.draw()
 
+    def cb_proj_scale(self, _event):
+        scale = self.proj_scale.get()
+
+        self.lbl_proj_scale_val.config(text=scale)
+
+        self.draw()
+
     def cb_time_incr(self, _event):
         self._t_incr = self.time_incr.get()
         self.lbl_time_incr_val.config(text="{:.1f}".format(self._t_incr))
@@ -455,14 +498,16 @@ class Gui:
 
     def _draw_vehicles(self):
         for vv in self._vv:
-            vv.draw(omit_clear=True, draw_pos_trace=self.draw_pos_trace.get(), draw_vel_trace=self.draw_vel_trace.get(),
+            vv.draw(omit_clear=True, draw_origin_cross=self.draw_origin_cross.get(),
+                    draw_pos_trace=self.draw_pos_trace.get(), draw_vel_trace=self.draw_vel_trace.get(),
                     draw_acc_trace=self.draw_acc_trace.get(), draw_tangent_trace=self.draw_tangent_trace.get(),
                     draw_normal_trace=self.draw_normal_trace.get(),
                     draw_acc_times_tangent_trace=self.draw_acc_times_tangent_trace.get(),
                     draw_acc_times_normal_trace=self.draw_acc_times_normal_trace.get(),
                     draw_vel_vec=self.draw_vel_vec.get(),
                     draw_acc_vec=self.draw_acc_vec.get(), draw_tangent=self.draw_tangent.get(),
-                    draw_normal=self.draw_normal.get())
+                    draw_normal=self.draw_normal.get(),
+                    proj_dim=self.proj_dim.get(), proj_scale=self.proj_scale.get())
 
     def _draw_sensors(self):
         for sv in self._sv:

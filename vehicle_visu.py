@@ -1,4 +1,5 @@
 import tkinter as tk
+import numpy as np
 
 
 class VehicleVisu:
@@ -60,14 +61,25 @@ class VehicleVisu:
     def add_cur_acc_times_normal_to_trace(self):
         self.add_cur_val_to_trace(self._trace_acc_times_normal, self.vehicle.rddxrdn * 1000.0)
 
-    def draw(self, omit_clear=False, draw_pos_trace=True, draw_vel_trace=True, draw_acc_trace=True,
-             draw_tangent_trace=True,
+    def draw(self, omit_clear=False, draw_origin_cross=True, draw_pos_trace=True, draw_vel_trace=True,
+             draw_acc_trace=True, draw_tangent_trace=True,
              draw_normal_trace=True, draw_acc_times_tangent_trace=True, draw_acc_times_normal_trace=True,
-             draw_vel_vec=True, draw_acc_vec=True, draw_tangent=True, draw_normal=True):
+             draw_vel_vec=True, draw_acc_vec=True, draw_tangent=True, draw_normal=True, proj_dim=None, proj_scale=1.):
 
         # Clear canvas
         if not omit_clear:
             self.clear()
+
+        # Draw cross
+        if draw_origin_cross:
+            x0, y0 = self.canvas.scale_point(0, 0)
+            x1, y1 = self.canvas.scale_point(self.canvas.winfo_width(), self.canvas.winfo_height())
+            print(x0, y0)
+            print(x1, y1)
+
+            self.canvas.create_line(0, y0, 0, y1, dash=(3, 5))
+            self.canvas.create_line(x0, 0, x1, 0, dash=(3, 5))
+
 
         # Draw trace arrays
         # -----------------
@@ -76,24 +88,28 @@ class VehicleVisu:
                              arrowshape=(16, 20, 6))
 
         if draw_vel_trace:
-            self._draw_trace(self._trace_vel, draw_arrow=True, fill_format="#{0:02x}{1:02x}{1:02x}", width=2.0)
+            self._draw_trace(self._trace_vel, proj_dim=proj_dim, proj_scale=proj_scale, draw_arrow=True,
+                             fill_format="#{0:02x}{1:02x}{1:02x}", width=2.0)
 
         if draw_acc_trace:
-            self._draw_trace(self._trace_acc, draw_arrow=True, fill_format="#{0:02x}0000", width=2.0)
+            self._draw_trace(self._trace_acc, proj_dim=proj_dim, proj_scale=proj_scale, draw_arrow=True,
+                             fill_format="#{0:02x}0000", width=2.0)
 
         if draw_tangent_trace:
-            self._draw_trace(self._trace_tangent, draw_arrow=True, fill_format="#{0:02x}{0:02x}{0:02x}", width=2.0)
+            self._draw_trace(self._trace_tangent, proj_dim=proj_dim, proj_scale=proj_scale, draw_arrow=True,
+                             fill_format="#{0:02x}{0:02x}{0:02x}", width=2.0)
 
         if draw_normal_trace:
-            self._draw_trace(self._trace_normal, draw_arrow=True, fill_format="#{1:02x}{1:02x}{1:02x}", width=2.0)
+            self._draw_trace(self._trace_normal, proj_dim=proj_dim, proj_scale=proj_scale, draw_arrow=True,
+                             fill_format="#{1:02x}{1:02x}{1:02x}", width=2.0)
 
         if draw_acc_times_tangent_trace:
-            self._draw_trace(self._trace_acc_times_tangent, draw_arrow=True, fill_format="#{0:02x}{0:02x}{1:02x}",
-                             width=2.0)
+            self._draw_trace(self._trace_acc_times_tangent, proj_dim=proj_dim, proj_scale=proj_scale, draw_arrow=True,
+                             fill_format="#{0:02x}{0:02x}{1:02x}", width=2.0)
 
         if draw_acc_times_normal_trace:
-            self._draw_trace(self._trace_acc_times_normal, draw_arrow=True, fill_format="#{1:02x}{1:02x}{0:02x}",
-                             width=2.0)
+            self._draw_trace(self._trace_acc_times_normal, proj_dim=proj_dim, proj_scale=proj_scale, draw_arrow=True,
+                             fill_format="#{1:02x}{1:02x}{0:02x}", width=2.0)
 
         # Draw vectors
         # ------------
@@ -144,7 +160,8 @@ class VehicleVisu:
         self._trace_acc_times_normal.clear()
 
     # Draw pos trace array
-    def _draw_trace(self, trace, draw_arrow=True, fill_format="#000000", **kwargs):
+    # proj_dim = projection dimension: 0 = No projection, 1 = X-axis, 2 = Y-axis
+    def _draw_trace(self, trace, draw_arrow=True, proj_dim=0, proj_scale=1., fill_format="#000000", **kwargs):
         num_steps = len(trace)
         for step in range(1, num_steps):
             x = step / float(self.trace_length_max - 1)
@@ -161,9 +178,20 @@ class VehicleVisu:
                 arrow = None
                 capstyle = tk.ROUND
 
-            self.canvas.create_line(trace[step - 1][0],
-                                    trace[step - 1][1],
-                                    trace[step][0],
-                                    trace[step][1],
+            p0 = trace[step - 1]
+            p1 = trace[step]
+
+            if proj_dim == 1:
+                p0 = p0 * np.asarray([0., 1.]) + np.asarray([(step - 1) * proj_scale, 0.])
+                p1 = p1 * np.asarray([0., 1.]) + np.asarray([step * proj_scale, 0.])
+
+            elif proj_dim == 2:
+                p0 = p0 * np.asarray([1., 0.]) + np.asarray([0., (step - 1) * proj_scale])
+                p1 = p1 * np.asarray([1., 0.]) + np.asarray([0., step * proj_scale])
+
+            self.canvas.create_line(p0[0],
+                                    p0[1],
+                                    p1[0],
+                                    p1[1],
                                     fill=fill, capstyle=capstyle, arrow=arrow, **kwargs)
         # end for

@@ -22,7 +22,7 @@ class ScalableCanvas(tk.Canvas):
         self.bind("<Motion>", self._cb_motion)
 
     def _cb_motion(self, event):
-        x, y = self._scale_point(event.x, event.y)
+        x, y = self.scale_point(event.x, event.y)
 
         e = {
             'x': x,
@@ -117,7 +117,7 @@ class ScalableCanvas(tk.Canvas):
 
         return self.create_polygon(_coords, *args, **kwargs)
 
-    def _scale_point(self, x, y):
+    def scale_point(self, x, y):
         p = np.asarray([x, y], dtype=np.float)
 
         width = self.winfo_width()

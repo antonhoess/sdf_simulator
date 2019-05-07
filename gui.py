@@ -250,7 +250,7 @@ class Gui:
         rad_proj_dim_x_axis = tk.Radiobutton(frm_control, text="Proj. X-axis", variable=self.proj_dim, value=1,
                                              command=self.cb_draw)
         rad_proj_dim_x_axis.pack(side=tk.TOP, anchor=tk.W)
-        rad_proj_dim_y_axis = tk.Radiobutton(frm_control, text="Proj. X-axis", variable=self.proj_dim, value=2,
+        rad_proj_dim_y_axis = tk.Radiobutton(frm_control, text="Proj. Y-axis", variable=self.proj_dim, value=2,
                                              command=self.cb_draw)
         rad_proj_dim_y_axis.pack(side=tk.TOP, anchor=tk.W)
 

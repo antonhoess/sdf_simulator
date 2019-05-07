@@ -179,12 +179,12 @@ class VehicleVisu:
             p1 = trace[step]
 
             if proj_dim == 1:
-                p0 = p0 * np.asarray([0., 1.]) + np.asarray([(step - 1) * proj_scale, 0.])
-                p1 = p1 * np.asarray([0., 1.]) + np.asarray([step * proj_scale, 0.])
-
-            elif proj_dim == 2:
                 p0 = p0 * np.asarray([1., 0.]) + np.asarray([0., (step - 1) * proj_scale])
                 p1 = p1 * np.asarray([1., 0.]) + np.asarray([0., step * proj_scale])
+
+            elif proj_dim == 2:
+                p0 = p0 * np.asarray([0., 1.]) + np.asarray([(step - 1) * proj_scale, 0.])
+                p1 = p1 * np.asarray([0., 1.]) + np.asarray([step * proj_scale, 0.])
 
             self.canvas.create_line(p0[0],
                                     p0[1],

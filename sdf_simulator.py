@@ -21,7 +21,7 @@ if __name__ == "__main__":
     vehicle1 = Vehicle("Vehicle1", 300.0, 9.0)
     gui.add_vehicle(vehicle1, "black")
     vehicle2 = Vehicle("Vehicle2", 200.0, 20.0)
-    gui.add_vehicle(vehicle2, "red")
+    #gui.add_vehicle(vehicle2, "red")
 
     # Add radars
     radar1 = Radar("R1", 3000, 8000, 5.,

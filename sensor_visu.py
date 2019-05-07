@@ -44,8 +44,12 @@ class SensorVisu:
                 handled_vehicles.append(meas.vehicle)
 
                 for sigma in range(1, self.cov_ell_cnt + 1):
-                    self.canvas.create_oval_rotated(meas.r_mean[0], meas.r_mean[1],  self.sensor.cov_r_r1 * sigma, self.sensor.cov_r_r2 * sigma, self.sensor.cov_r_theta, n_segments=20, fill="", width=3, outline="black")
-                    self.canvas.create_oval_rotated(meas.r_mean[0], meas.r_mean[1],  self.sensor.cov_r_r1 * sigma, self.sensor.cov_r_r2 * sigma, self.sensor.cov_r_theta, n_segments=20, fill="", width=1, outline=self.color)
+                    self.canvas.create_oval_rotated(meas.r_mean[0], meas.r_mean[1], self.sensor.cov_r_r1 * sigma,
+                                                    self.sensor.cov_r_r2 * sigma, self.sensor.cov_r_theta,
+                                                    n_segments=20, fill="", width=3, outline="black")
+                    self.canvas.create_oval_rotated(meas.r_mean[0], meas.r_mean[1], self.sensor.cov_r_r1 * sigma,
+                                                    self.sensor.cov_r_r2 * sigma, self.sensor.cov_r_theta,
+                                                    n_segments=20, fill="", width=1, outline=self.color)
                 # end for
             else:
                 break
@@ -63,14 +67,20 @@ class SensorVisu:
                     self.canvas.create_oval(meas.r[0], meas.r[1], meas.r[0], meas.r[1], width=3, outline=self.color)
                 elif x_style == 1:  # \ + /
                     x = 100
-                    self.canvas.create_line(meas.r[0] - x, meas.r[1] - x, meas.r[0] + x, meas.r[1] + x, width=3, fill="black")
-                    self.canvas.create_line(meas.r[0] - x, meas.r[1] + x, meas.r[0] + x, meas.r[1] - x, width=3, fill="black")
+                    self.canvas.create_line(meas.r[0] - x, meas.r[1] - x, meas.r[0] + x, meas.r[1] + x, width=3,
+                                            fill="black")
+                    self.canvas.create_line(meas.r[0] - x, meas.r[1] + x, meas.r[0] + x, meas.r[1] - x, width=3,
+                                            fill="black")
 
-                    self.canvas.create_line(meas.r[0] - x, meas.r[1] - x, meas.r[0] + x, meas.r[1] + x, width=1, fill=self.color)
-                    self.canvas.create_line(meas.r[0] - x, meas.r[1] + x, meas.r[0] + x, meas.r[1] - x, width=1, fill=self.color)
+                    self.canvas.create_line(meas.r[0] - x, meas.r[1] - x, meas.r[0] + x, meas.r[1] + x, width=1,
+                                            fill=self.color)
+                    self.canvas.create_line(meas.r[0] - x, meas.r[1] + x, meas.r[0] + x, meas.r[1] - x, width=1,
+                                            fill=self.color)
                 else:  # ❌
-                    self.canvas.create_text(meas.r[0], meas.r[1], text="❌", anchor=tk.CENTER, font=(None, 12), fill="black")
-                    self.canvas.create_text(meas.r[0], meas.r[1], text="❌", anchor=tk.CENTER, font=(None, 8), fill=self.color)
+                    self.canvas.create_text(meas.r[0], meas.r[1], text="❌", anchor=tk.CENTER, font=(None, 12),
+                                            fill="black")
+                    self.canvas.create_text(meas.r[0], meas.r[1], text="❌", anchor=tk.CENTER, font=(None, 8),
+                                            fill=self.color)
                 # end if
             # end for
         # end if

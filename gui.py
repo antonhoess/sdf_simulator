@@ -555,7 +555,7 @@ class Gui:
 
     def _draw_sensors(self):
         for sv in self._sv:
-            sv.draw(omit_clear=True, draw_meas=self.draw_meas.get())
+            sv.draw(omit_clear=True, draw_meas=self.draw_meas.get(), vehicle=self._vv[0].vehicle)
 
     def step(self):
         draw = False

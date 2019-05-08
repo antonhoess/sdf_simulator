@@ -10,4 +10,4 @@
 * Check, if complex numbers or a self defined type or tuples might make things easier with the (x, y) pairs. See http://effbot.org/zone/tkinter-complex-canvas.htm.
 * Probably create a separate class than build the connection between the sensor and the vehicle, that gets measured. The problem occurs when visualizing the measurements, since the sensor does not know, which vehicle a specific measurement was from.
   -> Or just adapt the imperfect logic already implemented at SenvorVisu.draw() - handled_vehicles...
-* Add lists for vehicles and sensors and allow e.g. to disable/enable them
+* Add lists for vehicles and sensors and allow e.g. to disable/enable them - and maybe further settings in a context menu or separate window when clicking on the sensor box.

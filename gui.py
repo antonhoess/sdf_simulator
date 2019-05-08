@@ -39,6 +39,9 @@ class Gui:
         self._play = False
         self._enter_command = False
 
+        self._show_trace_settings = False
+        self._show_vector_settings = False
+
         # For shift the objects on the canvas
         self._move_mode = False
         self._move_origin = [-1, -1]
@@ -165,47 +168,58 @@ class Gui:
         sep_hor = tk.Frame(frm_control, height=2, bd=1, relief=tk.SUNKEN)
         sep_hor.pack(fill=tk.X, padx=5, pady=5)
 
+        # Trace settings
+        frm_trace_settings = tk.Frame(frm_control)
+        frm_trace_settings.pack(fill=tk.X)
+
+        self.btn_toggle_trace_settings = tk.Button(frm_trace_settings, text="Show Trace Settings",
+                                                   command=self.cb_toggle_trace_settings)
+        self.btn_toggle_trace_settings.pack(fill=tk.X)
+
+        self.frm_trace_settings_content = tk.Frame(frm_trace_settings)
+        # No pack() statement, since it's hidden by default
+
         self.draw_origin_cross = tk.IntVar()
         self.draw_origin_cross.set(1)
-        chk_draw_origin_cross = tk.Checkbutton(frm_control, text="Draw Origin Cross", variable=self.draw_origin_cross,
+        chk_draw_origin_cross = tk.Checkbutton(self.frm_trace_settings_content, text="Draw Origin Cross", variable=self.draw_origin_cross,
                                                command=self.cb_draw)
         chk_draw_origin_cross.pack(side=tk.TOP, anchor=tk.W)
 
         self.draw_pos_trace = tk.IntVar()
         self.draw_pos_trace.set(1)
-        chk_draw_pos_trace = tk.Checkbutton(frm_control, text="Draw Pos. Trace", variable=self.draw_pos_trace,
+        chk_draw_pos_trace = tk.Checkbutton(self.frm_trace_settings_content, text="Draw Pos. Trace", variable=self.draw_pos_trace,
                                             command=self.cb_draw)
         chk_draw_pos_trace.pack(side=tk.TOP, anchor=tk.W)
 
         self.draw_vel_trace = tk.IntVar()
-        chk_draw_vel_trace = tk.Checkbutton(frm_control, text="Draw Vel. Trace", variable=self.draw_vel_trace,
+        chk_draw_vel_trace = tk.Checkbutton(self.frm_trace_settings_content, text="Draw Vel. Trace", variable=self.draw_vel_trace,
                                             command=self.cb_draw)
         chk_draw_vel_trace.pack(side=tk.TOP, anchor=tk.W)
 
         self.draw_acc_trace = tk.IntVar()
-        chk_draw_acc_trace = tk.Checkbutton(frm_control, text="Draw Accel. Trace", variable=self.draw_acc_trace,
+        chk_draw_acc_trace = tk.Checkbutton(self.frm_trace_settings_content, text="Draw Accel. Trace", variable=self.draw_acc_trace,
                                             command=self.cb_draw)
         chk_draw_acc_trace.pack(side=tk.TOP, anchor=tk.W)
 
         self.draw_tangent_trace = tk.IntVar()
-        chk_draw_tangent_trace = tk.Checkbutton(frm_control, text="Draw Tangent Trace",
+        chk_draw_tangent_trace = tk.Checkbutton(self.frm_trace_settings_content, text="Draw Tangent Trace",
                                                 variable=self.draw_tangent_trace,
                                                 command=self.cb_draw)
         chk_draw_tangent_trace.pack(side=tk.TOP, anchor=tk.W)
 
         self.draw_normal_trace = tk.IntVar()
-        chk_draw_normal_trace = tk.Checkbutton(frm_control, text="Draw Normal Trace", variable=self.draw_normal_trace,
+        chk_draw_normal_trace = tk.Checkbutton(self.frm_trace_settings_content, text="Draw Normal Trace", variable=self.draw_normal_trace,
                                                command=self.cb_draw)
         chk_draw_normal_trace.pack(side=tk.TOP, anchor=tk.W)
 
         self.draw_acc_times_tangent_trace = tk.IntVar()
-        chk_draw_acc_times_tangent_trace = tk.Checkbutton(frm_control, text="Draw Acc. x Tangent Trace",
+        chk_draw_acc_times_tangent_trace = tk.Checkbutton(self.frm_trace_settings_content, text="Draw Acc. x Tangent Trace",
                                                           variable=self.draw_acc_times_tangent_trace,
                                                           command=self.cb_draw)
         chk_draw_acc_times_tangent_trace.pack(side=tk.TOP, anchor=tk.W)
 
         self.draw_acc_times_normal_trace = tk.IntVar()
-        chk_draw_acc_times_normal_trace = tk.Checkbutton(frm_control, text="Draw Acc. x Normal Trace",
+        chk_draw_acc_times_normal_trace = tk.Checkbutton(self.frm_trace_settings_content, text="Draw Acc. x Normal Trace",
                                                          variable=self.draw_acc_times_normal_trace,
                                                          command=self.cb_draw)
         chk_draw_acc_times_normal_trace.pack(side=tk.TOP, anchor=tk.W)
@@ -214,27 +228,37 @@ class Gui:
         sep_hor = tk.Frame(frm_control, height=2, bd=1, relief=tk.SUNKEN)
         sep_hor.pack(fill=tk.X, padx=5, pady=5)
 
+        frm_vector_settings = tk.Frame(frm_control)
+        frm_vector_settings.pack(fill=tk.X)
+
+        self.btn_toggle_vector_settings = tk.Button(frm_vector_settings, text="Show Vector Settings",
+                                                    command=self.cb_toggle_vector_settings)
+        self.btn_toggle_vector_settings.pack(fill=tk.X)
+
+        self.frm_vector_settings_content = tk.Frame(frm_vector_settings)
+        # No pack() statement, since it's hidden by default
+
         self.draw_vel_vec = tk.IntVar()
-        chk_draw_vel_vec = tk.Checkbutton(frm_control, text="Draw Vel. Vec.", variable=self.draw_vel_vec,
+        chk_draw_vel_vec = tk.Checkbutton(self.frm_vector_settings_content, text="Draw Vel. Vec.", variable=self.draw_vel_vec,
                                           command=self.cb_draw)
         chk_draw_vel_vec.pack(side=tk.TOP, anchor=tk.W)
 
         self.draw_acc_vec = tk.IntVar()
-        chk_draw_acc_vec = tk.Checkbutton(frm_control, text="Draw Accel. Vec.", variable=self.draw_acc_vec,
+        chk_draw_acc_vec = tk.Checkbutton(self.frm_vector_settings_content, text="Draw Accel. Vec.", variable=self.draw_acc_vec,
                                           command=self.cb_draw)
         chk_draw_acc_vec.pack(side=tk.TOP, anchor=tk.W)
 
         # Tangent and normal
-        sep_hor = tk.Frame(frm_control, height=2, bd=1, relief=tk.SUNKEN)
+        sep_hor = tk.Frame(self.frm_vector_settings_content, height=2, bd=1, relief=tk.SUNKEN)
         sep_hor.pack(fill=tk.X, padx=5, pady=5)
 
         self.draw_tangent = tk.IntVar()
-        chk_draw_tangent = tk.Checkbutton(frm_control, text="Draw Tangent", variable=self.draw_tangent,
+        chk_draw_tangent = tk.Checkbutton(self.frm_vector_settings_content, text="Draw Tangent Vec.", variable=self.draw_tangent,
                                           command=self.cb_draw)
         chk_draw_tangent.pack(side=tk.TOP, anchor=tk.W)
 
         self.draw_normal = tk.IntVar()
-        chk_draw_normal = tk.Checkbutton(frm_control, text="Draw Normal", variable=self.draw_normal,
+        chk_draw_normal = tk.Checkbutton(self.frm_vector_settings_content, text="Draw Normal Vec.", variable=self.draw_normal,
                                          command=self.cb_draw)
         chk_draw_normal.pack(side=tk.TOP, anchor=tk.W)
 
@@ -419,7 +443,7 @@ class Gui:
     def cb_motion_scaled(self, event):
         self.lbl_cursor_pos_val.config(text="{:5.2f}; {:5.2f}".format(event.x, event.y))
 
-    def cb_left_click_release(self, event):
+    def cb_left_click_release(self, _event):
         self._move_mode = False
 
     def do_zoom(self, dir):
@@ -482,6 +506,26 @@ class Gui:
     def cb_time_tick(self, _event):
         self._t_tick = self.time_tick.get()
         self.lbl_time_tick_val.config(text="{:.2f}".format(self._t_tick))
+
+    def cb_toggle_trace_settings(self, _event=None):
+        self._show_trace_settings = not self._show_trace_settings
+
+        if self._show_trace_settings:
+            self.frm_trace_settings_content.pack(fill=tk.X)
+            self.btn_toggle_trace_settings.config(text="Hide Trace Settings")
+        else:
+            self.btn_toggle_trace_settings.config(text="Show Trace Settings")
+            self.frm_trace_settings_content.pack_forget()
+
+    def cb_toggle_vector_settings(self, _event=None):
+        self._show_vector_settings = not self._show_vector_settings
+
+        if self._show_vector_settings:
+            self.frm_vector_settings_content.pack(fill=tk.X)
+            self.btn_toggle_vector_settings.config(text="Hide Vector Settings")
+        else:
+            self.btn_toggle_vector_settings.config(text="Show Vector Settings")
+            self.frm_vector_settings_content.pack_forget()
 
     def cb_draw(self):
         self.draw()

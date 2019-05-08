@@ -162,6 +162,7 @@ class ScalableCanvas(tk.Canvas):
             else:
                 ratio_scale_factor = (height / 2.0 * self.scale_ratio)
 
+            self.ratio_scale_factor = ratio_scale_factor #xxx das muss gescheit eingebaut werden . es muss eine function geben, die die aktuelle gesamtskalierung zurückgibt
             self.scale(x, 0., 0., ratio_scale_factor, ratio_scale_factor)
         # end if
 

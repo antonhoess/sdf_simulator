@@ -32,23 +32,46 @@ class Radar(Sensor):
         self.cov_rd = cov_rd
         self.cov_rdd = cov_rdd
 
+    def __str__(self):
+        return "{}: ∆T={:f})".format(self.name, self.meas_interval)
+
+    def calc_rotation_angle(self, vehicle):
+        if vehicle is not None:
+            return math.atan2(vehicle.r[1] - self.r[1], vehicle.r[0] - self.r[0])
+        else:
+            return 0
+
+    @staticmethod
+    def calc_rotation_matrix(theta):
+        c, s = np.cos(theta), np.sin(theta)
+
+        return np.array(((c, -s), (s, c)))  # Rotation matrix
+
+    @staticmethod
+    def calc_cov_ell_params(cov):
         # Calculate eigenvalues
-        eVa, eVe = np.linalg.eig(self.cov_r)
+        eVa, eVe = np.linalg.eig(cov)
 
         # Calculate transformation matrix from eigen decomposition
         R, S = eVe, np.diag(np.sqrt(eVa))
 
-        # Calculate values for drawing the cov ellipse
-        self.cov_r_theta = math.atan2(R[1, 0], R[1, 1])
-        self.cov_r_r1 = S[0, 0]
-        self.cov_r_r2 = S[1, 1]
+        # Calculate values for the covariance ellipse
+        cov_r_theta = math.atan2(R[1, 0], R[1, 1])
+        cov_r_r1 = S[0, 0]
+        cov_r_r2 = S[1, 1]
 
-    def __str__(self):
-        return "{}: ∆T={:f})".format(self.name, self.meas_interval)
+        return cov_r_theta, cov_r_r1, cov_r_r2
 
     def measure(self, vehicle):
         mean = vehicle.r
-        meas_r = np.random.multivariate_normal(mean, self.cov_r, 1)[0]
-        meas_rd = np.random.multivariate_normal(mean, self.cov_rd, 1)[0]
-        meas_rdd = np.random.multivariate_normal(mean, self.cov_rdd, 1)[0]
+
+        R = self.calc_rotation_matrix(self.calc_cov_ell_params(self.cov_r)[0])
+        meas_r = np.random.multivariate_normal(mean, np.asarray(self.cov_r) * R, 1)[0]
+
+        R = self.calc_rotation_matrix(self.calc_cov_ell_params(self.cov_rd)[0])
+        meas_rd = np.random.multivariate_normal(mean, np.asarray(self.cov_rd) * R, 1)[0]
+
+        R = self.calc_rotation_matrix(self.calc_cov_ell_params(self.cov_rdd)[0])
+        meas_rdd = np.random.multivariate_normal(mean, np.asarray(self.cov_rdd) * R, 1)[0]
+
         self.measurements.append(RadarMeasurement(vehicle, mean, meas_r, meas_rd, meas_rdd))

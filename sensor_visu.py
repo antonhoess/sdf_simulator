@@ -14,7 +14,7 @@ class SensorVisu:
         self._n_sides = n_sides
         self._rot_offset = rot_offset
         self._font_size_scale = font_size_scale
-        self._meas_buf_max = meas_buf_max
+        self.meas_buf_max = meas_buf_max
         self.cov_ell_cnt = 0
 
     def draw(self, omit_clear=False, draw_meas=True, vehicles=None):
@@ -76,7 +76,7 @@ class SensorVisu:
             # end if
 
             # The sensor's measurements
-            self.sensor.measurements = self.sensor.measurements[-self._meas_buf_max:]
+            self.sensor.measurements = self.sensor.measurements[-self.meas_buf_max:]
 
             if draw_meas:
                 x_style = 1

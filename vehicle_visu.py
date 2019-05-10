@@ -30,7 +30,7 @@ class VehicleVisu:
     def add_cur_val_to_trace(self, trace, val):
         trace.append(val)
 
-        if len(trace) > self.trace_length_max:  # Limit trace array length
+        while len(trace) > self.trace_length_max:  # Limit trace array length
             trace.pop(0)
 
     # Update pos trace array

@@ -607,6 +607,8 @@ class Gui:
             self.btn_toggle_trace_settings.config(bg="lightblue")
             self.frm_trace_settings_content.pack_forget()
 
+        self.btn_toggle_trace_settings.flash()
+
     def cb_toggle_vector_settings(self, _event=None):
         self._show_vector_settings = not self._show_vector_settings
 
@@ -619,6 +621,8 @@ class Gui:
             self.btn_toggle_vector_settings.config(bg="lightblue")
             self.frm_vector_settings_content.pack_forget()
 
+        self.btn_toggle_vector_settings.flash()
+
     def cb_toggle_projection_settings(self, _event=None):
         self._show_projection_settings = not self._show_projection_settings
 
@@ -630,6 +634,8 @@ class Gui:
             self.btn_toggle_projection_settings.config(text="Show Projection Settings")
             self.btn_toggle_projection_settings.config(bg="lightblue")
             self.frm_projection_settings_content.pack_forget()
+
+        self.btn_toggle_projection_settings.flash()
 
     def cb_draw(self):
         self.draw()

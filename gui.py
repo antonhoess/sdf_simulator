@@ -2,6 +2,7 @@ import tkinter as tk
 from vehicle_visu import VehicleVisu
 from sensor_visu import SensorVisu
 from scalable_canvas import ScalableCanvas
+from scroll_frame import ScrollFrame
 import time
 from enum import Enum
 
@@ -58,6 +59,8 @@ class Gui:
         self._show_trace_settings = True
         self._show_vector_settings = True
         self._show_projection_settings = True
+        self._show_vehicle_settings = True
+        self._show_sensor_settings = True
 
         # For shift the objects on the canvas
         self._move_mode = False
@@ -433,6 +436,48 @@ class Gui:
                 scl_meas_buf_max.set(self._meas_buf_max)
                 scl_meas_buf_max.pack(expand=True, fill=tk.X, side=tk.LEFT)
                 frm = frm.parent
+
+            # Vehicles
+            sep_hor = tk.Frame(frm, height=2, bd=1, relief=tk.SUNKEN)
+            sep_hor.pack(fill=tk.X, padx=5, pady=5)
+
+            with self.Frame(frm) as frm:
+                frm.pack(fill=tk.X)
+
+                self.btn_toggle_vehicle_settings = tk.Button(frm, command=self.cb_toggle_vehicle_settings)
+                self.btn_toggle_vehicle_settings.pack(fill=tk.X)
+
+                with self.Frame(frm) as frm:
+                    frm.pack(fill=tk.X)
+                    self.frm_vehicle_settings_content = frm
+
+                    self.scf_vehicle = ScrollFrame(self.frm_vehicle_settings_content)
+                    self.scf_vehicle.update()
+
+                    frm = frm.parent
+                self.btn_toggle_vehicle_settings.invoke()
+                frm = frm.parent
+
+            # Sensors
+            sep_hor = tk.Frame(frm, height=2, bd=1, relief=tk.SUNKEN)
+            sep_hor.pack(fill=tk.X, padx=5, pady=5)
+
+            with self.Frame(frm) as frm:
+                frm.pack(fill=tk.X)
+
+                self.btn_toggle_sensor_settings = tk.Button(frm, command=self.cb_toggle_sensor_settings)
+                self.btn_toggle_sensor_settings.pack(fill=tk.X)
+
+                with self.Frame(frm) as frm:
+                    frm.pack(fill=tk.X)
+                    self.frm_sensor_settings_content = frm
+
+                    self.scf_sensor = ScrollFrame(self.frm_sensor_settings_content)
+                    self.scf_sensor.update()
+
+                    frm = frm.parent
+                self.btn_toggle_sensor_settings.invoke()
+                frm = frm.parent
             frm = frm.parent
 
         # The canvas on the bottom right
@@ -637,6 +682,34 @@ class Gui:
 
         self.btn_toggle_projection_settings.flash()
 
+    def cb_toggle_vehicle_settings(self, _event=None):
+        self._show_vehicle_settings = not self._show_vehicle_settings
+
+        if self._show_vehicle_settings:
+            self.frm_vehicle_settings_content.pack(fill=tk.X)
+            self.btn_toggle_vehicle_settings.config(text="Hide Vehicle Settings")
+            self.btn_toggle_vehicle_settings.config(bg="dodgerblue")
+        else:
+            self.btn_toggle_vehicle_settings.config(text="Show Vehicle Settings")
+            self.btn_toggle_vehicle_settings.config(bg="lightblue")
+            self.frm_vehicle_settings_content.pack_forget()
+
+        #self.btn_toggle_vehicle_settings.flash()
+
+    def cb_toggle_sensor_settings(self, _event=None):
+        self._show_sensor_settings = not self._show_sensor_settings
+
+        if self._show_sensor_settings:
+            self.frm_sensor_settings_content.pack(fill=tk.X)
+            self.btn_toggle_sensor_settings.config(text="Hide Sensor Settings")
+            self.btn_toggle_sensor_settings.config(bg="dodgerblue")
+        else:
+            self.btn_toggle_sensor_settings.config(text="Show Sensor Settings")
+            self.btn_toggle_sensor_settings.config(bg="lightblue")
+            self.frm_sensor_settings_content.pack_forget()
+
+        #self.btn_toggle_sensor_settings.flash()
+
     def cb_draw(self):
         self.draw()
 
@@ -720,9 +793,15 @@ class Gui:
 
     def add_vehicle(self, v, **kwargs):
         self._vv.append(VehicleVisu(v, self.canvas, trace_length_max=self._trace_length_max, **kwargs))  # Vehicle visu
+        chk = tk.Checkbutton(self.scf_vehicle.frame, text=v.name)
+        chk.pack()
+        self.scf_vehicle.update()
 
     def add_sensor(self, s, **kwargs):
         self._sv.append(SensorVisu(s, self.canvas, meas_buf_max=self._meas_buf_max, **kwargs))  # Sensor visu
+        chk = tk.Checkbutton(self.scf_sensor.frame, text=s.name)
+        chk.pack()
+        self.scf_sensor.update()
 
     # This function accepts a callback, since it's not possible to run tkinter in a non-main thread,
     # but we want to handle inputs from the console

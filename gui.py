@@ -55,9 +55,9 @@ class Gui:
         self._play = False
         self._enter_command = False
 
-        self._show_trace_settings = False
-        self._show_vector_settings = False
-        self._show_projection_settings = False
+        self._show_trace_settings = True
+        self._show_vector_settings = True
+        self._show_projection_settings = True
 
         # For shift the objects on the canvas
         self._move_mode = False
@@ -77,7 +77,7 @@ class Gui:
         with self.Frame(frm) as frm:
             frm.pack(expand=False, fill=tk.X, side=tk.TOP, pady=5)
 
-            # .. Position
+            # Position
             with self.Frame(frm) as frm:
                 frm.pack(fill=tk.X, side=tk.LEFT, padx=5)
                 with self.Frame(frm) as frm:
@@ -95,7 +95,7 @@ class Gui:
                     self.lbl_pos_y_val.pack(side=tk.LEFT)
                     frm = frm.parent
                 frm = frm.parent
-            # .. Velocity
+            # Velocity
             with self.Frame(frm) as frm:
                 frm.pack(fill=tk.X, side=tk.LEFT, padx=5)
                 with self.Frame(frm) as frm:
@@ -113,7 +113,7 @@ class Gui:
                     self.lbl_vel_y_val.pack(side=tk.LEFT)
                     frm = frm.parent
                 frm = frm.parent
-            # .. Acceleration
+            # Acceleration
             with self.Frame(frm) as frm:
                 frm.pack(fill=tk.X, side=tk.LEFT, padx=5)
                 with self.Frame(frm) as frm:
@@ -136,7 +136,7 @@ class Gui:
         # Status bar at the bottom
         with self.Frame(frm) as frm:
             frm.pack(expand=False, fill=tk.X, side=tk.BOTTOM)
-            # .. Cursor position (scaled)
+            # Cursor position (scaled)
             with self.Frame(frm) as frm:
                 frm.pack(fill=tk.X, side=tk.LEFT, pady=5)
                 lbl_cursor_pos = tk.Label(frm, text="cursor pos (x, y):", width=14, anchor=tk.W)
@@ -144,7 +144,7 @@ class Gui:
                 self.lbl_cursor_pos_val = tk.Label(frm, text="0; 0", width=20, bg="yellow")
                 self.lbl_cursor_pos_val.pack(fill=tk.X, side=tk.LEFT)
                 frm = frm.parent
-            # .. Elapsed time
+            # Elapsed time
             sep_ver = tk.Frame(frm, width=2, bd=1, relief=tk.SUNKEN)
             sep_ver.pack(fill=tk.Y, side=tk.LEFT, padx=5)
             with self.Frame(frm) as frm:
@@ -162,7 +162,7 @@ class Gui:
         # The control panel on the left
         # -----------------------------
         with self.Frame(frm) as frm:
-            frm.pack(expand=False, fill=tk.Y, side=tk.LEFT)
+            frm.pack(expand=False, fill=tk.BOTH, side=tk.LEFT)
 
             # Run controls
             self.btn_play_pause = tk.Button(frm, text="Play", width=10, bg="lightblue", command=self.cb_play_pause)
@@ -173,7 +173,7 @@ class Gui:
                                              command=self.cb_single_step)
             self.btn_single_step.pack(fill=tk.X, side=tk.TOP)
 
-            btn_reset_transformations = tk.Button(frm, text="Reset\nTransformations", width=10, bg="orange",
+            btn_reset_transformations = tk.Button(frm, text="Reset Transformations", width=10, bg="orange",
                                                   command=self.cb_reset_transformations)
             btn_reset_transformations.pack(fill=tk.X, side=tk.TOP)
 
@@ -184,13 +184,12 @@ class Gui:
             with self.Frame(frm) as frm:
                 frm.pack(fill=tk.X)
 
-                self.btn_toggle_trace_settings = tk.Button(frm, text="Show Trace Settings",
-                                                           command=self.cb_toggle_trace_settings)
+                self.btn_toggle_trace_settings = tk.Button(frm, command=self.cb_toggle_trace_settings)
                 self.btn_toggle_trace_settings.pack(fill=tk.X)
 
                 with self.Frame(frm) as frm:
+                    frm.pack(fill=tk.X)
                     self.frm_trace_settings_content = frm
-                    # No pack() statement, since it's hidden by default
 
                     self.draw_origin_cross = tk.IntVar()
                     self.draw_origin_cross.set(1)
@@ -237,23 +236,24 @@ class Gui:
                                                                      command=self.cb_draw)
                     chk_draw_acc_times_normal_trace.pack(side=tk.TOP, anchor=tk.W)
                     frm = frm.parent
+
+                self.btn_toggle_trace_settings.invoke()
                 frm = frm.parent
 
             # Vectors
             sep_hor = tk.Frame(frm, height=2, bd=1, relief=tk.SUNKEN)
             sep_hor.pack(fill=tk.X, padx=5, pady=5)
 
-            # .. Vectors
+            # Vectors
             with self.Frame(frm) as frm:
                 frm.pack(fill=tk.X)
 
-                self.btn_toggle_vector_settings = tk.Button(frm, text="Show Vector Settings",
-                                                            command=self.cb_toggle_vector_settings)
+                self.btn_toggle_vector_settings = tk.Button(frm, command=self.cb_toggle_vector_settings)
                 self.btn_toggle_vector_settings.pack(fill=tk.X)
 
                 with self.Frame(frm) as frm:
+                    frm.pack(fill=tk.X)
                     self.frm_vector_settings_content = frm
-                    # No pack() statement, since it's hidden by default
 
                     self.draw_vel_vec = tk.IntVar()
                     chk_draw_vel_vec = tk.Checkbutton(frm, text="Draw Vel. Vec.", variable=self.draw_vel_vec,
@@ -265,7 +265,7 @@ class Gui:
                                                       command=self.cb_draw)
                     chk_draw_acc_vec.pack(side=tk.TOP, anchor=tk.W)
 
-                    # .. Tangent and normal
+                    # Tangent and normal
                     sep_hor = tk.Frame(frm, height=2, bd=1, relief=tk.SUNKEN)
                     sep_hor.pack(fill=tk.X, padx=5, pady=5)
 
@@ -279,22 +279,22 @@ class Gui:
                                                      command=self.cb_draw)
                     chk_draw_normal.pack(side=tk.TOP, anchor=tk.W)
                     frm = frm.parent
+                self.btn_toggle_vector_settings.invoke()
                 frm = frm.parent
 
-            # .. Projection
+            # Projection
             sep_hor = tk.Frame(frm, height=2, bd=1, relief=tk.SUNKEN)
             sep_hor.pack(fill=tk.X, padx=5, pady=5)
 
             with self.Frame(frm) as frm:
                 frm.pack(fill=tk.X)
 
-                self.btn_toggle_projection_settings = tk.Button(frm, text="Show Projection Settings",
-                                                            command=self.cb_toggle_projection_settings)
+                self.btn_toggle_projection_settings = tk.Button(frm, command=self.cb_toggle_projection_settings)
                 self.btn_toggle_projection_settings.pack(fill=tk.X)
 
                 with self.Frame(frm) as frm:
+                    frm.pack(fill=tk.X)
                     self.frm_projection_settings_content = frm
-                    # No pack() statement, since it's hidden by default
 
                     self.proj_dim = tk.IntVar()
                     self.proj_dim.set(0)
@@ -317,13 +317,14 @@ class Gui:
 
                     self.proj_scale = tk.IntVar()
                     self.proj_scale.set(100)
-                    scl_proj_scale = tk.Scale(frm_proj_scale, orient=tk.HORIZONTAL, showvalue=False, from_=1, to=1000, resolution=1,
-                                              variable=self.proj_scale, command=self.cb_proj_scale)
+                    scl_proj_scale = tk.Scale(frm_proj_scale, orient=tk.HORIZONTAL, showvalue=False, from_=1, to=1000,
+                                              resolution=1, variable=self.proj_scale, command=self.cb_proj_scale)
                     scl_proj_scale.pack(expand=True, fill=tk.X, side=tk.LEFT)
                     frm = frm.parent
+                self.btn_toggle_projection_settings.invoke()
                 frm = frm.parent
 
-            # .. Measurements and covariance ellipses
+            # Measurements and covariance ellipses
             sep_hor = tk.Frame(frm, height=2, bd=1, relief=tk.SUNKEN)
             sep_hor.pack(fill=tk.X, padx=5, pady=5)
 
@@ -342,11 +343,11 @@ class Gui:
                 self.cov_ell_cnt = tk.IntVar()
                 self.cov_ell_cnt.set(0)
                 scl_cov_ell_cnt = tk.Scale(frm, orient=tk.HORIZONTAL, showvalue=False, from_=0, to=5, resolution=1,
-                                           variable=self.cov_ell_cnt, command=self.cb_cov_ell_cnt)
+                                           takefocus=True, length=70, variable=self.cov_ell_cnt, command=self.cb_cov_ell_cnt)
                 scl_cov_ell_cnt.pack(expand=True, fill=tk.X, side=tk.LEFT)
                 frm = frm.parent
 
-            # .. Zoom
+            # Zoom
             sep_hor = tk.Frame(frm, height=2, bd=1, relief=tk.SUNKEN)
             sep_hor.pack(fill=tk.X, padx=5, pady=5)
 
@@ -358,16 +359,16 @@ class Gui:
                 self.lbl_zoom_val = tk.Label(frm, text="{:.2f}".format(1. * 100.), bg="white", anchor=tk.E)
                 self.lbl_zoom_val.pack(expand=True, fill=tk.X, side=tk.LEFT)
 
-                btn_zoom_out = tk.Button(frm, text="-", width=2, bg="lightblue")
+                btn_zoom_out = tk.Button(frm, text="-", bg="lightblue")
                 btn_zoom_out.pack(fill=None, side=tk.LEFT)
                 btn_zoom_out.bind('<Button-1>', lambda event, direction=self.ZoomDir.OUT: self.cb_zoom(event, direction))
 
-                btn_zoom_in = tk.Button(frm, text="+", width=2, bg="blue")
+                btn_zoom_in = tk.Button(frm, text="+", bg="dodgerblue")
                 btn_zoom_in.pack(fill=None, side=tk.LEFT)
                 btn_zoom_in.bind('<Button-1>', lambda event, direction=self.ZoomDir.IN: self.cb_zoom(event, direction))
                 frm = frm.parent
 
-            # .. Time increment (per step)
+            # Time increment (per step)
             sep_hor = tk.Frame(frm, height=2, bd=1, relief=tk.SUNKEN)
             sep_hor.pack(fill=tk.X, padx=5, pady=5)
 
@@ -380,7 +381,7 @@ class Gui:
 
                 self.time_incr = tk.DoubleVar()
                 scl_time_incr = tk.Scale(frm, orient=tk.HORIZONTAL, showvalue=False, from_=0.1, to=10.0,
-                                         resolution=0.1, variable=self.time_incr, command=self.cb_time_incr)
+                                         resolution=0.1, takefocus=True, length=70, variable=self.time_incr, command=self.cb_time_incr)
                 scl_time_incr.set(1.0)
                 scl_time_incr.pack(expand=True, fill=tk.X, side=tk.LEFT)
                 frm = frm.parent
@@ -395,8 +396,42 @@ class Gui:
 
                 self.time_tick = tk.DoubleVar()
                 scl_time_tick = tk.Scale(frm, orient=tk.HORIZONTAL, showvalue=False, from_=0.01, to=1.00,
-                                         resolution=0.01, variable=self.time_tick, command=self.cb_time_tick)
+                                         resolution=0.01, takefocus=True, length=70, variable=self.time_tick, command=self.cb_time_tick)
                 scl_time_tick.pack(expand=True, fill=tk.X, side=tk.LEFT)
+                frm = frm.parent
+
+            # Trace length max.
+            sep_hor = tk.Frame(frm, height=2, bd=1, relief=tk.SUNKEN)
+            sep_hor.pack(fill=tk.X, padx=5, pady=5)
+
+            with self.Frame(frm) as frm:
+                frm.pack(fill=tk.X, side=tk.TOP)
+                lbl_trace_length_max = tk.Label(frm, text="Trace len. max.:", anchor=tk.W)
+                lbl_trace_length_max.pack(fill=tk.X, side=tk.LEFT)
+                self.lbl_trace_length_max_val = tk.Label(frm, text="100", bg="white", width=4, anchor=tk.E)
+                self.lbl_trace_length_max_val.pack(expand=True, fill=tk.X, side=tk.LEFT)
+
+                self.trace_length_max = tk.IntVar()
+                scl_trace_length_max = tk.Scale(frm, orient=tk.HORIZONTAL, showvalue=False, from_=2, to=1000,
+                                                resolution=1, takefocus=True, length=70, variable=self.trace_length_max, command=self.cb_trace_length_max)
+                scl_trace_length_max.set(self._trace_length_max)
+                scl_trace_length_max.pack(expand=True, fill=tk.X, side=tk.LEFT)
+                frm = frm.parent
+
+            # Measurement count
+            with self.Frame(frm) as frm:
+                frm.pack(fill=tk.X, side=tk.TOP)
+                lbl_meas_buf_max = tk.Label(frm, text="Meas. cnt.:", anchor=tk.W)
+                lbl_meas_buf_max.pack(fill=tk.X, side=tk.LEFT)
+                self.lbl_meas_buf_max_val = tk.Label(frm, text="100", bg="white", width=4, anchor=tk.E)
+                self.lbl_meas_buf_max_val.pack(expand=True, fill=tk.X, side=tk.LEFT)
+
+                self.meas_buf_max = tk.IntVar()
+                scl_meas_buf_max = tk.Scale(frm, orient=tk.HORIZONTAL, showvalue=False, from_=1, to=100, resolution=1,
+                                            takefocus=True, length=70, variable=self.meas_buf_max,
+                                            command=self.cb_meas_buf_max)
+                scl_meas_buf_max.set(self._meas_buf_max)
+                scl_meas_buf_max.pack(expand=True, fill=tk.X, side=tk.LEFT)
                 frm = frm.parent
             frm = frm.parent
 
@@ -546,14 +581,30 @@ class Gui:
         self._t_tick = self.time_tick.get()
         self.lbl_time_tick_val.config(text="{:.2f}".format(self._t_tick))
 
+    def cb_trace_length_max(self, _event):
+        self._trace_length_max = self.trace_length_max.get()
+        self.lbl_trace_length_max_val.config(text=self._trace_length_max)
+
+        for vv in self._vv:
+            vv.trace_length_max = self._trace_length_max
+
+    def cb_meas_buf_max(self, _event):
+        self._meas_buf_max = self.meas_buf_max.get()
+        self.lbl_meas_buf_max_val.config(text=self._meas_buf_max)
+
+        for sv in self._sv:
+            sv.meas_buf_max = self._meas_buf_max
+
     def cb_toggle_trace_settings(self, _event=None):
         self._show_trace_settings = not self._show_trace_settings
 
         if self._show_trace_settings:
             self.frm_trace_settings_content.pack(fill=tk.X)
             self.btn_toggle_trace_settings.config(text="Hide Trace Settings")
+            self.btn_toggle_trace_settings.config(bg="dodgerblue")
         else:
             self.btn_toggle_trace_settings.config(text="Show Trace Settings")
+            self.btn_toggle_trace_settings.config(bg="lightblue")
             self.frm_trace_settings_content.pack_forget()
 
     def cb_toggle_vector_settings(self, _event=None):
@@ -562,8 +613,10 @@ class Gui:
         if self._show_vector_settings:
             self.frm_vector_settings_content.pack(fill=tk.X)
             self.btn_toggle_vector_settings.config(text="Hide Vector Settings")
+            self.btn_toggle_vector_settings.config(bg="dodgerblue")
         else:
             self.btn_toggle_vector_settings.config(text="Show Vector Settings")
+            self.btn_toggle_vector_settings.config(bg="lightblue")
             self.frm_vector_settings_content.pack_forget()
 
     def cb_toggle_projection_settings(self, _event=None):
@@ -572,8 +625,10 @@ class Gui:
         if self._show_projection_settings:
             self.frm_projection_settings_content.pack(fill=tk.X)
             self.btn_toggle_projection_settings.config(text="Hide Projection Settings")
+            self.btn_toggle_projection_settings.config(bg="dodgerblue")
         else:
             self.btn_toggle_projection_settings.config(text="Show Projection Settings")
+            self.btn_toggle_projection_settings.config(bg="lightblue")
             self.frm_projection_settings_content.pack_forget()
 
     def cb_draw(self):

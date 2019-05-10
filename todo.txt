@@ -10,5 +10,4 @@
 * Check, if complex numbers or a self defined type or tuples might make things easier with the (x, y) pairs. See http://effbot.org/zone/tkinter-complex-canvas.htm.
 * Add lists for vehicles and sensors and allow e.g. to disable/enable them - and maybe further settings in a context menu or separate window when clicking on the sensor box.
 * Get the simulator run in a conda environment and document the steps to do so.
-
-
+* Don't set fixed initial values for dynamic labels, but try to use invoke() instead.

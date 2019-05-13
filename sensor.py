@@ -13,8 +13,9 @@ class RadarMeasurement:
 
 
 class Sensor:
-    def __init__(self, name, pos_x, pos_y):
+    def __init__(self, name, active, pos_x, pos_y):
         self.name = name
+        self.active = active
         self.r = np.asarray([pos_x, pos_y])
 
         self.measurements = []
@@ -25,8 +26,8 @@ class Sensor:
 
 
 class Radar(Sensor):
-    def __init__(self, name, pos_x, pos_y, meas_interval, cov_r, cov_rd, cov_rdd):
-        super().__init__(name, pos_x, pos_y)
+    def __init__(self, name, active, pos_x, pos_y, meas_interval, cov_r, cov_rd, cov_rdd):
+        super().__init__(name, active, pos_x, pos_y)
         self.meas_interval = meas_interval
         self.cov_r = cov_r
         self.cov_rd = cov_rd

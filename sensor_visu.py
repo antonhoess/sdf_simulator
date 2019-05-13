@@ -17,11 +17,7 @@ class SensorVisu:
         self.meas_buf_max = meas_buf_max
         self.cov_ell_cnt = 0
 
-    def draw(self, omit_clear=False, draw_meas=True, vehicles=None):
-        # Clear canvas
-        if not omit_clear:
-            self.clear()
-
+    def draw(self, draw_meas=True, vehicles=None):
         # The sensor itself
         def cb_mouse_enter(event, item):
             event.widget.itemconfig(item, fill="red")
@@ -33,8 +29,20 @@ class SensorVisu:
             vehicles = [vehicles]
 
         # Draw the sensor box itself
-        vehicle = vehicles[0]
-        angle = self.sensor.calc_rotation_angle(vehicle)  # Look to the first vehicle
+
+        vehicle = None
+
+        for v in vehicles:
+            if v.active:
+                vehicle = v
+                break
+            # end if
+        # end for
+
+        if vehicle is not None:
+            angle = self.sensor.calc_rotation_angle(vehicle)  # Look to the first vehicle
+        else:
+            angle = 0.
 
         ps = []
         for i in range(self._n_sides):
@@ -48,7 +56,10 @@ class SensorVisu:
 
         shape = self.canvas.create_polygon(ps, fill=self.fill, outline=self.outline, tag="{:x}".format(id(self.sensor)))
         font_size = int(self.canvas.scale_factor * self.canvas.zoom * self.canvas.ratio_scale_factor * 1.e03 * self._font_size_scale)
-        self.canvas.create_line(self.sensor.r[0], self.sensor.r[1], vehicle.r[0], vehicle.r[1], fill=self.outline, dash=(2, 5))
+
+        if vehicle is not None:
+            self.canvas.create_line(self.sensor.r[0], self.sensor.r[1], vehicle.r[0], vehicle.r[1], fill=self.outline, dash=(2, 5))
+
         self.canvas.create_text(self.sensor.r[0], self.sensor.r[1], text=self.sensor.name, fill=self.outline, font=(None, font_size),
                                 anchor=tk.CENTER, tag="{:x}".format(id(self.sensor)))
 
@@ -60,7 +71,7 @@ class SensorVisu:
         # For each vehicle draw the measurement information
         for vehicle in vehicles:
             # The covariance ellipses
-            if self.cov_ell_cnt > 0:
+            if vehicle.active and self.cov_ell_cnt > 0:
                 theta = self.sensor.calc_rotation_angle(vehicle)
 
                 # Calculate values for drawing the cov ellipse
@@ -81,7 +92,7 @@ class SensorVisu:
             if draw_meas:
                 x_style = 1
                 for meas in self.sensor.measurements:
-                    if meas.vehicle is not vehicle:
+                    if meas.vehicle is not vehicle or not vehicle.active:
                         continue
 
                     if x_style == 0:  # Point

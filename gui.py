@@ -767,6 +767,7 @@ class Gui:
             # Visualization in canvas
             # -----------------------
             vv.add_cur_vals_to_traces()
+            draw = True
         # end if
 
         # Update gui elements with current values
@@ -786,9 +787,6 @@ class Gui:
                 break
             # end if
         # end for
-
-            draw = True
-        # end if
 
         # Make sensor measurements
         for sv in self._sv:

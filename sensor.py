@@ -18,7 +18,7 @@ class Sensor:
         self.active = active
         self.r = np.asarray([pos_x, pos_y])
 
-        self.measurements = []
+        self.measurements = {}
         self.last_meas_time = 0.
 
     def measure(self, vehicle):
@@ -75,4 +75,7 @@ class Radar(Sensor):
         R = self.calc_rotation_matrix(self.calc_cov_ell_params(self.cov_rdd)[0])
         meas_rdd = np.random.multivariate_normal(mean, np.asarray(self.cov_rdd) * R, 1)[0]
 
-        self.measurements.append(RadarMeasurement(vehicle, mean, meas_r, meas_rd, meas_rdd))
+        if not vehicle in self.measurements:
+            self.measurements[vehicle] = []
+
+        self.measurements[vehicle].append(RadarMeasurement(vehicle, mean, meas_r, meas_rd, meas_rdd))

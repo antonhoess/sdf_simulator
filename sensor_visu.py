@@ -87,11 +87,15 @@ class SensorVisu:
             # end if
 
             # The sensor's measurements
-            self.sensor.measurements = self.sensor.measurements[-self.meas_buf_max:]
+            measurements = []
+            if vehicle in self.sensor.measurements:
+                self.sensor.measurements[vehicle] = self.sensor.measurements[vehicle][-self.meas_buf_max:]
+                measurements = self.sensor.measurements[vehicle]
+            # end if
 
             if draw_meas:
                 x_style = 1
-                for meas in self.sensor.measurements:
+                for meas in measurements:
                     if meas.vehicle is not vehicle or not vehicle.active:
                         continue
 

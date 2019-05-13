@@ -13,3 +13,4 @@
 * Add further settings for vehicles and/or sensors in a context menu or separate window when clicking on the sensor box.
 * Make a combobox list widget derived from the ScrollFrame and use it for the vehicle and sensor list.
 * Add all exercises from the 4th lecture.
+* Check, why the trace only updates every 5 seconds - this is exactly the time, the sensors measure

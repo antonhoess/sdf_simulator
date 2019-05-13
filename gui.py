@@ -1,7 +1,8 @@
 import tkinter as tk
+from base_visu import BaseVisu
 from vehicle_visu import VehicleVisu
 from sensor_visu import SensorVisu
-from scalable_canvas import ScalableCanvas
+from scale_trans_canvas import ScaleTransCanvas
 from scroll_frame import ScrollFrame
 import time
 from enum import Enum
@@ -41,6 +42,7 @@ class Gui:
         self._BASE_SCALE_FACTOR = base_scale_factor  # Set to a fixed value that is good for zoom == 1.0
         self._ZOOM_FACTOR = zoom_factor
 
+        self._bv = None  # Base visualizations
         self._vv = []  # Vehicle visualizations
         self._sv = []  # Sensor visualizations
 
@@ -51,6 +53,7 @@ class Gui:
         self._trace_length_max = int(trace_length_max / self._t_incr)  # Max. length of the trace
         self._meas_buf_max = meas_buf_max  # Max. size of measurements
 
+        self._gui_inited = False
         self._is_running = False
 
         self._play = False
@@ -451,7 +454,7 @@ class Gui:
                     frm.pack(fill=tk.X)
                     self.frm_vehicle_settings_content = frm
 
-                    self.scf_vehicle = ScrollFrame(self.frm_vehicle_settings_content)
+                    self.scf_vehicle = ScrollFrame(self.frm_vehicle_settings_content, max_width=200, max_height=100)
                     self.scf_vehicle.update()
 
                     frm = frm.parent
@@ -472,7 +475,7 @@ class Gui:
                     frm.pack(fill=tk.X)
                     self.frm_sensor_settings_content = frm
 
-                    self.scf_sensor = ScrollFrame(self.frm_sensor_settings_content)
+                    self.scf_sensor = ScrollFrame(self.frm_sensor_settings_content, max_width=200, max_height=100)
                     self.scf_sensor.update()
 
                     frm = frm.parent
@@ -485,10 +488,10 @@ class Gui:
         with self.Frame(frm) as frm:
             frm.pack(expand=True, fill=tk.BOTH, side=tk.TOP)
 
-            self.canvas = ScalableCanvas(frm, width=canvas_width, height=canvas_height,
-                                         scale_factor=self._BASE_SCALE_FACTOR,
-                                         scale_ratio=1., invert_y=True, center_origin=True, offset_x=0, offset_y=0,
-                                         zoom_factor=self._ZOOM_FACTOR)
+            self.canvas = ScaleTransCanvas(frm, width=canvas_width, height=canvas_height,
+                                           scale_factor=self._BASE_SCALE_FACTOR,
+                                           scale_ratio=1., invert_y=True, center_origin=True, offset_x=0, offset_y=0,
+                                           zoom_factor=self._ZOOM_FACTOR)
             self.canvas.pack(expand=True, fill=tk.BOTH)
             self.canvas.bind('<Configure>', self.cb_canvas_configure)
             self.canvas.bind("<MouseWheel>", self.cb_mouse_wheel)  # With Windows OS
@@ -507,6 +510,9 @@ class Gui:
             self.canvas.bind_all('<Shift-Up>', lambda event, direction=self.MoveDir.UP: self.cb_move(event, direction))
             self.canvas.bind_all('<Shift-Down>', lambda event, direction=self.MoveDir.DOWN: self.cb_move(event, direction))
             frm = frm.parent
+
+        self._bv = BaseVisu(self.canvas)
+        self._gui_inited = True
 
     # Play / pause button
     def cb_play_pause(self, _event=None):
@@ -694,7 +700,8 @@ class Gui:
             self.btn_toggle_vehicle_settings.config(bg="lightblue")
             self.frm_vehicle_settings_content.pack_forget()
 
-        #self.btn_toggle_vehicle_settings.flash()
+        if self._gui_inited:
+            self.btn_toggle_vehicle_settings.flash()
 
     def cb_toggle_sensor_settings(self, _event=None):
         self._show_sensor_settings = not self._show_sensor_settings
@@ -708,38 +715,47 @@ class Gui:
             self.btn_toggle_sensor_settings.config(bg="lightblue")
             self.frm_sensor_settings_content.pack_forget()
 
-        #self.btn_toggle_sensor_settings.flash()
+        if self._gui_inited:
+            self.btn_toggle_sensor_settings.flash()
 
     def cb_draw(self):
         self.draw()
 
     def clear(self):
-        self.canvas.delete(tk.ALL)
+        self._bv.clear()
 
     def draw(self):
-        if len(self._vv) > 0 or len(self._sv) > 0:
-            self.clear()
-
+        self.clear()
+        self._bv.draw()
         self._draw_vehicles()
         self._draw_sensors()
 
     def _draw_vehicles(self):
         for vv in self._vv:
-            vv.draw(omit_clear=True, draw_origin_cross=self.draw_origin_cross.get(),
-                    draw_pos_trace=self.draw_pos_trace.get(), draw_vel_trace=self.draw_vel_trace.get(),
-                    draw_acc_trace=self.draw_acc_trace.get(), draw_tangent_trace=self.draw_tangent_trace.get(),
-                    draw_normal_trace=self.draw_normal_trace.get(),
-                    draw_acc_times_tangent_trace=self.draw_acc_times_tangent_trace.get(),
-                    draw_acc_times_normal_trace=self.draw_acc_times_normal_trace.get(),
-                    draw_vel_vec=self.draw_vel_vec.get(),
-                    draw_acc_vec=self.draw_acc_vec.get(), draw_tangent=self.draw_tangent.get(),
-                    draw_normal=self.draw_normal.get(),
-                    proj_dim=self.proj_dim.get(), proj_scale=self.proj_scale.get())
+            if vv.vehicle.active:
+                vv.draw(draw_pos_trace=self.draw_pos_trace.get(), draw_vel_trace=self.draw_vel_trace.get(),
+                        draw_acc_trace=self.draw_acc_trace.get(), draw_tangent_trace=self.draw_tangent_trace.get(),
+                        draw_normal_trace=self.draw_normal_trace.get(),
+                        draw_acc_times_tangent_trace=self.draw_acc_times_tangent_trace.get(),
+                        draw_acc_times_normal_trace=self.draw_acc_times_normal_trace.get(),
+                        draw_vel_vec=self.draw_vel_vec.get(),
+                        draw_acc_vec=self.draw_acc_vec.get(), draw_tangent=self.draw_tangent.get(),
+                        draw_normal=self.draw_normal.get(),
+                        proj_dim=self.proj_dim.get(), proj_scale=self.proj_scale.get())
 
     def _draw_sensors(self):
         for sv in self._sv:
-            sv.draw(omit_clear=True, draw_meas=self.draw_meas.get(),
-                    vehicles=[self._vv[v].vehicle for v in range(len(self._vv))])
+            if sv.sensor.active:
+                sv.draw(draw_meas=self.draw_meas.get(),
+                        vehicles=[self._vv[v].vehicle for v in range(len(self._vv))])
+
+    def _cb_toggle_vehicle_active(self, variable, vehicle):
+        vehicle.active = variable.get()
+        self.draw()
+
+    def _cb_toggle_sensor_active(self, variable, sensor):
+        sensor.active = variable.get()
+        self.draw()
 
     def step(self):
         draw = False
@@ -754,17 +770,22 @@ class Gui:
         # end if
 
         # Update gui elements with current values
-        if len(self._vv) > 0:
-            v = self._vv[0].vehicle
+        for vv in self._vv:
+            if vv.vehicle.active:
+                v = vv.vehicle
 
-            self.lbl_pos_x_val.config(text="{:.4f}".format(v.r[0]))
-            self.lbl_pos_y_val.config(text="{:.4f}".format(v.r[1]))
+                self.lbl_pos_x_val.config(text="{:.4f}".format(v.r[0]))
+                self.lbl_pos_y_val.config(text="{:.4f}".format(v.r[1]))
 
-            self.lbl_vel_x_val.config(text="{:.4f}".format(v.rd[0]))
-            self.lbl_vel_y_val.config(text="{:.4f}".format(v.rd[1]))
+                self.lbl_vel_x_val.config(text="{:.4f}".format(v.rd[0]))
+                self.lbl_vel_y_val.config(text="{:.4f}".format(v.rd[1]))
 
-            self.lbl_acc_x_val.config(text="{:.4f}".format(v.rdd[0]))
-            self.lbl_acc_y_val.config(text="{:.4f}".format(v.rdd[1]))
+                self.lbl_acc_x_val.config(text="{:.4f}".format(v.rdd[0]))
+                self.lbl_acc_y_val.config(text="{:.4f}".format(v.rdd[1]))
+
+                break
+            # end if
+        # end for
 
             draw = True
         # end if
@@ -793,14 +814,23 @@ class Gui:
 
     def add_vehicle(self, v, **kwargs):
         self._vv.append(VehicleVisu(v, self.canvas, trace_length_max=self._trace_length_max, **kwargs))  # Vehicle visu
-        chk = tk.Checkbutton(self.scf_vehicle.frame, text=v.name)
-        chk.pack()
+        var = tk.BooleanVar()
+        chk = tk.Checkbutton(self.scf_vehicle.frame, text=v.name, variable=var,
+                             command=lambda variable=var, vehicle=v:self._cb_toggle_vehicle_active(variable, vehicle))
+        if v.active:
+            chk.select()
+
+        chk.pack(anchor=tk.W)
         self.scf_vehicle.update()
 
     def add_sensor(self, s, **kwargs):
         self._sv.append(SensorVisu(s, self.canvas, meas_buf_max=self._meas_buf_max, **kwargs))  # Sensor visu
-        chk = tk.Checkbutton(self.scf_sensor.frame, text=s.name)
-        chk.pack()
+        var = tk.BooleanVar()
+        chk = tk.Checkbutton(self.scf_sensor.frame, text=s.name, variable=var,
+                             command=lambda variable=var, sensor=s:self._cb_toggle_sensor_active(variable, sensor))
+        if s.active:
+            chk.select()
+        chk.pack(anchor=tk.W)
         self.scf_sensor.update()
 
     # This function accepts a callback, since it's not possible to run tkinter in a non-main thread,

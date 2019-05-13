@@ -4,8 +4,9 @@ import math
 
 class Vehicle:
 
-    def __init__(self, name, v=100., q=10.):
+    def __init__(self, name, active, v=100., q=10.):
         self.name = name
+        self.active = active
         self.v = v
         self.q = q
 

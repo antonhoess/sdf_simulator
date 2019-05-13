@@ -61,22 +61,10 @@ class VehicleVisu:
     def add_cur_acc_times_normal_to_trace(self):
         self.add_cur_val_to_trace(self._trace_acc_times_normal, self.vehicle.rddxrdn * 1000.0)
 
-    def draw(self, omit_clear=False, draw_origin_cross=True, draw_pos_trace=True, draw_vel_trace=True,
+    def draw(self, draw_pos_trace=True, draw_vel_trace=True,
              draw_acc_trace=True, draw_tangent_trace=True,
              draw_normal_trace=True, draw_acc_times_tangent_trace=True, draw_acc_times_normal_trace=True,
              draw_vel_vec=True, draw_acc_vec=True, draw_tangent=True, draw_normal=True, proj_dim=None, proj_scale=1.):
-
-        # Clear canvas
-        if not omit_clear:
-            self.clear()
-
-        # Draw cross
-        if draw_origin_cross:
-            x0, y0 = self.canvas.scale_point(0, 0)
-            x1, y1 = self.canvas.scale_point(self.canvas.winfo_width(), self.canvas.winfo_height())
-
-            self.canvas.create_line(0, y0, 0, y1, dash=(3, 5))
-            self.canvas.create_line(x0, 0, x1, 0, dash=(3, 5))
 
         # Draw trace arrays
         # -----------------

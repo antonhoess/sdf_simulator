@@ -8,9 +8,8 @@
 * How to handle the scale factors (10000., etc.) in vehicle_visu, especially when changing the velocity and acceleration or when adding further vehicles with different parameters.
 * Test, if by choosing the element nearest to the mouse pointer on the canvas and keeping track of the association of the line segment, etc. to the vehicle/sensor, it is possible to select e.g. a sensor and interaxt with it (e.g. show a list of the recent measurements)
 * Check, if complex numbers or a self defined type or tuples might make things easier with the (x, y) pairs. See http://effbot.org/zone/tkinter-complex-canvas.htm.
-* Add lists for vehicles and sensors and allow e.g. to disable/enable them - and maybe further settings in a context menu or separate window when clicking on the sensor box.
 * Get the simulator run in a conda environment and document the steps to do so.
 * Don't set fixed initial values for dynamic labels, but try to use invoke() instead.
-* Add attribute "active" to the vehicle and the sensors and make it a parameter when adding to the gui object, connect it with the checkbutton's state and handle it's state in the drawing routine.
+* Add further settings for vehicles and/or sensors in a context menu or separate window when clicking on the sensor box.
+* Make a combobox list widget derived from the ScrollFrame and use it for the vehicle and sensor list.
 * Add all exercises from the 4th lecture.
-* Execute the self.btn_toggle_vehicle/sensor_settings.flash() later, since it makes a strange behaviour when launching the program - maybe for all flush() calls. Maybe make a flag, that indicates, if the gui is fully loaded and then this flush() call gets executed (if..).

@@ -19,14 +19,16 @@ class AutoScrollbar(tk.Scrollbar):
 
 
 class ScrollFrame:
-    def __init__(self, master):
+    def __init__(self, master, max_width=0, max_height=0, **kwargs):
+        self.max_width = max_width
+        self.max_height = max_height
 
         self.vscrollbar = AutoScrollbar(master)
         self.vscrollbar.grid(row=0, column=1, sticky=tk.N + tk.S)
         self.hscrollbar = AutoScrollbar(master, orient=tk.HORIZONTAL)
         self.hscrollbar.grid(row=1, column=0, sticky=tk.E + tk.W)
 
-        self.canvas = tk.Canvas(master, yscrollcommand=self.vscrollbar.set, xscrollcommand=self.hscrollbar.set)
+        self.canvas = tk.Canvas(master, yscrollcommand=self.vscrollbar.set, xscrollcommand=self.hscrollbar.set, **kwargs)
         self.canvas.grid(row=0, column=0, sticky=tk.N + tk.S + tk.E + tk.W)
 
         self.vscrollbar.config(command=self.canvas.yview)
@@ -50,11 +52,17 @@ class ScrollFrame:
 
         if self.frame.winfo_reqwidth() != self.canvas.winfo_width():
             # Update the canvas's width to fit the inner frame
-            self.canvas.config(width=self.frame.winfo_reqwidth())
+            if self.max_width > 0:
+                self.canvas.config(width=min(self.max_width, self.frame.winfo_reqwidth()))
+            else:
+                self.canvas.config(width=self.frame.winfo_reqwidth())
 
         if self.frame.winfo_reqheight() != self.canvas.winfo_height():
             # Update the canvas's width to fit the inner frame
-            self.canvas.config(height=self.frame.winfo_reqheight())
+            if self.max_height > 0:
+                self.canvas.config(height=min(self.max_height, self.frame.winfo_reqheight()))
+            else:
+                self.canvas.config(height=self.frame.winfo_reqheight())
 
     def reset_scrollregion(self, _event):
         self.canvas.configure(scrollregion=self.canvas.bbox(tk.ALL))

@@ -179,10 +179,6 @@ class Gui:
                                              command=self.cb_single_step)
             self.btn_single_step.pack(fill=tk.X, side=tk.TOP)
 
-            btn_reset_transformations = tk.Button(frm, text="Reset Transformations", width=10, bg="orange",
-                                                  command=self.cb_reset_transformations)
-            btn_reset_transformations.pack(fill=tk.X, side=tk.TOP)
-
             sep_hor = tk.Frame(frm, height=2, bd=1, relief=tk.SUNKEN)
             sep_hor.pack(fill=tk.X, padx=5, pady=5)
 
@@ -509,6 +505,18 @@ class Gui:
             self.canvas.bind_all('<Shift-Right>', lambda event, direction=self.MoveDir.RIGHT: self.cb_move(event, direction))
             self.canvas.bind_all('<Shift-Up>', lambda event, direction=self.MoveDir.UP: self.cb_move(event, direction))
             self.canvas.bind_all('<Shift-Down>', lambda event, direction=self.MoveDir.DOWN: self.cb_move(event, direction))
+
+            # Context menu
+            self.pum_context_menu = tk.Menu(self.canvas, tearoff=0)
+            self.pum_context_menu.add_command(label="Reset Transformations", background="orange", command=self.cb_reset_transformations)
+
+            def popup(event):
+                try:
+                    self.pum_context_menu.tk_popup(event.x_root, event.y_root, 0)
+                finally:
+                    self.pum_context_menu.grab_release()
+
+            self.canvas.bind("<Button-3>", popup)  # Button-2 on Aqua
             frm = frm.parent
 
         self._bv = BaseVisu(self.canvas)

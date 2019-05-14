@@ -4,6 +4,7 @@ from vehicle_visu import VehicleVisu
 from sensor_visu import SensorVisu
 from scale_trans_canvas import ScaleTransCanvas
 from scroll_frame import ScrollFrame
+from popup_menu import PopupMenu
 import time
 from enum import Enum
 
@@ -507,16 +508,10 @@ class Gui:
             self.canvas.bind_all('<Shift-Down>', lambda event, direction=self.MoveDir.DOWN: self.cb_move(event, direction))
 
             # Context menu
-            self.pum_context_menu = tk.Menu(self.canvas, tearoff=0)
+            self.pum_context_menu = PopupMenu(self.canvas, tearoff=0)
             self.pum_context_menu.add_command(label="Reset Transformations", background="orange", command=self.cb_reset_transformations)
 
-            def popup(event):
-                try:
-                    self.pum_context_menu.tk_popup(event.x_root, event.y_root, 0)
-                finally:
-                    self.pum_context_menu.grab_release()
-
-            self.canvas.bind("<Button-3>", popup)  # Button-2 on Aqua
+            self.canvas.bind("<Button-3>", self.pum_context_menu.popup)
             frm = frm.parent
 
         self._bv = BaseVisu(self.canvas)
@@ -828,6 +823,7 @@ class Gui:
 
         chk.pack(anchor=tk.W)
         self.scf_vehicle.update()
+        self.draw()
 
     def add_sensor(self, s, **kwargs):
         self._sv.append(SensorVisu(s, self.canvas, meas_buf_max=self._meas_buf_max, **kwargs))  # Sensor visu
@@ -838,6 +834,7 @@ class Gui:
             chk.select()
         chk.pack(anchor=tk.W)
         self.scf_sensor.update()
+        self.draw()
 
     # This function accepts a callback, since it's not possible to run tkinter in a non-main thread,
     # but we want to handle inputs from the console

@@ -1,10 +1,11 @@
 import tkinter as tk
 import math
 import numpy as np
+from base_visu import BaseVisu
 
 
 class SensorVisu:
-    def __init__(self, sensor, canvas, fill=None, outline=None, radius=2500, n_sides=4, rot_offset=math.pi/4, font_size_scale=1., meas_buf_max=100):
+    def __init__(self, sensor, canvas, fill=None, outline=None, radius=2500, n_sides=4, rot_offset=math.pi/4, font_size_scale=1., trace_length_max=10, meas_buf_max=100):
         self.sensor = sensor
         self.canvas = canvas
         self.fill = fill
@@ -14,38 +15,35 @@ class SensorVisu:
         self._n_sides = n_sides
         self._rot_offset = rot_offset
         self._font_size_scale = font_size_scale
+        self.trace_length_max = trace_length_max
         self.meas_buf_max = meas_buf_max
         self.cov_ell_cnt = 0
 
-    def _draw_trace(self, trace, draw_arrow=True, fill_format="#000000", **kwargs):
-        self.trace_length_max = 100 #xxx
-        num_steps = len(trace)
-        for step in range(1, num_steps):
-            x = step / float(self.trace_length_max - 1)
+        self._trace_pos_filtered = {}
 
-            fill = fill_format.format(int(x * 255), int((1 - x) * 255))
+    def add_cur_vals_to_traces(self):
+        self.add_cur_pos_filtered_to_trace()
 
-            if draw_arrow and step == num_steps - 1:
-                arrow = tk.LAST
-                capstyle = None
+    # Update trace array
+    def add_cur_val_to_trace(self, trace, val):
+        trace.append(val)
 
-                if self.fill is not None:
-                    fill = self.fill
-            else:
-                arrow = None
-                capstyle = tk.ROUND
+        while len(trace) > self.trace_length_max:  # Limit trace array length
+            trace.pop(0)
 
-            p0 = trace[step - 1]
-            p1 = trace[step]
+    # Update filtered pos trace array
+    def add_cur_pos_filtered_to_trace(self):
+        for vehicle in self.sensor.kalman_filter:
+            if vehicle not in self._trace_pos_filtered:
+                self._trace_pos_filtered[vehicle] = []
 
-            self.canvas.create_line(p0[0],
-                                    p0[1],
-                                    p1[0],
-                                    p1[1],
-                                    fill=fill, capstyle=capstyle, arrow=arrow, **kwargs)
+            self.add_cur_val_to_trace(self._trace_pos_filtered[vehicle], self.sensor.kalman_filter[vehicle].get_current_state_estimate())
         # end for
 
-    def draw(self, draw_meas=True, vehicles=None):
+    def _draw_trace(self, trace, draw_arrow=True, fill_format="#000000", **kwargs):
+        BaseVisu.draw_trace(self.canvas, trace=trace, draw_arrow=draw_arrow, fill_format=fill_format, color=self.fill, trace_length_max=self.trace_length_max, **kwargs)
+
+    def draw(self, draw_meas=True, vehicles=None, draw_meas_filtered=True):
         # The sensor itself
         def cb_mouse_enter(event, item):
             event.widget.itemconfig(item, fill="red")
@@ -149,11 +147,10 @@ class SensorVisu:
                 # end for
             # end if
 
-            draw_meas_filtered = True #XXX
             if draw_meas_filtered:
-                for vehicle in self.sensor.measurements_filtered:
+                for vehicle in self._trace_pos_filtered:
                     if vehicle.active:
-                        self._draw_trace(self.sensor.measurements_filtered[vehicle], draw_arrow=True, fill_format="#000000", width=1.0)
+                        self._draw_trace(self._trace_pos_filtered[vehicle], draw_arrow=True, fill_format="#000000", width=1.0)
             # end if
         # end for
 

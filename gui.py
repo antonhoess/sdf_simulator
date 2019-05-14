@@ -238,6 +238,13 @@ class Gui:
                                                                      variable=self.draw_acc_times_normal_trace,
                                                                      command=self.cb_draw)
                     chk_draw_acc_times_normal_trace.pack(side=tk.TOP, anchor=tk.W)
+
+                    self.draw_meas_filtered = tk.IntVar()
+                    self.draw_meas_filtered.set(1)
+                    chk_draw_meas_filtered = tk.Checkbutton(frm, text="Draw Kalman filtered Trace", variable=self.draw_meas_filtered,
+                                                     command=self.cb_draw)
+                    chk_draw_meas_filtered.pack(side=tk.TOP, anchor=tk.W)
+
                     frm = frm.parent
 
                 self.btn_toggle_trace_settings.invoke()
@@ -642,6 +649,9 @@ class Gui:
         for vv in self._vv:
             vv.trace_length_max = self._trace_length_max
 
+        for sv in self._sv:
+            sv.trace_length_max = self._trace_length_max
+
     def cb_meas_buf_max(self, _event):
         self._meas_buf_max = self.meas_buf_max.get()
         self.lbl_meas_buf_max_val.config(text=self._meas_buf_max)
@@ -750,7 +760,8 @@ class Gui:
         for sv in self._sv:
             if sv.sensor.active:
                 sv.draw(draw_meas=self.draw_meas.get(),
-                        vehicles=[self._vv[v].vehicle for v in range(len(self._vv))])
+                        vehicles=[self._vv[v].vehicle for v in range(len(self._vv))],
+                        draw_meas_filtered=self.draw_meas_filtered.get())
 
     def _cb_toggle_vehicle_active(self, variable, vehicle):
         vehicle.active = variable.get()
@@ -771,7 +782,14 @@ class Gui:
             # -----------------------
             vv.add_cur_vals_to_traces()
             draw = True
-        # end if
+        # end for
+
+        # for sv in self._sv:
+        #     # Visualization in canvas
+        #     # -----------------------
+        #     sv.add_cur_vals_to_traces()
+        #     draw = True
+        # # end for
 
         # Update gui elements with current values
         for vv in self._vv:
@@ -803,6 +821,8 @@ class Gui:
                     s.measure(v)
                 # end for
 
+                sv.add_cur_vals_to_traces()
+
                 draw = True
             # end if
         # end if
@@ -826,7 +846,7 @@ class Gui:
         self.draw()
 
     def add_sensor(self, s, **kwargs):
-        self._sv.append(SensorVisu(s, self.canvas, meas_buf_max=self._meas_buf_max, **kwargs))  # Sensor visu
+        self._sv.append(SensorVisu(s, self.canvas, trace_length_max=self._trace_length_max, meas_buf_max=self._meas_buf_max, **kwargs))  # Sensor visu
         var = tk.BooleanVar()
         chk = tk.Checkbutton(self.scf_sensor.frame, text=s.name, variable=var,
                              command=lambda variable=var, sensor=s:self._cb_toggle_sensor_active(variable, sensor))

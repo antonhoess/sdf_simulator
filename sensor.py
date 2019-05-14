@@ -20,7 +20,6 @@ class Sensor:
 
         self.measurements = {}
         self.kalman_filter = {}
-        self.measurements_filtered = {}
         self.last_meas_time = 0.
 
     def measure(self, vehicle):
@@ -65,13 +64,6 @@ class Radar(Sensor):
 
         return cov_r_theta, cov_r_r1, cov_r_r2
 
-    # Update trace array
-    def add_cur_val_to_trace(self, trace, val):
-        trace.append(val)
-        self.trace_length_max = 50 #XXX
-        while len(trace) > self.trace_length_max:  # Limit trace array length
-            trace.pop(0)
-
     def measure(self, vehicle):
         # Measure position, velocity and acceleration
         mean = vehicle.r
@@ -103,8 +95,3 @@ class Radar(Sensor):
 
         self.kalman_filter[vehicle].predict(u=np.asarray([0., 0.]))
         self.kalman_filter[vehicle].filter(z=meas_r)
-
-        if vehicle not in self.measurements_filtered:
-            self.measurements_filtered[vehicle] = []
-
-        self.add_cur_val_to_trace(self.measurements_filtered[vehicle], self.kalman_filter[vehicle].get_current_state_estimate())

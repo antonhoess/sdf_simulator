@@ -1,5 +1,5 @@
 import tkinter as tk
-import numpy as np
+from base_visu import BaseVisu
 
 
 class VehicleVisu:
@@ -147,36 +147,4 @@ class VehicleVisu:
     # Draw pos trace array
     # proj_dim = projection dimension: 0 = No projection, 1 = X-axis, 2 = Y-axis
     def _draw_trace(self, trace, draw_arrow=True, proj_dim=0, proj_scale=1., fill_format="#000000", **kwargs):
-        num_steps = len(trace)
-        for step in range(1, num_steps):
-            x = step / float(self.trace_length_max - 1)
-
-            fill = fill_format.format(int(x * 255), int((1 - x) * 255))
-
-            if draw_arrow and step == num_steps - 1:
-                arrow = tk.LAST
-                capstyle = None
-
-                if self.color is not None:
-                    fill = self.color
-            else:
-                arrow = None
-                capstyle = tk.ROUND
-
-            p0 = trace[step - 1]
-            p1 = trace[step]
-
-            if proj_dim == 1:
-                p0 = p0 * np.asarray([1., 0.]) + np.asarray([0., (step - 1) * proj_scale])
-                p1 = p1 * np.asarray([1., 0.]) + np.asarray([0., step * proj_scale])
-
-            elif proj_dim == 2:
-                p0 = p0 * np.asarray([0., 1.]) + np.asarray([(step - 1) * proj_scale, 0.])
-                p1 = p1 * np.asarray([0., 1.]) + np.asarray([step * proj_scale, 0.])
-
-            self.canvas.create_line(p0[0],
-                                    p0[1],
-                                    p1[0],
-                                    p1[1],
-                                    fill=fill, capstyle=capstyle, arrow=arrow, **kwargs)
-        # end for
+        BaseVisu.draw_trace(self.canvas, trace=trace, draw_arrow=draw_arrow, proj_dim=proj_dim, proj_scale=proj_scale, fill_format=fill_format, color=self.color, trace_length_max=self.trace_length_max, **kwargs)

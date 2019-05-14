@@ -2,20 +2,27 @@ import numpy as np
 
 
 class KalmanFilter:
-    # x_init: Initial state vector: What we know about the (probable) start state
-    # P_init: Initial (uncertainty) covariance matrix: How sure are we about the start state - in each dimension?
-    # F     : State transition matrix: For predicting the next state from the current state
-    # B     : Control matrix: For predicting the next state from the current state using control signals
-    # Q     : Process noise covariance matrix: Describes the (Gaussian) randomness of
-    #         state transitions in each dimension
-    # H     : Measurement matrix: Describes how we think that our sensors map states to measurements z
-    # R     : Measurement noise covariance matrix: Describes the (Gaussian) randomness of measurements per dimension
-    def __init__(self, x_init, P_init, F, B, Q, H, R):
+    def __init__(self, x_init, P_init, F, B, D, H, R):
+        """ Constructor of the The N-dimensional Kalman filter
+
+        Parameters:
+        x_init (array): Initial state vector: What we know about the (probable) start state
+        P_init (array): Initial (uncertainty) covariance matrix: How sure are we about the start state - in each dimension?
+        F      (array): State transition matrix: For predicting the next state from the current state
+        B      (array): Control matrix: For predicting the next state from the current state using control signals
+        D      (array): Process noise covariance matrix: Describes the (Gaussian) randomness of state transitions in each dimension
+        H      (array): Measurement matrix: Describes how we think that our sensors map states to measurements z
+        R      (array): Measurement noise covariance matrix: Describes the (Gaussian) randomness of measurements per dimension
+
+        Returns:
+        An initialized Kalman filter object which can be used for further filtering.
+        """
+
         self.x = x_init
         self.P = P_init
         self.F = F
         self.B = B
-        self.Q = Q
+        self.D = D
         self.H = H
         self.R = R
 
@@ -23,27 +30,27 @@ class KalmanFilter:
     # uncertainty covariance matrix F embodies our knowledge about the system dynamics
     def predict(self, u):
         # Predict new state
-        self.x = self.F * self.x + self.B * u
+        self.x = np.dot(self.F, self.x) + np.dot(self.B, u)
 
         # Update uncertainty covariance matrix
-        self.P = self.F * self.P * self.F.T + self.Q
+        self.P = np.dot(self.F, np.dot(self.P, self.F.T)) + self.D
 
     def filter(self, z):
-        # Compute innovation y
-        y = z - self.H * self.x
+        # Compute innovation ν
+        ν = z - np.dot(self.H, self.x)
 
         # Compute residual covariance matrix S
-        S = self.H * self.P * self.H.T + self.R
+        S = np.dot(self.H, np.dot(self.P, self.H.T)) + self.R
 
         # Compute Kalman gain matrix the Kalman gain matrix tells us how strongly to correct each dimension of the
         # predicted state vector by the help of the measurement
-        K = self.P * self.H.T * S.inv()
+        W = np.dot(self.P, np.dot(self.H.T, np.linalg.inv(S)))
 
         # Correct previously predicted new state vector
-        self.x = self.x + K * y
+        self.x = self.x + np.dot(W, ν)
 
         # Update uncertainty covariance matrix
-        self.P = self.P - K * self.H * self.P
+        self.P = self.P - np.dot(W, np.dot(self.H, self.P))
 
     # Returns the current estimated state vector x, may it be after the predict() or
     # after the correct_by_measurement() step

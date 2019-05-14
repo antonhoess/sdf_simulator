@@ -17,6 +17,34 @@ class SensorVisu:
         self.meas_buf_max = meas_buf_max
         self.cov_ell_cnt = 0
 
+    def _draw_trace(self, trace, draw_arrow=True, fill_format="#000000", **kwargs):
+        self.trace_length_max = 100 #xxx
+        num_steps = len(trace)
+        for step in range(1, num_steps):
+            x = step / float(self.trace_length_max - 1)
+
+            fill = fill_format.format(int(x * 255), int((1 - x) * 255))
+
+            if draw_arrow and step == num_steps - 1:
+                arrow = tk.LAST
+                capstyle = None
+
+                if self.fill is not None:
+                    fill = self.fill
+            else:
+                arrow = None
+                capstyle = tk.ROUND
+
+            p0 = trace[step - 1]
+            p1 = trace[step]
+
+            self.canvas.create_line(p0[0],
+                                    p0[1],
+                                    p1[0],
+                                    p1[1],
+                                    fill=fill, capstyle=capstyle, arrow=arrow, **kwargs)
+        # end for
+
     def draw(self, draw_meas=True, vehicles=None):
         # The sensor itself
         def cb_mouse_enter(event, item):
@@ -29,7 +57,6 @@ class SensorVisu:
             vehicles = [vehicles]
 
         # Draw the sensor box itself
-
         vehicle = None
 
         for v in vehicles:
@@ -120,6 +147,13 @@ class SensorVisu:
                                                 fill=self.fill)
                     # end if
                 # end for
+            # end if
+
+            draw_meas_filtered = True #XXX
+            if draw_meas_filtered:
+                for vehicle in self.sensor.measurements_filtered:
+                    if vehicle.active:
+                        self._draw_trace(self.sensor.measurements_filtered[vehicle], draw_arrow=True, fill_format="#000000", width=1.0)
             # end if
         # end for
 

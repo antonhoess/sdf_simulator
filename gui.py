@@ -362,11 +362,11 @@ class Gui:
                 self.lbl_zoom_val = tk.Label(frm, text="{:.2f}".format(1. * 100.), bg="white", anchor=tk.E)
                 self.lbl_zoom_val.pack(expand=True, fill=tk.X, side=tk.LEFT)
 
-                btn_zoom_out = tk.Button(frm, text="-", bg="lightblue")
+                btn_zoom_out = tk.Button(frm, text="-", bg="lightblue", width=2)
                 btn_zoom_out.pack(fill=None, side=tk.LEFT)
                 btn_zoom_out.bind('<Button-1>', lambda event, direction=self.ZoomDir.OUT: self.cb_zoom(event, direction))
 
-                btn_zoom_in = tk.Button(frm, text="+", bg="dodgerblue")
+                btn_zoom_in = tk.Button(frm, text="+", bg="dodgerblue", width=2)
                 btn_zoom_in.pack(fill=None, side=tk.LEFT)
                 btn_zoom_in.bind('<Button-1>', lambda event, direction=self.ZoomDir.IN: self.cb_zoom(event, direction))
                 frm = frm.parent

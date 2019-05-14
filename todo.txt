@@ -13,3 +13,5 @@
 * Add further settings for vehicles and/or sensors in a context menu or separate window when clicking on the sensor box.
 * Make a combobox list widget derived from the ScrollFrame and use it for the vehicle and sensor list.
 * Add all exercises from the 4th lecture.
+* Unify the _draw_trace() method in VehicleVisu and SensorVisu class - pur it probably as staticmethod in the BaseVisu class.
+* Check all XXX

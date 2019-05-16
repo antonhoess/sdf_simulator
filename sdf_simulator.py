@@ -37,7 +37,7 @@ if __name__ == "__main__":
                    cov_rdd=[[1000, 0], [0, 10000]])
     gui.add_sensor(radar, fill="lightblue", outline="black", radius=2500, n_sides=4, rot_offset=math.pi/4, font_size_scale=1.0)
 
-    sigma_c = 50
+    sigma_c = 500
     radar = Radar("R3 KF Test", True, 0, 0, 5.,
                    cov_r=[[sigma_c * sigma_c, 0], [0, sigma_c * sigma_c]],
                    cov_rd=[[10000, 0], [0, 10000]],

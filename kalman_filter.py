@@ -27,7 +27,8 @@ class KalmanFilter:
         self.R = R
 
     # Predicts the new state vector x using the transition matrix F and the specified control vector u and updates the
-    # uncertainty covariance matrix F embodies our knowledge about the system dynamics
+    # uncertainty covariance
+    # Matrix F embodies our knowledge about the system dynamics
     def predict(self, u):
         # Predict new state
         self.x = np.dot(self.F, self.x) + np.dot(self.B, u)

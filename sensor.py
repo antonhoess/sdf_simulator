@@ -85,13 +85,13 @@ class Radar(Sensor):
 
         # Add filtered position measurement to the measurement_filter list
         if not vehicle in self.kalman_filter:
-            self.kalman_filter[vehicle] = KalmanFilter(x_init=np.asarray([0., 0.]),
-                                                       P_init=np.asarray([[10., 0.], [0., 10.]]),
-                                                       F=np.asarray([[1., 0.], [0., 1.]]),
-                                                       B=np.asarray([[1., 0.], [0., 1.]]),
-                                                       D=np.asarray([[0., 0.], [0., 0.]]),
-                                                       H=np.asarray([[1., 0.], [0., 1.]]),
+            self.kalman_filter[vehicle] = KalmanFilter(x_init=np.zeros(2),
+                                                       P_init=np.identity(2) * 10.,
+                                                       F=np.identity(2),
+                                                       B=np.identity(2),
+                                                       D=np.zeros([2, 2]),
+                                                       H=np.identity(2),
                                                        R=np.asarray(self.cov_r))
 
-        self.kalman_filter[vehicle].predict(u=np.asarray([0., 0.]))
+        self.kalman_filter[vehicle].predict(u=vehicle.rd * self.meas_interval)
         self.kalman_filter[vehicle].filter(z=meas_r)

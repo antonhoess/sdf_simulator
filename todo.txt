@@ -13,3 +13,6 @@
 * Add further settings for vehicles and/or sensors in a context menu or separate window when clicking on the sensor box.
 * Make a combobox list widget derived from the ScrollFrame and use it for the vehicle and sensor list.
 * Add all exercises from the 4th lecture.
+* Draw the last trace line segment and the arrow separate.
+  -> Impossible, since in cases where the line segments are very short, even previous segments are visible beyond the tip af the arrow
+* Check, if it makes sense to make a separate class that connects the vehicles ans sensor/measurements and connect them direktly at the program startup (or when adding a vehicle or sensor).

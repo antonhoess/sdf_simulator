@@ -85,13 +85,19 @@ class Radar(Sensor):
 
         # Add filtered position measurement to the measurement_filter list
         if not vehicle in self.kalman_filter:
-            self.kalman_filter[vehicle] = KalmanFilter(x_init=np.zeros(2),
-                                                       P_init=np.identity(2) * 10.,
-                                                       F=np.identity(2),
-                                                       B=np.identity(2),
-                                                       D=np.zeros([2, 2]),
-                                                       H=np.identity(2),
-                                                       R=np.asarray(self.cov_r))
-
-        self.kalman_filter[vehicle].predict(u=vehicle.rd * self.meas_interval)
-        self.kalman_filter[vehicle].filter(z=meas_r)
+            DT = self.meas_interval
+            I = np.identity(2)
+            O = np.zeros((2, 2))
+            F = np.block([[I, DT*I, 0.5*DT*DT*I],
+                          [O,    I,        DT*I],
+                          [O,    I,           I]])
+            self.kalman_filter[vehicle] = KalmanFilter(x_init=np.zeros(6),
+                                                       P_init=np.identity(6) * 1.e10,
+                                                       F=F,
+                                                       B=np.identity(6),
+                                                       D=np.zeros([6, 6]), #XXX Here use G as in the script or on the website
+                                                       H=np.identity(6),
+                                                       R=np.identity(6) * 2500#xxx auch als np.block mit den 3 matrizen, aber diese sind ja winkelabhängig    np.stack([np.asarray(self.cov_r), np.asarray(self.cov_rd), np.asarray(self.cov_rdd)])
+                                                       )#np.concatenate(self.cov_r, self.cov_rd, self.cov_rdd))
+        self.kalman_filter[vehicle].predict(u=np.zeros(6))
+        self.kalman_filter[vehicle].filter(z=np.concatenate([meas_r, meas_rd, meas_rdd]))

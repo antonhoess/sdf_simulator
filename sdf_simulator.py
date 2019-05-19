@@ -43,13 +43,13 @@ if __name__ == "__main__":
                                        [0, 10000]]))
     gui.add_sensor(radar, fill="lightblue", outline="black", radius=2500, n_sides=4, rot_offset=math.pi/4, font_size_scale=1.0)
 
-    sigma_c = 500
+    sigma_r = 5.e1
+    sigma_rd = 1.e0
+    sigma_rdd = 1.e-2
     radar = Radar("R3 KF Test", True, 0, 0, 5.,
-                   cov_r=np.asarray([[sigma_c * sigma_c, 0], [0, sigma_c * sigma_c]]),
-#                   cov_rd=np.asarray([[1, 0], [0, 1]]),
-                   cov_rd=np.asarray([[10000, 0], [0, 10000]]),
-#                   cov_rdd=np.asarray([[1, 0], [0, 1]]))
-                   cov_rdd=np.asarray([[1000, 0], [0, 10000]]))
+                  cov_r=np.identity(2) * sigma_r**2,
+                  cov_rd=np.identity(2) * sigma_rd**2,
+                  cov_rdd=np.identity(2) * sigma_rdd**2)
     gui.add_sensor(radar, fill="violet", outline="black", radius=50, n_sides=5, rot_offset=math.pi/5, font_size_scale=0.1)
 
     gui.run(cb_main_loop=cb_main_loop)

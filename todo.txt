@@ -18,9 +18,9 @@ TODO:
 * Make a combobox list widget derived from the ScrollFrame and use it for the vehicle and sensor list.
 * Add all exercises from the 4th lecture.
 * Check, if it makes sense to make a separate class that connects the vehicles ans sensor/measurements and connect them directly at the program startup (or when adding a vehicle or sensor).
-
-
-näcste übungsaufgabe: viele sensoren, deren werte mitteln - schon bei init sensoren gruppieren eben hierfür
-
-Fragen:
-* Zustandsvektor 4- anstatt 2-dimensional machen? Oder sogar 6?
++ Make the state vector of 6 instead of 2 dimensions
+* Add multiple sensors in different locations and join their measurements with their arithmetic and their geometric average.
+* Create a function, that rotates (in dependence of the angle between the sensor and the vehicle) a covariance matrix und rotate the base covariance matrices on each measurement once and store the result in a new variable and use this variable for all further steps:
+  * Sampling points
+  * Draw covariance ellipse
+  * Calculate Q of the Kalman filter

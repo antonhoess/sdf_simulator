@@ -3,10 +3,9 @@ import math
 from kalman_filter import KalmanFilter
 
 class RadarMeasurement:
-    def __init__(self, vehicle, r_mean, r, rd, rdd):
+    def __init__(self, vehicle, r, rd, rdd):
         super().__init__()
         self.vehicle = vehicle
-        self.r_mean = r_mean
         self.r = r
         self.rd = rd
         self.rdd = rdd
@@ -66,22 +65,18 @@ class Radar(Sensor):
 
     def measure(self, vehicle):
         # Measure position, velocity and acceleration
-        mean = vehicle.r
+        theta = self.calc_rotation_angle(vehicle)
+        R = self.calc_rotation_matrix(theta)
 
-        R = self.calc_rotation_matrix(self.calc_cov_ell_params(self.cov_r)[0])  # XXX It makes no sense to get R and multiply it again - we need the andlge between sensor and vaehicle and calculate the rotation matrix
-        meas_r = np.random.multivariate_normal(mean, self.cov_r * R, 1)[0]
-
-        R = self.calc_rotation_matrix(self.calc_cov_ell_params(self.cov_rd)[0])
-        meas_rd = np.random.multivariate_normal(mean, self.cov_rd * R, 1)[0]
-
-        R = self.calc_rotation_matrix(self.calc_cov_ell_params(self.cov_rdd)[0])
-        meas_rdd = np.random.multivariate_normal(mean, self.cov_rdd * R, 1)[0]
+        meas_r = np.dot(R, np.random.multivariate_normal(np.asarray([0, 0]), self.cov_r, 1)[0]) + vehicle.r
+        meas_rd = np.dot(R, np.random.multivariate_normal(np.asarray([0, 0]), self.cov_rd, 1)[0]) + vehicle.rd
+        meas_rdd = np.dot(R, np.random.multivariate_normal(np.asarray([0, 0]), self.cov_rdd, 1)[0]) + vehicle.rdd
 
         # Add position measurement to the measurement list
         if not vehicle in self.measurements:
             self.measurements[vehicle] = []
 
-        self.measurements[vehicle].append(RadarMeasurement(vehicle, mean, meas_r, meas_rd, meas_rdd))
+        self.measurements[vehicle].append(RadarMeasurement(vehicle, meas_r, meas_rd, meas_rdd))
 
         # Add filtered position measurement to the measurement_filter list
         if not vehicle in self.kalman_filter:
@@ -91,21 +86,24 @@ class Radar(Sensor):
             F = np.block([[I, DT * I, 0.5 * DT * DT * I],
                           [O,      I,            DT * I],
                           [O,      I,                 I]])
-            a = 9  # m/s^2
+            Σ = np.ones(6).T * 9 * 0.75  # m/s^2
             G = np.block([[0.5 * DT * DT * I],
                           [           DT * I],
                           [                I]])
-            R = np.block([[self.cov_r,           I,            I],
-                          [         I, self.cov_rd,            I],
-                          [         I,           I, self.cov_rdd]])
-            self.kalman_filter[vehicle] = KalmanFilter(x_init=np.zeros(6),
+            H = np.block([[I, O, O],
+                          [O, I, O],
+                          [O, O, O]])
+            R = np.block([[self.cov_r,           O,            O],
+                          [         O, self.cov_rd,            O],
+                          [         O,           O, self.cov_rdd]])  # XXX cov_r* is not rotated yet
+            self.kalman_filter[vehicle] = KalmanFilter(#x_init=np.zeros(6),
+                                                       x_init=np.asarray([1000, 1000, 150, 300, 0, 0]),  # np.ones(6) * 1.e4,
                                                        P_init=np.identity(6) * 1.e10,
                                                        F=F,
                                                        B=np.identity(6),
-                                                       Q=np.dot(G, G.T) * a * a,
-                                                       H=np.identity(6),
-                                                       R=np.identity(6)*1,
-                                                       #R=R, # * 2500#xxx auch als np.block mit den 3 matrizen, aber diese sind ja winkelabhängig
-                                                       )#np.concatenate(self.cov_r, self.cov_rd, self.cov_rdd))
+                                                       Q=np.dot(G, G.T) * Σ**2,
+                                                       H=H,  # np.identity(6),
+                                                       R=R  # np.identity(6),
+                                                       )
         self.kalman_filter[vehicle].predict(u=np.zeros(6))
         self.kalman_filter[vehicle].filter(z=np.concatenate([meas_r, meas_rd, meas_rdd]))

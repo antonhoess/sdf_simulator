@@ -2,7 +2,7 @@ import numpy as np
 
 
 class KalmanFilter:
-    def __init__(self, x_init, P_init, F, B, D, H, R):
+    def __init__(self, x_init, P_init, F, B, Q, H, R):
         """ Constructor of the The N-dimensional Kalman filter
 
         Parameters:
@@ -10,7 +10,7 @@ class KalmanFilter:
         P_init (array): Initial (uncertainty) covariance matrix: How sure are we about the start state - in each dimension?
         F      (array): State transition matrix: For predicting the next state from the current state
         B      (array): Control matrix: For predicting the next state from the current state using control signals
-        D      (array): Process noise covariance matrix: Describes the (Gaussian) randomness of state transitions in each dimension
+        Q      (array): Process noise covariance matrix: Describes the (Gaussian) randomness of state transitions in each dimension
         H      (array): Measurement matrix: Describes how we think that our sensors map states to measurements z
         R      (array): Measurement noise covariance matrix: Describes the (Gaussian) randomness of measurements per dimension
 
@@ -22,7 +22,7 @@ class KalmanFilter:
         self.P = P_init
         self.F = F
         self.B = B
-        self.D = D
+        self.Q = Q
         self.H = H
         self.R = R
 
@@ -34,7 +34,7 @@ class KalmanFilter:
         self.x = np.dot(self.F, self.x) + np.dot(self.B, u)
 
         # Update uncertainty covariance matrix
-        self.P = np.dot(self.F, np.dot(self.P, self.F.T)) + self.D
+        self.P = np.dot(self.F, np.dot(self.P, self.F.T)) + self.Q
 
     def filter(self, z):
         # Compute innovation ν
@@ -45,7 +45,7 @@ class KalmanFilter:
 
         # Compute Kalman gain matrix the Kalman gain matrix tells us how strongly to correct each dimension of the
         # predicted state vector by the help of the measurement
-        W = np.dot(self.P, np.dot(self.H.T, np.linalg.inv(S)))
+        W = np.dot(self.P, np.dot(self.H.T, np.linalg.pinv(S)))
 
         # Correct previously predicted new state vector
         self.x = self.x + np.dot(W, ν)

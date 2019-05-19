@@ -52,7 +52,7 @@ class Radar(Sensor):
     @staticmethod
     def calc_cov_ell_params(cov):
         # Calculate eigenvalues
-        eVa, eVe = np.linalg.eig(cov)
+        eVa, eVe = np.linalg.eig(np.asarray(cov))
 
         # Calculate transformation matrix from eigen decomposition
         R, S = eVe, np.diag(np.sqrt(eVa))
@@ -68,14 +68,14 @@ class Radar(Sensor):
         # Measure position, velocity and acceleration
         mean = vehicle.r
 
-        R = self.calc_rotation_matrix(self.calc_cov_ell_params(self.cov_r)[0])
-        meas_r = np.random.multivariate_normal(mean, np.asarray(self.cov_r) * R, 1)[0]
+        R = self.calc_rotation_matrix(self.calc_cov_ell_params(self.cov_r)[0])  # XXX It makes no sense to get R and multiply it again - we need the andlge between sensor and vaehicle and calculate the rotation matrix
+        meas_r = np.random.multivariate_normal(mean, self.cov_r * R, 1)[0]
 
         R = self.calc_rotation_matrix(self.calc_cov_ell_params(self.cov_rd)[0])
-        meas_rd = np.random.multivariate_normal(mean, np.asarray(self.cov_rd) * R, 1)[0]
+        meas_rd = np.random.multivariate_normal(mean, self.cov_rd * R, 1)[0]
 
         R = self.calc_rotation_matrix(self.calc_cov_ell_params(self.cov_rdd)[0])
-        meas_rdd = np.random.multivariate_normal(mean, np.asarray(self.cov_rdd) * R, 1)[0]
+        meas_rdd = np.random.multivariate_normal(mean, self.cov_rdd * R, 1)[0]
 
         # Add position measurement to the measurement list
         if not vehicle in self.measurements:
@@ -88,16 +88,24 @@ class Radar(Sensor):
             DT = self.meas_interval
             I = np.identity(2)
             O = np.zeros((2, 2))
-            F = np.block([[I, DT*I, 0.5*DT*DT*I],
-                          [O,    I,        DT*I],
-                          [O,    I,           I]])
+            F = np.block([[I, DT * I, 0.5 * DT * DT * I],
+                          [O,      I,            DT * I],
+                          [O,      I,                 I]])
+            a = 9  # m/s^2
+            G = np.block([[0.5 * DT * DT * I],
+                          [           DT * I],
+                          [                I]])
+            R = np.block([[self.cov_r,           I,            I],
+                          [         I, self.cov_rd,            I],
+                          [         I,           I, self.cov_rdd]])
             self.kalman_filter[vehicle] = KalmanFilter(x_init=np.zeros(6),
                                                        P_init=np.identity(6) * 1.e10,
                                                        F=F,
                                                        B=np.identity(6),
-                                                       D=np.zeros([6, 6]), #XXX Here use G as in the script or on the website
+                                                       Q=np.dot(G, G.T) * a * a,
                                                        H=np.identity(6),
-                                                       R=np.identity(6) * 2500#xxx auch als np.block mit den 3 matrizen, aber diese sind ja winkelabhängig    np.stack([np.asarray(self.cov_r), np.asarray(self.cov_rd), np.asarray(self.cov_rdd)])
+                                                       R=np.identity(6)*1,
+                                                       #R=R, # * 2500#xxx auch als np.block mit den 3 matrizen, aber diese sind ja winkelabhängig
                                                        )#np.concatenate(self.cov_r, self.cov_rd, self.cov_rdd))
         self.kalman_filter[vehicle].predict(u=np.zeros(6))
         self.kalman_filter[vehicle].filter(z=np.concatenate([meas_r, meas_rd, meas_rdd]))

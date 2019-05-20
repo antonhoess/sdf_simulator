@@ -15,6 +15,7 @@ def cb_main_loop():
 
 
 if __name__ == "__main__":
+    print(np.version.version)
     gui = Gui(canvas_width=800, canvas_height=400, base_scale_factor=.8e-4, zoom_factor=1.1, trace_length_max=100,
               meas_buf_max=10)
 
@@ -46,10 +47,19 @@ if __name__ == "__main__":
     sigma_r = 5.e1
     sigma_rd = 1.e0
     sigma_rdd = 1.e-2
-    radar = Radar("R3 KF Test", True, 0, 0, 5.,
-                  cov_r=np.identity(2) * sigma_r**2,
-                  cov_rd=np.identity(2) * sigma_rd**2,
-                  cov_rdd=np.identity(2) * sigma_rdd**2)
-    gui.add_sensor(radar, fill="violet", outline="black", radius=50, n_sides=5, rot_offset=math.pi/5, font_size_scale=0.1)
+    radar_positions = [{"r_x": 0, "r_y": 0},
+                       {"r_x": 10000, "r_y": -3000},
+                       {"r_x": 5000, "r_y": 5000},
+                       {"r_x": -8000, "r_y": 6000},
+                       {"r_x": -7000, "r_y": -10000},
+                       {"r_x": -12000, "r_y": -2000}]
+
+    for i in range(len(radar_positions)):
+        radar = Radar("R3 KF Test #{:03d}".format(i), True, radar_positions[i]["r_x"], radar_positions[i]["r_y"], 5.,
+                      cov_r=np.identity(2) * sigma_r**2,
+                      cov_rd=np.identity(2) * sigma_rd**2,
+                      cov_rdd=np.identity(2) * sigma_rdd**2)
+        gui.add_sensor(radar, fill="violet", outline="black", radius=1000, n_sides=5, rot_offset=math.pi/5, font_size_scale=0.1)
+    # end for
 
     gui.run(cb_main_loop=cb_main_loop)

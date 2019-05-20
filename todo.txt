@@ -24,3 +24,5 @@ TODO:
   * Sampling points
   * Draw covariance ellipse
   * Calculate Q of the Kalman filter
+
+sensor group einführen - erzwingen, indem erst eine group erstellt und dann ein oder mehrere sensoren hinzugefügt werden muss, oder lose gekoppelt? ersteres ist sicherlich nicht verkehrt, wenn der fall mit einem Sensor leicht bleibt

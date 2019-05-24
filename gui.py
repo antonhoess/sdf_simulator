@@ -462,7 +462,7 @@ class Gui:
                     frm.pack(fill=tk.X)
                     self.frm_vehicle_settings_content = frm
 
-                    self.scf_vehicle = ScrollFrame(self.frm_vehicle_settings_content, max_width=200, max_height=100)
+                    self.scf_vehicle = ScrollFrame(self.frm_vehicle_settings_content, max_width=200, max_height=20)
                     self.scf_vehicle.update()
 
                     frm = frm.parent
@@ -502,7 +502,7 @@ class Gui:
                                            zoom_factor=self._ZOOM_FACTOR)
             self.canvas.pack(expand=True, fill=tk.BOTH)
             self.canvas.bind('<Configure>', self.cb_canvas_configure)
-            self.canvas.bind("<MouseWheel>", self.cb_mouse_wheel)  # With Windows OS
+            self.canvas.bind('<MouseWheel>', self.cb_mouse_wheel)  # With Windows OS
             self.canvas.bind('<Button-4>', self.cb_mouse_wheel)  # With Linux OS
             self.canvas.bind('<Button-5>', self.cb_mouse_wheel)  # "
             self.canvas.bind('<Shift-Button-1>', self.cb_left_click_shift)
@@ -566,6 +566,8 @@ class Gui:
 
         elif event.num == 5 or event.delta == -120:
             self.do_zoom(self.ZoomDir.OUT)
+
+        return "break"
 
     def cb_left_click_shift(self, event):
         self._move_origin = [event.x, event.y]
@@ -867,6 +869,9 @@ class Gui:
         var = tk.BooleanVar()
         chk = tk.Checkbutton(self.scf_vehicle.frame, text=v.name, variable=var,
                              command=lambda variable=var, vehicle=v: self._cb_toggle_vehicle_active(variable, vehicle))
+
+        self.scf_vehicle.bind_mouse_wheel_event(chk)
+
         if v.active:
             chk.select()
 
@@ -879,6 +884,9 @@ class Gui:
         var = tk.BooleanVar()
         chk = tk.Checkbutton(self.scf_sensor.frame, text=s.name, variable=var,
                              command=lambda variable=var, sensor=s: self._cb_toggle_sensor_active(variable, sensor))
+
+        self.scf_sensor.bind_mouse_wheel_event(chk)
+
         if s.active:
             chk.select()
 

@@ -29,17 +29,11 @@ TODO:
   * The sensors itself will loose their measurement interval property, since this will be moves to the sensor group.
   * The sensor group will trigger the measurements and handle the results of the individual sensors as a single one, according to the selected mode (arithmetic or geometric mean).
   * Check, if it makes sense, to allow a sensor to be added to multiple groups.
-* Add event for mouse scroll (and for the horizontal scrolling using the Shift modifier key) on the scroll_frame.
 * Strictly separate logic and gui - use callback/hooks?
 * Are R1 and R2 really HomogeniousTriggeredSensorGroup? What if we have a group of inhomogeneous sensors, how to set the covariance matrix for each sensor, since it got removed? Try to unify this.
 * Explicitly add a vehicle to a sensor, instead of waiting until it get's measured the first time? Which one is better?
 * Implement exercises 4* and 5*.
-* Create a class derived from the Kalman filter which initializes it?
-* In KalmanFilterFactory.get_kalman_filter() use kwargs to allow setting several parameters
-* Fix syntax warning on the derived frunctions from Sensor.measure().
+* Fix syntax warning on the derived functions from Sensor.measure().
 * The arrow of the trace with the Kalman filtered measurements is most of the time not visible - fix it! Should be somewhere in BaseVisu.
 * Finish implementing Radar.measure and in general the whole Radar class.
-* Treat the sensor mwasurement and the kalman filter result in a separate class suitable for the used sensor. In general put all code related to a sensor type in the class where the sensor is defined.
-* Only allow scrolling h/v in the ScaleCanvas, if the scrollbar is visible (set a flag).
-* Avoid the list to be scrolled, when the mouse scrolls somewhere on the application (e.g. over the canvas).
-* Check, why the vehicle list does not scroll.
+* Treat the sensor measurement and the Kalman filter result in a separate class suitable for the used sensor. In general put all code related to a sensor type in the class where the sensor is defined.

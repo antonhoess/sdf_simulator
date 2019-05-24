@@ -4,8 +4,10 @@ import numpy as np
 from base_visu import BaseVisu
 
 
-class SensorVisu:
+class SensorVisu(BaseVisu):
     def __init__(self, sensor, canvas, fill=None, outline=None, radius=2500, n_sides=4, rot_offset=math.pi/4, font_size_scale=1., trace_length_max=10, meas_buf_max=100):
+        super().__init__(canvas)
+
         self.sensor = sensor
         self.canvas = canvas
         self.fill = fill
@@ -22,28 +24,12 @@ class SensorVisu:
         self._trace_pos_filtered = {}
 
     def add_cur_vals_to_traces(self):
-        self.add_cur_pos_filtered_to_trace()
-
-    # Update trace array
-    def add_cur_val_to_trace(self, trace, val):
-        trace.append(val)
-
-        while len(trace) > self.trace_length_max:  # Limit trace array length
-            trace.pop(0)
-
-    # Update filtered pos trace array
-    def add_cur_pos_filtered_to_trace(self):
-        for vehicle in self.sensor.kalman_filter:
-            if vehicle not in self._trace_pos_filtered:
-                self._trace_pos_filtered[vehicle] = []
-
-            self.add_cur_val_to_trace(self._trace_pos_filtered[vehicle], self.sensor.kalman_filter[vehicle].get_current_state_estimate())
-        # end for
+        pass
 
     def _draw_trace(self, trace, draw_arrow=True, fill_format="#000000", **kwargs):
         BaseVisu.draw_trace(self.canvas, trace=trace, draw_arrow=draw_arrow, fill_format=fill_format, color=self.fill, trace_length_max=self.trace_length_max, **kwargs)
 
-    def draw(self, draw_meas=True, vehicles=None, draw_meas_filtered=True):
+    def draw(self, draw_meas=True, vehicles=None):
         # The sensor itself
         def cb_mouse_enter(event, item):
             event.widget.itemconfig(item, fill="red")
@@ -72,9 +58,9 @@ class SensorVisu:
         ps = []
         for i in range(self._n_sides):
             theta = math.pi * 2. / float(self._n_sides) * float(i) + angle + self._rot_offset
-            R = self.sensor.calc_rotation_matrix(theta)
+            R = self.sensor.calc_rotation_matrix_2d(theta)
 
-            p = np.dot(np.asarray([self._radius / 2, 0]), R.T) + self.sensor.r
+            p = np.dot(np.asarray([self._radius / 2, 0]), R.T) + self.sensor.pos
             ps.append(p[0])
             ps.append(p[1])
         # end for
@@ -83,9 +69,9 @@ class SensorVisu:
         font_size = int(self.canvas.scale_factor * self.canvas.zoom * self.canvas.ratio_scale_factor * 1.e03 * self._font_size_scale)
 
         if vehicle is not None:
-            self.canvas.create_line(self.sensor.r[0], self.sensor.r[1], vehicle.r[0], vehicle.r[1], fill=self.outline, dash=(2, 5))
+            self.canvas.create_line(self.sensor.pos[0], self.sensor.pos[1], vehicle.r[0], vehicle.r[1], fill=self.outline, dash=(2, 5))
 
-        self.canvas.create_text(self.sensor.r[0], self.sensor.r[1], text=self.sensor.name, fill=self.outline, font=(None, font_size),
+        self.canvas.create_text(self.sensor.pos[0], self.sensor.pos[1], text=self.sensor.name, fill=self.outline, font=(None, font_size),
                                 anchor=tk.CENTER, tag="{:x}".format(id(self.sensor)))
 
         self.canvas.tag_bind("{:x}".format(id(self.sensor)), '<Enter>',
@@ -100,7 +86,7 @@ class SensorVisu:
                 theta = self.sensor.calc_rotation_angle(vehicle)
 
                 # Calculate values for drawing the cov ellipse
-                cov_r_theta, cov_r_r1, cov_r_r2 = self.sensor.calc_cov_ell_params(np.asarray(self.sensor.cov_r))
+                cov_r_theta, cov_r_r1, cov_r_r2 = self.sensor.calc_cov_ell_params_2d(np.asarray(self.sensor.cov_r))
                 cov_r_theta += theta
 
                 for sigma in range(1, self.cov_ell_cnt + 1):
@@ -146,13 +132,4 @@ class SensorVisu:
                     # end if
                 # end for
             # end if
-
-            if draw_meas_filtered:
-                for vehicle in self._trace_pos_filtered:
-                    if vehicle.active:
-                        self._draw_trace(self._trace_pos_filtered[vehicle], draw_arrow=True, fill_format="#000000", width=1.0)
-            # end if
         # end for
-
-    def clear(self):
-        self.canvas.delete(tk.ALL)

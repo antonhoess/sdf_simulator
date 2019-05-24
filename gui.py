@@ -2,6 +2,7 @@ import tkinter as tk
 from base_visu import BaseVisu
 from vehicle_visu import VehicleVisu
 from sensor_visu import SensorVisu
+from sensor_group_visu import SensorGroupVisu
 from scale_trans_canvas import ScaleTransCanvas
 from scroll_frame import ScrollFrame
 from popup_menu import PopupMenu
@@ -46,6 +47,9 @@ class Gui:
         self._bv = None  # Base visualizations
         self._vv = []  # Vehicle visualizations
         self._sv = []  # Sensor visualizations
+        self._sgv = []  # Sensor group visualizations
+
+        self._sg = []  # Sensor groups
 
         self._t = 0.0       # Absolute time
         self._t_incr = 1.   # Time increase per tick
@@ -353,7 +357,7 @@ class Gui:
                 self.cov_ell_cnt = tk.IntVar()
                 self.cov_ell_cnt.set(0)
                 scl_cov_ell_cnt = tk.Scale(frm, orient=tk.HORIZONTAL, showvalue=False, from_=0, to=5, resolution=1,
-                                           takefocus=True, length=70, variable=self.cov_ell_cnt, command=self.cb_cov_ell_cnt)
+                                           length=70, variable=self.cov_ell_cnt, command=self.cb_cov_ell_cnt)
                 scl_cov_ell_cnt.pack(expand=True, fill=tk.X, side=tk.LEFT)
                 frm = frm.parent
 
@@ -391,7 +395,7 @@ class Gui:
 
                 self.time_incr = tk.DoubleVar()
                 scl_time_incr = tk.Scale(frm, orient=tk.HORIZONTAL, showvalue=False, from_=0.1, to=10.0,
-                                         resolution=0.1, takefocus=True, length=70, variable=self.time_incr, command=self.cb_time_incr)
+                                         resolution=0.1, length=70, variable=self.time_incr, command=self.cb_time_incr)
                 scl_time_incr.set(1.0)
                 scl_time_incr.pack(expand=True, fill=tk.X, side=tk.LEFT)
                 frm = frm.parent
@@ -406,7 +410,7 @@ class Gui:
 
                 self.time_tick = tk.DoubleVar()
                 scl_time_tick = tk.Scale(frm, orient=tk.HORIZONTAL, showvalue=False, from_=0.01, to=1.00,
-                                         resolution=0.01, takefocus=True, length=70, variable=self.time_tick, command=self.cb_time_tick)
+                                         resolution=0.01, length=70, variable=self.time_tick, command=self.cb_time_tick)
                 scl_time_tick.pack(expand=True, fill=tk.X, side=tk.LEFT)
                 frm = frm.parent
 
@@ -423,7 +427,7 @@ class Gui:
 
                 self.trace_length_max = tk.IntVar()
                 scl_trace_length_max = tk.Scale(frm, orient=tk.HORIZONTAL, showvalue=False, from_=2, to=1000,
-                                                resolution=1, takefocus=True, length=70, variable=self.trace_length_max, command=self.cb_trace_length_max)
+                                                resolution=1, length=70, variable=self.trace_length_max, command=self.cb_trace_length_max)
                 scl_trace_length_max.set(self._trace_length_max)
                 scl_trace_length_max.pack(expand=True, fill=tk.X, side=tk.LEFT)
                 frm = frm.parent
@@ -438,7 +442,7 @@ class Gui:
 
                 self.meas_buf_max = tk.IntVar()
                 scl_meas_buf_max = tk.Scale(frm, orient=tk.HORIZONTAL, showvalue=False, from_=1, to=100, resolution=1,
-                                            takefocus=True, length=70, variable=self.meas_buf_max,
+                                            length=70, variable=self.meas_buf_max,
                                             command=self.cb_meas_buf_max)
                 scl_meas_buf_max.set(self._meas_buf_max)
                 scl_meas_buf_max.pack(expand=True, fill=tk.X, side=tk.LEFT)
@@ -652,6 +656,9 @@ class Gui:
         for sv in self._sv:
             sv.trace_length_max = self._trace_length_max
 
+        for sgv in self._sgv:
+            sgv.trace_length_max = self._trace_length_max
+
     def cb_meas_buf_max(self, _event):
         self._meas_buf_max = self.meas_buf_max.get()
         self.lbl_meas_buf_max_val.config(text=self._meas_buf_max)
@@ -742,6 +749,7 @@ class Gui:
         self._bv.draw()
         self._draw_vehicles()
         self._draw_sensors()
+        self._draw_sensors_groups()
 
     def _draw_vehicles(self):
         for vv in self._vv:
@@ -760,8 +768,13 @@ class Gui:
         for sv in self._sv:
             if sv.sensor.active:
                 sv.draw(draw_meas=self.draw_meas.get(),
-                        vehicles=[self._vv[v].vehicle for v in range(len(self._vv))],
-                        draw_meas_filtered=self.draw_meas_filtered.get())
+                        vehicles=[self._vv[v].vehicle for v in range(len(self._vv))])
+
+    def _draw_sensors_groups(self):
+        for sgv in self._sgv:
+            if sgv.sensor_group.active:
+                sgv.draw(draw_meas_filtered=self.draw_meas_filtered.get(),
+                         vehicles=[self._vv[v].vehicle for v in range(len(self._vv))])
 
     def _cb_toggle_vehicle_active(self, variable, vehicle):
         vehicle.active = variable.get()
@@ -770,6 +783,13 @@ class Gui:
     def _cb_toggle_sensor_active(self, variable, sensor):
         sensor.active = variable.get()
         self.draw()
+
+    def _get_sensor_visu_from_sensor(self, sensor):
+        for sv in self._sv:
+            if sv.sensor is sensor:
+                return sv
+
+        return None
 
     def step(self):
         draw = False
@@ -780,16 +800,23 @@ class Gui:
 
             # Visualization in canvas
             # -----------------------
-            vv.add_cur_vals_to_traces()
+            vv.add_cur_vals_to_traces()  # add_cur_vals_to_traces in base class?
             draw = True
         # end for
 
-        # for sv in self._sv:
-        #     # Visualization in canvas
-        #     # -----------------------
-        #     sv.add_cur_vals_to_traces()
-        #     draw = True
-        # # end for
+        for sv in self._sv:
+            # Visualization in canvas
+            # -----------------------
+            sv.add_cur_vals_to_traces()
+            draw = True
+        # end for
+
+        for sgv in self._sgv:
+            # Visualization in canvas
+            # -----------------------
+            sgv.add_cur_vals_to_traces()
+            draw = True
+        # end for
 
         # Update gui elements with current values
         for vv in self._vv:
@@ -810,19 +837,21 @@ class Gui:
         # end for
 
         # Make sensor measurements
-        for sv in self._sv:
-            s = sv.sensor
+        for sgv in self._sgv:
+            if sgv.sensor_group.trigger(self._t):
 
-            if self._t >= s.last_meas_time + s.meas_interval:
-                s.last_meas_time += s.meas_interval  # Don't loose the modulo rest
-
+                results = []
                 for vv in self._vv:
                     v = vv.vehicle
-                    s.measure(v)
+                    results.append(sgv.sensor_group.measure(v))
                 # end for
 
-                sv.add_cur_vals_to_traces()
+                for s in sgv.sensor_group.sensors:
+                    sv = self._get_sensor_visu_from_sensor(s)
 
+                    if sv is not None:
+                        sv.add_cur_vals_to_traces()
+                # end for
                 draw = True
             # end if
         # end if
@@ -837,7 +866,7 @@ class Gui:
         self._vv.append(VehicleVisu(v, self.canvas, trace_length_max=self._trace_length_max, **kwargs))  # Vehicle visu
         var = tk.BooleanVar()
         chk = tk.Checkbutton(self.scf_vehicle.frame, text=v.name, variable=var,
-                             command=lambda variable=var, vehicle=v:self._cb_toggle_vehicle_active(variable, vehicle))
+                             command=lambda variable=var, vehicle=v: self._cb_toggle_vehicle_active(variable, vehicle))
         if v.active:
             chk.select()
 
@@ -849,12 +878,16 @@ class Gui:
         self._sv.append(SensorVisu(s, self.canvas, trace_length_max=self._trace_length_max, meas_buf_max=self._meas_buf_max, **kwargs))  # Sensor visu
         var = tk.BooleanVar()
         chk = tk.Checkbutton(self.scf_sensor.frame, text=s.name, variable=var,
-                             command=lambda variable=var, sensor=s:self._cb_toggle_sensor_active(variable, sensor))
+                             command=lambda variable=var, sensor=s: self._cb_toggle_sensor_active(variable, sensor))
         if s.active:
             chk.select()
+
         chk.pack(anchor=tk.W)
         self.scf_sensor.update()
         self.draw()
+
+    def add_sensor_group(self, sg, **kwargs):
+        self._sgv.append(SensorGroupVisu(sg, self.canvas, trace_length_max=self._trace_length_max, **kwargs))  # Sensor group visu
 
     # This function accepts a callback, since it's not possible to run tkinter in a non-main thread,
     # but we want to handle inputs from the console

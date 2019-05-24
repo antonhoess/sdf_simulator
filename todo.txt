@@ -1,5 +1,5 @@
 INFO:
-*Drawing the last trace line segment and the arrow separate is impossible, since in cases where the line segments are very short, even previous segments are visible beyond the tip af the arrow
+* Drawing the last trace line segment and the arrow separate is impossible, since in cases where the line segments are very short, even previous segments are visible beyond the tip af the arrow
 
 TODO:
 * Check, if it makes sense to use canvas-functions as xview(), xview_scroll(), canvasx() and it's y-counterparts - probalby they are only interesting, if all items stay on the canvas and not when deleting all items in each cycle.
@@ -24,5 +24,19 @@ TODO:
   * Sampling points
   * Draw covariance ellipse
   * Calculate Q of the Kalman filter
-
-sensor group einführen - erzwingen, indem erst eine group erstellt und dann ein oder mehrere sensoren hinzugefügt werden muss, oder lose gekoppelt? ersteres ist sicherlich nicht verkehrt, wenn der fall mit einem Sensor leicht bleibt
+* Introduce a sensor group class which contains one or more sensors.
+  * The sensor group acts as a trigger for all contained sensors.
+  * The sensors itself will loose their measurement interval property, since this will be moves to the sensor group.
+  * The sensor group will trigger the measurements and handle the results of the individual sensors as a single one, according to the selected mode (arithmetic or geometric mean).
+  * Check, if it makes sense, to allow a sensor to be added to multiple groups.
+* Add event for mouse scroll (and for the horizontal scrolling using the Shift modifier key) on the scroll_frame.
+* Strictly separate logic and gui - use callback/hooks?
+* Are R1 and R2 really HomogeniousTriggeredSensorGroup? What if we have a group of inhomogeneous sensors, how to set the covariance matrix for each sensor, since it got removed? Try to unify this.
+* Explicitly add a vehicle to a sensor, instead of waiting until it get's measured the first time? Which one is better?
+* Implement exercises 4* and 5*.
+* Create a class derived from the Kalman filter which initializes it?
+* In KalmanFilterFactory.get_kalman_filter() use kwargs to allow setting several parameters
+* Fix syntax warning on the derived frunctions from Sensor.measure().
+* The arrow of the trace with the Kalman filtered measurements is most of the time not visible - fix it! Should be somewhere in BaseVisu.
+* Finish implementing Radar.measure and in general the whole Radar class.
+* Treat the sensor mwasurement and the kalman filter result in a separate class suitable for the used sensor. In general put all code related to a sensor type in the class where the sensor is defined.

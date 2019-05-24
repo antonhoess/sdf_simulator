@@ -37,21 +37,21 @@ class KalmanFilter:
         self.P = np.dot(self.F, np.dot(self.P, self.F.T)) + self.Q
 
     def filter(self, z):
-        # Compute innovation ν
-        ν = z - np.dot(self.H, self.x)
+        # Compute innovation y
+        y = z - np.dot(self.H, self.x)
 
         # Compute residual covariance matrix S
         S = np.dot(self.H, np.dot(self.P, self.H.T)) + self.R
 
         # Compute Kalman gain matrix the Kalman gain matrix tells us how strongly to correct each dimension of the
         # predicted state vector by the help of the measurement
-        W = np.dot(self.P, np.dot(self.H.T, np.linalg.pinv(S)))
+        K = np.dot(self.P, np.dot(self.H.T, np.linalg.pinv(S)))
 
         # Correct previously predicted new state vector
-        self.x = self.x + np.dot(W, ν)
+        self.x = self.x + np.dot(K, y)
 
         # Update uncertainty covariance matrix
-        self.P = self.P - np.dot(W, np.dot(self.H, self.P))
+        self.P = self.P - np.dot(K, np.dot(self.H, self.P))
 
     # Returns the current estimated state vector x, may it be after the predict() or
     # after the correct_by_measurement() step

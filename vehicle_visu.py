@@ -1,9 +1,12 @@
 import tkinter as tk
-from base_visu import BaseVisu
+from base_visu import BaseVisu, TraceVisu
 
 
-class VehicleVisu:
+class VehicleVisu(BaseVisu, TraceVisu):
     def __init__(self, vehicle, canvas, color=None, trace_length_max=10):
+        BaseVisu.__init__(self, canvas)
+        TraceVisu.__init__(self, trace_length_max)
+
         self.vehicle = vehicle
         self.canvas = canvas
         self.color = color
@@ -26,20 +29,13 @@ class VehicleVisu:
         self.add_cur_acc_times_tangent_to_trace()
         self.add_cur_acc_times_normal_to_trace()
 
-    # Update trace array
-    def add_cur_val_to_trace(self, trace, val):
-        trace.append(val)
-
-        while len(trace) > self.trace_length_max:  # Limit trace array length
-            trace.pop(0)
-
     # Update pos trace array
     def add_cur_pos_to_trace(self):
         self.add_cur_val_to_trace(self._trace_pos, self.vehicle.r)
 
     # Update vel trace array
     def add_cur_vel_to_trace(self):
-        self.add_cur_val_to_trace(self._trace_vel, self.vehicle.rd * 20.0)
+        self.add_cur_val_to_trace(self._trace_vel, self.vehicle.rd * 20.0)  # XXX Make these scale factors parameters
 
     # Update acc trace array
     def add_cur_acc_to_trace(self):
@@ -131,9 +127,6 @@ class VehicleVisu:
                                         width=2.0, capstyle=tk.ROUND, fill="#000000", arrow=tk.LAST)
             # end if
         # end if
-
-    def clear(self):
-        self.canvas.delete(tk.ALL)
 
     def _reset_traces(self):
         self._trace_pos.clear()

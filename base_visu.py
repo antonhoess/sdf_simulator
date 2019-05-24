@@ -26,6 +26,7 @@ class BaseVisu:
     @staticmethod
     def draw_trace(canvas, trace, draw_arrow=True, proj_dim=0, proj_scale=1., fill_format="#000000", color="black", trace_length_max=100, **kwargs):
         num_steps = len(trace)
+
         for step in range(1, num_steps):
             x = step / float(trace_length_max - 1)
 
@@ -53,8 +54,20 @@ class BaseVisu:
                 p1 = p1 * np.asarray([0., 1.]) + np.asarray([step * proj_scale, 0.])
 
             canvas.create_line(p0[0],
-                                    p0[1],
-                                    p1[0],
-                                    p1[1],
-                                    fill=fill, capstyle=capstyle, arrow=arrow, **kwargs)
+                               p0[1],
+                               p1[0],
+                               p1[1],
+                               fill=fill, capstyle=capstyle, arrow=arrow, **kwargs)
         # end for
+
+
+class TraceVisu:
+    def __init__(self, trace_length_max=10):
+        self.trace_length_max = trace_length_max
+
+    # Update trace array
+    def add_cur_val_to_trace(self, trace, val):
+        trace.append(val)
+
+        while len(trace) > self.trace_length_max:  # Limit trace array length
+            trace.pop(0)

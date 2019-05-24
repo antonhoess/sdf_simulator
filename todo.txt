@@ -40,3 +40,6 @@ TODO:
 * The arrow of the trace with the Kalman filtered measurements is most of the time not visible - fix it! Should be somewhere in BaseVisu.
 * Finish implementing Radar.measure and in general the whole Radar class.
 * Treat the sensor mwasurement and the kalman filter result in a separate class suitable for the used sensor. In general put all code related to a sensor type in the class where the sensor is defined.
+* Only allow scrolling h/v in the ScaleCanvas, if the scrollbar is visible (set a flag).
+* Avoid the list to be scrolled, when the mouse scrolls somewhere on the application (e.g. over the canvas).
+* Check, why the vehicle list does not scroll.

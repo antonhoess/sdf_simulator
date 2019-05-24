@@ -2,7 +2,7 @@ import tkinter as tk
 import numpy as np
 
 
-class ScalableCanvas(tk.Canvas):
+class ScaleCanvas(tk.Canvas):
 
     # scale_ratio = width / height
     def __init__(self, widget, scale_factor=1.0, scale_ratio=None, invert_y=False,

@@ -45,6 +45,14 @@ class ScrollFrame:
 
         self.frame.bind("<Configure>", self.reset_scrollregion)
 
+        master.bind_all("<MouseWheel>", self.cb_mouse_wheel_vertical)  # With Windows OS
+        master.bind_all('<Button-4>', self.cb_mouse_wheel_vertical)  # With Linux OS
+        master.bind_all('<Button-5>', self.cb_mouse_wheel_vertical)  # "
+
+        master.bind_all("<Shift-MouseWheel>", self.cb_mouse_wheel_horizontal)  # With Windows OS
+        master.bind_all('<Shift-Button-4>', self.cb_mouse_wheel_horizontal)  # With Linux OS
+        master.bind_all('<Shift-Button-5>', self.cb_mouse_wheel_horizontal)  # "
+
     def update(self):
         self.canvas.create_window(0, 0, anchor=tk.NW, window=self.frame)
         self.frame.update_idletasks()
@@ -66,3 +74,23 @@ class ScrollFrame:
 
     def reset_scrollregion(self, _event):
         self.canvas.configure(scrollregion=self.canvas.bbox(tk.ALL))
+
+    def cb_mouse_wheel(self, event, ver):
+        # Respond to Linux or Windows wheel event
+        if event.num == 4:
+            event.delta = 120
+
+        elif event.num == 5:
+            event.delta = -120
+
+        if ver:
+            self.canvas.yview_scroll(int(-1 * (event.delta / 120)), tk.UNITS)
+        else:
+            self.canvas.xview_scroll(int(-1 * (event.delta / 120)), tk.UNITS)
+
+    def cb_mouse_wheel_vertical(self, event):
+        self.cb_mouse_wheel(event, ver=True)
+
+    def cb_mouse_wheel_horizontal(self, event):
+        self.cb_mouse_wheel(event, ver=False)
+

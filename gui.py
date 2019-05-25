@@ -629,6 +629,9 @@ class Gui:
         for sv in range(len(self._sv)):
             self._sv[sv].cov_ell_cnt = cnt
 
+        for sgv in range(len(self._sgv)):
+            self._sgv[sgv].cov_ell_cnt = cnt
+
         self.lbl_cov_ell_cnt_val.config(text=cnt)
 
         self.draw()

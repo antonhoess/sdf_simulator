@@ -28,10 +28,15 @@ class ISensorMeasure(abc.ABC):
         self.meas_interval = meas_interval
         self.cov_mat = cov_mat
 
+        self.cov_mat_draw = True
         self.measurements = {}
         self.last_meas_time = 0.
 
+    def set_meas_interval(self, meas_interval):
+        self.meas_interval = meas_interval
+
     def set_cov_mat(self, cov_mat):
+        self.cov_mat_draw = False
         self.cov_mat = cov_mat
 
     def trigger(self, t):
@@ -107,11 +112,13 @@ class Plane(ISensor, ISensorMeasure):
         return meas
 
 
-# class Radar(Sensor):
-#     def __init__(self, name, active, pos):
-#         super().__init__(name, active, pos)
-#
-#     def measure(self, vehicle, cov_mat, *args, **kwargs):
+class Radar(ISensor, ISensorMeasure):
+    def __init__(self, name, active, pos, meas_interval, cov_mat):
+        ISensor.__init__(self, name, active, pos)
+        ISensorMeasure.__init__(self, meas_interval, cov_mat)
+
+    def measure(self, vehicle, **kwargs):
+         pass
 #         # Measure azimuth and range
 #         theta = self.calc_rotation_angle(vehicle)
 #         R = self.calc_rotation_matrix_2d(theta)

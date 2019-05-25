@@ -1,13 +1,15 @@
 from kalman_filter_factory import *
 from sensor import *
 import numpy as np
-import abc
 
 
 class _SensorGroup:
     def __init__(self, name, sensors):
         self.name = name
         self.sensors = sensors
+
+    def __str__(self):
+        return self.name
 
     @property
     def active(self):
@@ -23,13 +25,14 @@ class _SensorGroup:
 
 
 class HomogeneousTriggeredSensorGroup(ISensorMeasure, _SensorGroup):
-    def __init__(self, name, sensors, meas_interval, cov_mat=None):
+    def __init__(self, name, sensors, meas_interval=None, cov_mat=None):
         ISensorMeasure.__init__(self, meas_interval, cov_mat)
         _SensorGroup.__init__(self, name, sensors)
 
         self.kalman_filter = {}
 
         for sensor in sensors:
+            sensor.set_meas_interval(self.meas_interval)
             sensor.set_cov_mat(self.cov_mat)
 
     def __str__(self):
@@ -63,4 +66,5 @@ class HomogeneousTriggeredSensorGroup(ISensorMeasure, _SensorGroup):
 
     def add_sensor(self, sensor):
         _SensorGroup.add_sensor(sensor)
+        sensor.set_meas_interval(self.meas_interval)
         sensor.set_cov_mat(self.cov_mat)

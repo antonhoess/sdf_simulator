@@ -1,6 +1,7 @@
 import tkinter as tk
 import numpy as np
 import abc
+from sensor import *
 
 
 class BaseVisu:
@@ -61,6 +62,22 @@ class BaseVisu:
                                fill=fill, capstyle=capstyle, arrow=arrow, **kwargs)
         # end for
 
+    def draw_cov_mat_ell(self, vehicle, cov_mat, cov_ell_cnt, fill, orient=False):
+        # The covariance ellipses
+        if vehicle.active and cov_ell_cnt > 0:
+            theta = ISensor.calc_rotation_angle(vehicle) if orient else 0
+
+            # Calculate values for drawing the cov ellipse
+            cov_r_theta, cov_r_r1, cov_r_r2 = ISensor.calc_cov_ell_params_2d(np.asarray(cov_mat))
+            cov_r_theta += theta
+
+            for sigma in range(1, cov_ell_cnt + 1):
+                self.canvas.create_oval_rotated(vehicle.r[0], vehicle.r[1], cov_r_r1 * sigma, cov_r_r2 * sigma,
+                                                cov_r_theta, n_segments=20, fill="", width=3, outline="black")
+                self.canvas.create_oval_rotated(vehicle.r[0], vehicle.r[1], cov_r_r1 * sigma, cov_r_r2 * sigma,
+                                                cov_r_theta, n_segments=20, fill="", width=1, outline=fill)
+            # end for
+        # end if
 
 class TraceVisu(abc.ABC):
     def __init__(self, trace_length_max=10):

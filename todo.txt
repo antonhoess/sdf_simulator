@@ -16,9 +16,7 @@ TODO:
 * Don't set fixed initial values for dynamic labels, but try to use invoke() instead.
 * Add further settings for vehicles and/or sensors in a context menu or separate window when clicking on the sensor box.
 * Make a combobox list widget derived from the ScrollFrame and use it for the vehicle and sensor list.
-* Add all exercises from the 4th lecture.
 * Check, if it makes sense to make a separate class that connects the vehicles ans sensor/measurements and connect them directly at the program startup (or when adding a vehicle or sensor).
-* Add multiple sensors in different locations and join their measurements with their arithmetic and their geometric average.
 * Create a function, that rotates (in dependence of the angle between the sensor and the vehicle) a covariance matrix und rotate the base covariance matrices on each measurement once and store the result in a new variable and use this variable for all further steps:
   * Sampling points
   * Draw covariance ellipse
@@ -37,6 +35,5 @@ TODO:
 * Adapt the SensorVisu ans SensorGroupVisu to the new interfaces in a way that allows to handle stand alone sensors the same way as sensor groups.
 * Implement the first way of calculating KalmanFilter.join_measurements().
 * Think about renaming and changing the SensorGroup to something with Kalman filter.
-* Avoid drawing the covariance matrix several times for the sensors of a homogeneous sensor group.
 * Try to restructure HomogeneousTriggeredSensorGroup e.g. to SensorGroup with parameters homogeneous and triggered to unify it in one place.
 * Correctly implement SensorVisu.calc_rotation_angle(), since it makes sense for radar, but not for plane.

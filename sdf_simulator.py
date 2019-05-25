@@ -48,11 +48,11 @@ if __name__ == "__main__":
     sensors = []
 
     for i in range(len(radar_positions)):
-        radar = Plane("R3 KF Test #{:03d}".format(i), True, np.asarray([radar_positions[i]["r_x"], radar_positions[i]["r_y"]]), meas_interval=5., cov_mat=None)
+        radar = Plane("R3 KF Test #{:03d}".format(i), True, np.asarray([radar_positions[i]["r_x"], radar_positions[i]["r_y"]]), meas_interval=None, cov_mat=None)
         gui.add_sensor(radar, fill="violet", outline="black", radius=1000, n_sides=5, rot_offset=math.pi / 5,
                        font_size_scale=0.1)
         sensors.append(radar)
     # end for
-    gui.add_sensor_group(HomogeneousTriggeredSensorGroup("Multi Group", sensors, 5., cov_mat=np.identity(2) * sigma_c ** 2), fill="pink")
+    gui.add_sensor_group(HomogeneousTriggeredSensorGroup("Multi Group", sensors, meas_interval=5., cov_mat=np.identity(2) * sigma_c ** 2), fill="pink")
 
     gui.run(cb_main_loop=cb_main_loop)

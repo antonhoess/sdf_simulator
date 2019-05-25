@@ -2,6 +2,7 @@ import tkinter as tk
 import math
 import numpy as np
 from base_visu import *
+from sensor import *
 
 
 class SensorVisu(BaseVisu, TraceVisu):
@@ -57,7 +58,7 @@ class SensorVisu(BaseVisu, TraceVisu):
             # end if
         # end for
 
-        if vehicle is not None:
+        if vehicle is not None and isinstance(self.sensor, Radar):
             angle = self.sensor.calc_rotation_angle(vehicle)  # Look to the first vehicle
         else:
             angle = 0.
@@ -89,20 +90,8 @@ class SensorVisu(BaseVisu, TraceVisu):
         # For each vehicle draw the measurement information
         for vehicle in vehicles:
             # The covariance ellipses
-            if vehicle.active and self.cov_ell_cnt > 0:
-                #theta = self.sensor.calc_rotation_angle(vehicle)
-
-                # Calculate values for drawing the cov ellipse
-                cov_r_theta, cov_r_r1, cov_r_r2 = self.sensor.calc_cov_ell_params_2d(np.asarray(self.sensor.cov_mat))
-                cov_r_theta += 0#theta
-
-                for sigma in range(1, self.cov_ell_cnt + 1):
-                    self.canvas.create_oval_rotated(vehicle.r[0], vehicle.r[1], cov_r_r1 * sigma, cov_r_r2 * sigma,
-                                                    cov_r_theta, n_segments=20, fill="", width=3, outline="black")
-                    self.canvas.create_oval_rotated(vehicle.r[0], vehicle.r[1], cov_r_r1 * sigma, cov_r_r2 * sigma,
-                                                    cov_r_theta, n_segments=20, fill="", width=1, outline=self.fill)
-                # end for
-            # end if
+            if self.sensor.cov_mat_draw:
+                self.draw_cov_mat_ell(vehicle, self.sensor.cov_mat, self.cov_ell_cnt, self.fill, orient=False)
 
             # The sensor's measurements
             measurements = []

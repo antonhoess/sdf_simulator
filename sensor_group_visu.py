@@ -9,6 +9,7 @@ class SensorGroupVisu(BaseVisu, TraceVisu):
         self.sensor_group = sensor_group
         self.canvas = canvas
         self.fill = fill
+        self.cov_ell_cnt = 0
 
         self._trace_pos_filtered = {}
 
@@ -28,6 +29,13 @@ class SensorGroupVisu(BaseVisu, TraceVisu):
     def draw(self, draw_meas_filtered=True, vehicles=None):
         if not isinstance(vehicles, list):
             vehicles = [vehicles]
+
+        # For each vehicle draw the measurement information
+        for vehicle in vehicles:
+            # The covariance ellipses
+            if self.sensor_group.cov_mat_draw:
+                self.draw_cov_mat_ell(vehicle, self.sensor_group.cov_mat, self.cov_ell_cnt, self.fill, orient=False)
+        # end for
 
         # For each vehicle draw the Kalman filtered measurement information
         if draw_meas_filtered:

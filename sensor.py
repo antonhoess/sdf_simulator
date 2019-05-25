@@ -34,7 +34,7 @@ class ISensorMeasure(abc.ABC):
         self.measurements = {}
 
     @abc.abstractmethod
-    def measure(self, vehicle, *kargs, **kwargs):
+    def measure(self, vehicle, **kwargs):
         pass
 
     def append_measurement(self, meas):
@@ -90,29 +90,34 @@ class StandAloneSensor(ISensor, ISensorMeasure, ISensorCovMat):
         ISensorMeasure.__init__(self)
         ISensorCovMat.__init__(self, cov_mat)
 
+
 class GroupSensor(ISensor, ISensorMeasure):
     def __init__(self, name, active, pos):
         ISensor.__init__(self, name, active, pos)
         ISensorMeasure.__init__(self)
+
+    @abc.abstractmethod
+    def measure(self, vehicle, **kwargs):
+        pass
 
 
 class Plane(GroupSensor):
     def __init__(self, name, active, pos):
         GroupSensor.__init__(self, name, active, pos)
 
-
-    def measure(self, vehicle, cov_mat, *kargs, **kwargs):
+    def measure(self, vehicle, cov_mat=0, **kwargs):
         # Measure position
         meas = np.random.multivariate_normal(vehicle.r, cov_mat, 1)[0]
         self.append_measurement(PlaneMeasurement(vehicle, meas))
 
         return meas
 
+
 class StandAlonePlane(StandAloneSensor):
     def __init__(self, name, active, pos, cov_mat):
         StandAloneSensor.__init__(self, name, active, pos, cov_mat)
 
-    def measure(self, vehicle, *kargs, **kwargs):
+    def measure(self, vehicle, *args, **kwargs):
         # Measure position
         meas = np.random.multivariate_normal(vehicle.r, self.cov_mat, 1)[0]
         self.append_measurement(PlaneMeasurement(vehicle, meas))
@@ -123,7 +128,7 @@ class StandAlonePlane(StandAloneSensor):
 #     def __init__(self, name, active, pos):
 #         super().__init__(name, active, pos)
 #
-#     def measure(self, vehicle, cov_mat, *kargs, **kwargs):
+#     def measure(self, vehicle, cov_mat, *args, **kwargs):
 #         # Measure azimuth and range
 #         theta = self.calc_rotation_angle(vehicle)
 #         R = self.calc_rotation_matrix_2d(theta)

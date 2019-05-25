@@ -36,7 +36,10 @@ class KalmanFilter:
         # Update uncertainty covariance matrix
         self.P = np.dot(self.F, np.dot(self.P, self.F.T)) + self.Q
 
-    def filter(self, z):
+    def filter(self, z, R=None):
+        if R is not None:
+            self.R = R
+
         # Compute innovation y
         y = z - np.dot(self.H, self.x)
 
@@ -45,7 +48,7 @@ class KalmanFilter:
 
         # Compute Kalman gain matrix the Kalman gain matrix tells us how strongly to correct each dimension of the
         # predicted state vector by the help of the measurement
-        K = np.dot(self.P, np.dot(self.H.T, np.linalg.pinv(S)))
+        K = np.dot(self.P, np.dot(self.H.T, np.linalg.inv(S)))
 
         # Correct previously predicted new state vector
         self.x = self.x + np.dot(K, y)
@@ -63,3 +66,24 @@ class KalmanFilter:
     # = uncertainty about this argument of the state vector
     def get_current_uncertainty(self):
         return self.P
+
+    @staticmethod
+    def join_measurements(R_z_list, mode=0):
+        if mode == 0:
+            if not isinstance(R_z_list, list):
+                R_z_list = [R_z_list]
+
+            # Calculate R and z
+            R_res = 0
+            z_res = 0
+
+            for R, z in R_z_list:
+                R_res += np.linalg.inv(R)
+                z_res += np.dot(np.linalg.inv(R), z)
+
+            R_res = np.linalg.inv(R_res)
+            z_res = np.dot(z_res, R_res)
+        else:  # if mode == 1
+            pass  # XXX
+
+        return R_res, z_res

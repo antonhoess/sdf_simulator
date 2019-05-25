@@ -48,7 +48,7 @@ if __name__ == "__main__":
                                                          cov_mat=np.asarray([[100000, 30000],
                                                                           [30000, 100000]])))
 
-    sigma_c = 5.e2  # m
+    sigma_c = 5.e3  # m
     radar_positions = [{"r_x": 0, "r_y": 0},
                        {"r_x": 10000, "r_y": -3000},
                        {"r_x": 5000, "r_y": 5000},

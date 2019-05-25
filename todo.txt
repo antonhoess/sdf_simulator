@@ -37,3 +37,4 @@ TODO:
 * The arrow of the trace with the Kalman filtered measurements is most of the time not visible - fix it! Should be somewhere in BaseVisu.
 * Finish implementing Radar.measure and in general the whole Radar class.
 * Treat the sensor measurement and the Kalman filter result in a separate class suitable for the used sensor. In general put all code related to a sensor type in the class where the sensor is defined.
+* Adapt the SensorVisu ans SensorGroupVisu to the new interfaces in a way that allows to handle stand alone sensors the same way as sensor groups.

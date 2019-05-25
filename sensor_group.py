@@ -1,4 +1,5 @@
 from kalman_filter_factory import *
+from sensor import *
 import numpy as np
 
 
@@ -35,15 +36,14 @@ class SensorGroupTrigger:
             return False
 
 
-class HomogeneousTriggeredSensorGroup(SensorGroup, SensorGroupTrigger):
-    def __init__(self, name, sensors, meas_interval, cov_r):
+class HomogeneousTriggeredSensorGroup(ISensorMeasure, ISensorCovMat, SensorGroup, SensorGroupTrigger):
+    def __init__(self, name, sensors, meas_interval, cov_mat):
+        ISensorMeasure.__init__(self)
+        ISensorCovMat.__init__(self, cov_mat)
         SensorGroup.__init__(self, name, sensors)
         SensorGroupTrigger.__init__(self, meas_interval)
 
-        self.cov_r = cov_r
-
         self.kalman_filter = {}
-        self.measurements = {}
 
     def __str__(self):
         return "{}: ∆T={:f}".format(self.name, self.meas_interval)
@@ -52,7 +52,7 @@ class HomogeneousTriggeredSensorGroup(SensorGroup, SensorGroupTrigger):
         meas_res = []
 
         for s in self.sensors:
-            meas_res.append(s.measure(vehicle, self.cov_r))
+            meas_res.append(s.measure(vehicle, self.cov_mat))
         # end for
 
         if vehicle not in self.measurements:
@@ -61,7 +61,7 @@ class HomogeneousTriggeredSensorGroup(SensorGroup, SensorGroupTrigger):
         if vehicle not in self.kalman_filter:
             self.kalman_filter[vehicle] \
                 = KalmanFilterFactory.get_kalman_filter(KalmanFilterType.PLANE_2D,
-                                                        self.meas_interval, self.cov_r,
+                                                        self.meas_interval, self.cov_mat,
                                                         vehicle.v_max / vehicle.q_max * 0.75,
                                                         x_init=np.asarray([10000, 10000, 150, 300, 0, 0]))
 

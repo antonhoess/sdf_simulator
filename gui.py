@@ -795,31 +795,6 @@ class Gui:
 
     def step(self):
         draw = False
-        # Update vehicle positions
-        for vv in self._vv:
-            v = vv.vehicle
-            v.update(self._t)
-
-            # Visualization in canvas
-            # -----------------------
-            vv.add_cur_vals_to_traces()  # add_cur_vals_to_traces in base class?
-            draw = True
-        # end for
-
-        for sv in self._sv:
-            # Visualization in canvas
-            # -----------------------
-            sv.add_cur_vals_to_traces()
-            draw = True
-        # end for
-
-        for sgv in self._sgv:
-            # Visualization in canvas
-            # -----------------------
-            sgv.add_cur_vals_to_traces()
-            draw = True
-        # end for
-
         # Update gui elements with current values
         for vv in self._vv:
             if vv.vehicle.active:
@@ -838,10 +813,27 @@ class Gui:
             # end if
         # end for
 
+        # Update vehicle positions
+        for vv in self._vv:
+            v = vv.vehicle
+            v.update(self._t)
+
+            # Visualization in canvas
+            # -----------------------
+            vv.add_cur_vals_to_traces()  # add_cur_vals_to_traces in base class?
+            draw = True
+        # end for
+
+        for sv in self._sv:
+            # Visualization in canvas
+            # -----------------------
+            sv.add_cur_vals_to_traces()
+            draw = True
+        # end for
+
         # Make sensor measurements
         for sgv in self._sgv:
             if sgv.sensor_group.trigger(self._t):
-
                 results = []
                 for vv in self._vv:
                     v = vv.vehicle
@@ -855,6 +847,13 @@ class Gui:
                         sv.add_cur_vals_to_traces()
                 # end for
                 draw = True
+
+                for sgv in self._sgv:
+                    # Visualization in canvas
+                    # -----------------------
+                    sgv.add_cur_vals_to_traces()
+                    draw = True
+                    # end for
             # end if
         # end if
 

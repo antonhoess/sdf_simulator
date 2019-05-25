@@ -1,9 +1,10 @@
 from kalman_filter_factory import *
 from sensor import *
 import numpy as np
+import abc
 
 
-class SensorGroup:
+class _SensorGroup:
     def __init__(self, name, sensors):
         self.name = name
         self.sensors = sensors
@@ -21,29 +22,15 @@ class SensorGroup:
         self.sensors.append(sensor)
 
 
-class SensorGroupTrigger:
-    def __init__(self, meas_interval):
-        self.meas_interval = meas_interval
-
-        self.last_meas_time = 0.
-
-    def trigger(self, t):
-        if t >= self.last_meas_time + self.meas_interval:
-            self.last_meas_time += self.meas_interval  # Don't loose the modulo rest
-
-            return True
-        else:
-            return False
-
-
-class HomogeneousTriggeredSensorGroup(ISensorMeasure, ISensorCovMat, SensorGroup, SensorGroupTrigger):
-    def __init__(self, name, sensors, meas_interval, cov_mat):
-        ISensorMeasure.__init__(self)
-        ISensorCovMat.__init__(self, cov_mat)
-        SensorGroup.__init__(self, name, sensors)
-        SensorGroupTrigger.__init__(self, meas_interval)
+class HomogeneousTriggeredSensorGroup(ISensorMeasure, _SensorGroup):
+    def __init__(self, name, sensors, meas_interval, cov_mat=None):
+        ISensorMeasure.__init__(self, meas_interval, cov_mat)
+        _SensorGroup.__init__(self, name, sensors)
 
         self.kalman_filter = {}
+
+        for sensor in sensors:
+            sensor.set_cov_mat(self.cov_mat)
 
     def __str__(self):
         return "{}: ∆T={:f}".format(self.name, self.meas_interval)
@@ -52,7 +39,7 @@ class HomogeneousTriggeredSensorGroup(ISensorMeasure, ISensorCovMat, SensorGroup
         meas_res = []
 
         for s in self.sensors:
-            meas_res.append((self.cov_mat, s.measure(vehicle, self.cov_mat)))
+            meas_res.append((self.cov_mat, s.measurements[vehicle][-1].val))
         # end for
 
         if vehicle not in self.measurements:
@@ -74,4 +61,6 @@ class HomogeneousTriggeredSensorGroup(ISensorMeasure, ISensorCovMat, SensorGroup
 
         self.measurements[vehicle].append(self.kalman_filter[vehicle].get_current_state_estimate())
 
-
+    def add_sensor(self, sensor):
+        _SensorGroup.add_sensor(sensor)
+        sensor.set_cov_mat(self.cov_mat)

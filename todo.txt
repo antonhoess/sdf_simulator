@@ -18,7 +18,6 @@ TODO:
 * Make a combobox list widget derived from the ScrollFrame and use it for the vehicle and sensor list.
 * Add all exercises from the 4th lecture.
 * Check, if it makes sense to make a separate class that connects the vehicles ans sensor/measurements and connect them directly at the program startup (or when adding a vehicle or sensor).
-+ Make the state vector of 6 instead of 2 dimensions
 * Add multiple sensors in different locations and join their measurements with their arithmetic and their geometric average.
 * Create a function, that rotates (in dependence of the angle between the sensor and the vehicle) a covariance matrix und rotate the base covariance matrices on each measurement once and store the result in a new variable and use this variable for all further steps:
   * Sampling points
@@ -30,10 +29,14 @@ TODO:
   * The sensor group will trigger the measurements and handle the results of the individual sensors as a single one, according to the selected mode (arithmetic or geometric mean).
   * Check, if it makes sense, to allow a sensor to be added to multiple groups.
 * Strictly separate logic and gui - use callback/hooks?
-* Are R1 and R2 really HomogeniousTriggeredSensorGroup? What if we have a group of inhomogeneous sensors, how to set the covariance matrix for each sensor, since it got removed? Try to unify this.
+* What if we have a group of inhomogeneous sensors, how to set the covariance matrix for each sensor? Try to unify this.
 * Explicitly add a vehicle to a sensor, instead of waiting until it get's measured the first time? Which one is better?
 * Implement exercises 4* and 5*.
-* Fix syntax warning on the derived functions from Sensor.measure().
 * Finish implementing Radar.measure and in general the whole Radar class.
 * Treat the sensor measurement and the Kalman filter result in a separate class suitable for the used sensor. In general put all code related to a sensor type in the class where the sensor is defined.
 * Adapt the SensorVisu ans SensorGroupVisu to the new interfaces in a way that allows to handle stand alone sensors the same way as sensor groups.
+* Implement the first way of calculating KalmanFilter.join_measurements().
+* Think about renaming and changing the SensorGroup to something with Kalman filter.
+* Avoid drawing the covariance matrix several times for the sensors of a homogeneous sensor group.
+* Try to restructure HomogeneousTriggeredSensorGroup e.g. to SensorGroup with parameters homogeneous and triggered to unify it in one place.
+* Correctly implement SensorVisu.calc_rotation_angle(), since it makes sense for radar, but not for plane.

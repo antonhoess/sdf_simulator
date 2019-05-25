@@ -817,43 +817,31 @@ class Gui:
         for vv in self._vv:
             v = vv.vehicle
             v.update(self._t)
-
-            # Visualization in canvas
-            # -----------------------
-            vv.add_cur_vals_to_traces()  # add_cur_vals_to_traces in base class?
+            vv.add_cur_vals_to_traces()
             draw = True
         # end for
 
+        # Update sensor measurements
         for sv in self._sv:
-            # Visualization in canvas
-            # -----------------------
-            sv.add_cur_vals_to_traces()
-            draw = True
-        # end for
-
-        # Make sensor measurements
-        for sgv in self._sgv:
-            if sgv.sensor_group.trigger(self._t):
-                results = []
+            if sv.sensor.trigger(self._t):
                 for vv in self._vv:
                     v = vv.vehicle
-                    results.append(sgv.sensor_group.measure(v))
-                # end for
-
-                for s in sgv.sensor_group.sensors:
-                    sv = self._get_sensor_visu_from_sensor(s)
-
-                    if sv is not None:
-                        sv.add_cur_vals_to_traces()
-                # end for
-                draw = True
-
-                for sgv in self._sgv:
-                    # Visualization in canvas
-                    # -----------------------
-                    sgv.add_cur_vals_to_traces()
+                    sv.sensor.measure(vehicle=v)
+                    sv.add_cur_vals_to_traces(vehicle=v)
                     draw = True
-                    # end for
+                # end for
+            # end if
+        # end for
+
+        # Make Kalman filtered measurements
+        for sgv in self._sgv:
+            if sgv.sensor_group.trigger(self._t):
+                for vv in self._vv:
+                    v = vv.vehicle
+                    sgv.sensor_group.measure(vehicle=v)
+                    sgv.add_cur_vals_to_traces(vehicle=v)
+                    draw = True
+                # end for
             # end if
         # end if
 
@@ -864,7 +852,7 @@ class Gui:
             self.draw()
 
     def add_vehicle(self, v, **kwargs):
-        self._vv.append(VehicleVisu(v, self.canvas, trace_length_max=self._trace_length_max, **kwargs))  # Vehicle visu
+        self._vv.append(VehicleVisu(v, self.canvas, trace_length_max=self._trace_length_max, **kwargs))
         var = tk.BooleanVar()
         chk = tk.Checkbutton(self.scf_vehicle.frame, text=v.name, variable=var,
                              command=lambda variable=var, vehicle=v: self._cb_toggle_vehicle_active(variable, vehicle))
@@ -877,7 +865,7 @@ class Gui:
         self.draw()
 
     def add_sensor(self, s, **kwargs):
-        self._sv.append(SensorVisu(s, self.canvas, trace_length_max=self._trace_length_max, meas_buf_max=self._meas_buf_max, **kwargs))  # Sensor visu
+        self._sv.append(SensorVisu(s, self.canvas, trace_length_max=self._trace_length_max, meas_buf_max=self._meas_buf_max, **kwargs))
         var = tk.BooleanVar()
         chk = tk.Checkbutton(self.scf_sensor.frame, text=s.name, variable=var,
                              command=lambda variable=var, sensor=s: self._cb_toggle_sensor_active(variable, sensor))
@@ -890,7 +878,7 @@ class Gui:
         self.draw()
 
     def add_sensor_group(self, sg, **kwargs):
-        self._sgv.append(SensorGroupVisu(sg, self.canvas, trace_length_max=self._trace_length_max, **kwargs))  # Sensor group visu
+        self._sgv.append(SensorGroupVisu(sg, self.canvas, trace_length_max=self._trace_length_max, **kwargs))
 
     # This function accepts a callback, since it's not possible to run tkinter in a non-main thread,
     # but we want to handle inputs from the console

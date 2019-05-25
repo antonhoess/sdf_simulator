@@ -6,32 +6,41 @@ import abc
 class Measurement:
     def __init__(self, vehicle):
         self.vehicle = vehicle
-        self.meas = []  # List of different measures, the sensor can measure (position, range, azimuth, etc.)
+        self.val = None  # List of different measures, the sensor can measure (position, range, azimuth, etc.)
 
 
 # A measurement in a rectangular 2D plane
 class PlaneMeasurement(Measurement):
     def __init__(self, vehicle, pos):
         super().__init__(vehicle)
-        self.meas = [pos]
+        self.val = pos
 
 
 # A measurement in polar coordinates
 class RadarMeasurement(Measurement):
     def __init__(self, vehicle, pos):
         super().__init__(vehicle)
-        self.meas = [pos]
-
-
-class ISensorCovMat:
-    def __init__(self, cov_mat):
-        self.cov_mat = cov_mat
-        #XXX hier evtl. eine set_cov_mat() funktion einbauen? diese könnte im konstruktor aufgerufen werden
+        self.val = pos
 
 
 class ISensorMeasure(abc.ABC):
-    def __init__(self):
+    def __init__(self, meas_interval, cov_mat):
+        self.meas_interval = meas_interval
+        self.cov_mat = cov_mat
+
         self.measurements = {}
+        self.last_meas_time = 0.
+
+    def set_cov_mat(self, cov_mat):
+        self.cov_mat = cov_mat
+
+    def trigger(self, t):
+        if t >= self.last_meas_time + self.meas_interval:
+            self.last_meas_time += self.meas_interval  # Don't loose the modulo rest
+
+            return True
+        else:
+            return False
 
     @abc.abstractmethod
     def measure(self, vehicle, **kwargs):
@@ -49,6 +58,7 @@ class ISensorMeasure(abc.ABC):
 
 class ISensor:
     def __init__(self, name, active, pos):
+
         self.name = name
         self.active = active
         self.pos = pos
@@ -84,45 +94,18 @@ class ISensor:
             return 0
 
 
-class StandAloneSensor(ISensor, ISensorMeasure, ISensorCovMat):
-    def __init__(self, name, active, pos, cov_mat):
+class Plane(ISensor, ISensorMeasure):
+    def __init__(self, name, active, pos, meas_interval, cov_mat):
         ISensor.__init__(self, name, active, pos)
-        ISensorMeasure.__init__(self)
-        ISensorCovMat.__init__(self, cov_mat)
+        ISensorMeasure.__init__(self, meas_interval, cov_mat)
 
-
-class GroupSensor(ISensor, ISensorMeasure):
-    def __init__(self, name, active, pos):
-        ISensor.__init__(self, name, active, pos)
-        ISensorMeasure.__init__(self)
-
-    @abc.abstractmethod
     def measure(self, vehicle, **kwargs):
-        pass
-
-
-class Plane(GroupSensor):
-    def __init__(self, name, active, pos):
-        GroupSensor.__init__(self, name, active, pos)
-
-    def measure(self, vehicle, cov_mat=0, **kwargs):
-        # Measure position
-        meas = np.random.multivariate_normal(vehicle.r, cov_mat, 1)[0]
-        self.append_measurement(PlaneMeasurement(vehicle, meas))
-
-        return meas
-
-
-class StandAlonePlane(StandAloneSensor):
-    def __init__(self, name, active, pos, cov_mat):
-        StandAloneSensor.__init__(self, name, active, pos, cov_mat)
-
-    def measure(self, vehicle, *args, **kwargs):
         # Measure position
         meas = np.random.multivariate_normal(vehicle.r, self.cov_mat, 1)[0]
         self.append_measurement(PlaneMeasurement(vehicle, meas))
 
         return meas
+
 
 # class Radar(Sensor):
 #     def __init__(self, name, active, pos):

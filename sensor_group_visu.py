@@ -1,4 +1,4 @@
-from base_visu import BaseVisu, TraceVisu
+from base_visu import *
 
 
 class SensorGroupVisu(BaseVisu, TraceVisu):
@@ -10,21 +10,17 @@ class SensorGroupVisu(BaseVisu, TraceVisu):
         self.canvas = canvas
         self.fill = fill
 
-        self.trace_length_max = trace_length_max
-
         self._trace_pos_filtered = {}
 
-    def add_cur_vals_to_traces(self):
-        self.add_cur_pos_filtered_to_trace()
+    def add_cur_vals_to_traces(self, vehicle):
+        self.add_cur_pos_filtered_to_trace(vehicle)
 
     # Update filtered pos trace array
-    def add_cur_pos_filtered_to_trace(self):
-        for vehicle in self.sensor_group.kalman_filter:
-            if vehicle not in self._trace_pos_filtered:
-                self._trace_pos_filtered[vehicle] = []
+    def add_cur_pos_filtered_to_trace(self, vehicle):
+        if vehicle not in self._trace_pos_filtered:
+            self._trace_pos_filtered[vehicle] = []
 
-            self.add_cur_val_to_trace(self._trace_pos_filtered[vehicle], self.sensor_group.kalman_filter[vehicle].get_current_state_estimate())
-        # end for
+        self.add_cur_val_to_trace(self._trace_pos_filtered[vehicle], self.sensor_group.measurements[vehicle][-1])
 
     def _draw_trace(self, trace, draw_arrow=True, fill_format="#000000", **kwargs):
         BaseVisu.draw_trace(self.canvas, trace=trace, draw_arrow=draw_arrow, fill_format=fill_format, color=self.fill, trace_length_max=self.trace_length_max, **kwargs)

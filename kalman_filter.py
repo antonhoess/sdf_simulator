@@ -68,8 +68,13 @@ class KalmanFilter:
         return self.P
 
     @staticmethod
-    def join_measurements(R_z_list, mode=0):
+    def join_measurements(R_z_list, mode=1):
+        R_res = None
+        z_res = None
+
         if mode == 0:
+            pass
+        else:  # if mode == 1
             if not isinstance(R_z_list, list):
                 R_z_list = [R_z_list]
 
@@ -83,7 +88,6 @@ class KalmanFilter:
 
             R_res = np.linalg.inv(R_res)
             z_res = np.dot(z_res, R_res)
-        else:  # if mode == 1
-            pass  # XXX
+        # end if
 
         return R_res, z_res

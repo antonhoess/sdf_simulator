@@ -48,11 +48,11 @@ class HomogeneousTriggeredSensorGroup(ISensorMeasure, ISensorCovMat, SensorGroup
     def __str__(self):
         return "{}: ∆T={:f}".format(self.name, self.meas_interval)
 
-    def measure(self, vehicle):
+    def measure(self, vehicle, **kwargs):
         meas_res = []
 
         for s in self.sensors:
-            meas_res.append(s.measure(vehicle, self.cov_mat))
+            meas_res.append((self.cov_mat, s.measure(vehicle, self.cov_mat)))
         # end for
 
         if vehicle not in self.measurements:
@@ -67,6 +67,11 @@ class HomogeneousTriggeredSensorGroup(ISensorMeasure, ISensorCovMat, SensorGroup
 
         # Add filtered position measurement to the measurement list
         self.kalman_filter[vehicle].predict(u=np.zeros(6))
-        self.kalman_filter[vehicle].filter(z=np.mean(meas_res, axis=0))
+
+        R, z = KalmanFilter.join_measurements(meas_res)
+
+        self.kalman_filter[vehicle].filter(z=z, R=R)
 
         self.measurements[vehicle].append(self.kalman_filter[vehicle].get_current_state_estimate())
+
+

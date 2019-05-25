@@ -33,11 +33,10 @@ class SensorGroupVisu(BaseVisu, TraceVisu):
         if not isinstance(vehicles, list):
             vehicles = [vehicles]
 
-        # For each vehicle draw the kalman filtered measurement informations
+        # For each vehicle draw the Kalman filtered measurement information
         if draw_meas_filtered:
             for vehicle in self._trace_pos_filtered:
                 if vehicle in vehicles and vehicle.active:
-                    print(len(self._trace_pos_filtered[vehicle]))
                     self._draw_trace(self._trace_pos_filtered[vehicle], draw_arrow=True, fill_format="#000000",
                                      width=1.0)
                 # end if

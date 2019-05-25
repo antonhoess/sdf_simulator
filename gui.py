@@ -870,8 +870,6 @@ class Gui:
         chk = tk.Checkbutton(self.scf_vehicle.frame, text=v.name, variable=var,
                              command=lambda variable=var, vehicle=v: self._cb_toggle_vehicle_active(variable, vehicle))
 
-        self.scf_vehicle.bind_mouse_wheel_event(chk)
-
         if v.active:
             chk.select()
 
@@ -884,8 +882,6 @@ class Gui:
         var = tk.BooleanVar()
         chk = tk.Checkbutton(self.scf_sensor.frame, text=s.name, variable=var,
                              command=lambda variable=var, sensor=s: self._cb_toggle_sensor_active(variable, sensor))
-
-        self.scf_sensor.bind_mouse_wheel_event(chk)
 
         if s.active:
             chk.select()

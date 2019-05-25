@@ -34,6 +34,8 @@ class ScrollFrame:
     tag_name = "scroll_frame"
 
     def __init__(self, master, max_width=0, max_height=0, **kwargs):
+        self.master = master
+
         self.max_width = max_width
         self.max_height = max_height
 
@@ -50,8 +52,8 @@ class ScrollFrame:
         self.hscrollbar.config(command=self.canvas.xview)
 
         # Make the canvas expandable
-        master.grid_rowconfigure(0, weight=1)
-        master.grid_columnconfigure(0, weight=1)
+        self.master.grid_rowconfigure(0, weight=1)
+        self.master.grid_columnconfigure(0, weight=1)
 
         # Create frame inside canvas
         self.frame = tk.Frame(self.canvas)
@@ -60,7 +62,7 @@ class ScrollFrame:
 
         self.frame.bind('<Configure>', self.reset_scrollregion)
 
-        self.bind_mouse_wheel_event(master)
+        self.bind_mouse_wheel_event(self.master)
 
     def bind_mouse_wheel_event(self, master):
         self.bind_tree(master, '<MouseWheel>', self.cb_mouse_wheel_vertical)  # With Windows OS
@@ -79,6 +81,8 @@ class ScrollFrame:
             self.bind_tree(child, event, callback, add)
 
     def update(self):
+        self.bind_mouse_wheel_event(self.master)
+
         self.canvas.create_window(0, 0, anchor=tk.NW, window=self.frame)
         self.frame.update_idletasks()
         self.canvas.config(scrollregion=self.canvas.bbox(tk.ALL))

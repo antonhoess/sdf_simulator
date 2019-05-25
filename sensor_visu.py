@@ -1,12 +1,13 @@
 import tkinter as tk
 import math
 import numpy as np
-from base_visu import BaseVisu
+from base_visu import *
 
 
-class SensorVisu(BaseVisu):
+class SensorVisu(BaseVisu, TraceVisu):
     def __init__(self, sensor, canvas, fill=None, outline=None, radius=2500, n_sides=4, rot_offset=math.pi/4, font_size_scale=1., trace_length_max=10, meas_buf_max=100):
-        super().__init__(canvas)
+        BaseVisu.__init__(self, canvas)
+        TraceVisu.__init__(self, trace_length_max)
 
         self.sensor = sensor
         self.canvas = canvas
@@ -17,14 +18,20 @@ class SensorVisu(BaseVisu):
         self._n_sides = n_sides
         self._rot_offset = rot_offset
         self._font_size_scale = font_size_scale
-        self.trace_length_max = trace_length_max
         self.meas_buf_max = meas_buf_max
         self.cov_ell_cnt = 0
 
-        self._trace_pos_filtered = {}
+        self._trace_pos = {}
 
-    def add_cur_vals_to_traces(self):
-        pass
+    def add_cur_vals_to_traces(self, vehicle=None):
+        self.add_cur_pos_to_trace(vehicle)
+
+    # Update filtered pos trace array
+    def add_cur_pos_to_trace(self, vehicle):
+        if vehicle not in self._trace_pos:
+            self._trace_pos[vehicle] = []
+
+        self.add_cur_val_to_trace(self._trace_pos[vehicle], self.sensor.measurements[vehicle][-1])
 
     def _draw_trace(self, trace, draw_arrow=True, fill_format="#000000", **kwargs):
         BaseVisu.draw_trace(self.canvas, trace=trace, draw_arrow=draw_arrow, fill_format=fill_format, color=self.fill, trace_length_max=self.trace_length_max, **kwargs)
@@ -83,11 +90,11 @@ class SensorVisu(BaseVisu):
         for vehicle in vehicles:
             # The covariance ellipses
             if vehicle.active and self.cov_ell_cnt > 0:
-                theta = self.sensor.calc_rotation_angle(vehicle)
+                #theta = self.sensor.calc_rotation_angle(vehicle)
 
                 # Calculate values for drawing the cov ellipse
-                cov_r_theta, cov_r_r1, cov_r_r2 = self.sensor.calc_cov_ell_params_2d(np.asarray(self.sensor.cov_r))
-                cov_r_theta += theta
+                cov_r_theta, cov_r_r1, cov_r_r2 = self.sensor.calc_cov_ell_params_2d(np.asarray(self.sensor.cov_mat))
+                cov_r_theta += 0#theta
 
                 for sigma in range(1, self.cov_ell_cnt + 1):
                     self.canvas.create_oval_rotated(vehicle.r[0], vehicle.r[1], cov_r_r1 * sigma, cov_r_r2 * sigma,
@@ -111,23 +118,23 @@ class SensorVisu(BaseVisu):
                         continue
 
                     if x_style == 0:  # Point
-                        self.canvas.create_oval(meas.r[0], meas.r[1], meas.r[0], meas.r[1], width=5, outline="black")
-                        self.canvas.create_oval(meas.r[0], meas.r[1], meas.r[0], meas.r[1], width=3, outline=self.fill)
+                        self.canvas.create_oval(meas.val[0], meas.val[1], meas.val[0], meas.val[1], width=5, outline="black")
+                        self.canvas.create_oval(meas.val[0], meas.val[1], meas.val[0], meas.val[1], width=3, outline=self.fill)
                     elif x_style == 1:  # \ + /
                         x = 100
-                        self.canvas.create_line(meas.r[0] - x, meas.r[1] - x, meas.r[0] + x, meas.r[1] + x, width=3,
+                        self.canvas.create_line(meas.val[0] - x, meas.val[1] - x, meas.val[0] + x, meas.val[1] + x, width=3,
                                                 fill="black")
-                        self.canvas.create_line(meas.r[0] - x, meas.r[1] + x, meas.r[0] + x, meas.r[1] - x, width=3,
+                        self.canvas.create_line(meas.val[0] - x, meas.val[1] + x, meas.val[0] + x, meas.val[1] - x, width=3,
                                                 fill="black")
 
-                        self.canvas.create_line(meas.r[0] - x, meas.r[1] - x, meas.r[0] + x, meas.r[1] + x, width=1,
+                        self.canvas.create_line(meas.val[0] - x, meas.val[1] - x, meas.val[0] + x, meas.val[1] + x, width=1,
                                                 fill=self.fill)
-                        self.canvas.create_line(meas.r[0] - x, meas.r[1] + x, meas.r[0] + x, meas.r[1] - x, width=1,
+                        self.canvas.create_line(meas.val[0] - x, meas.val[1] + x, meas.val[0] + x, meas.val[1] - x, width=1,
                                                 fill=self.fill)
                     else:  # ❌
-                        self.canvas.create_text(meas.r[0], meas.r[1], text="❌", anchor=tk.CENTER, font=(None, 12),
+                        self.canvas.create_text(meas.val[0], meas.val[1], text="❌", anchor=tk.CENTER, font=(None, 12),
                                                 fill="black")
-                        self.canvas.create_text(meas.r[0], meas.r[1], text="❌", anchor=tk.CENTER, font=(None, 8),
+                        self.canvas.create_text(meas.val[0], meas.val[1], text="❌", anchor=tk.CENTER, font=(None, 8),
                                                 fill=self.fill)
                     # end if
                 # end for

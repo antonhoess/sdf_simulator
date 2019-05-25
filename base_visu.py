@@ -1,5 +1,6 @@
 import tkinter as tk
 import numpy as np
+import abc
 
 
 class BaseVisu:
@@ -61,7 +62,7 @@ class BaseVisu:
         # end for
 
 
-class TraceVisu:
+class TraceVisu(abc.ABC):
     def __init__(self, trace_length_max=10):
         self.trace_length_max = trace_length_max
 
@@ -71,3 +72,7 @@ class TraceVisu:
 
         while len(trace) > self.trace_length_max:  # Limit trace array length
             trace.pop(0)
+
+    @abc.abstractmethod
+    def add_cur_vals_to_traces(self, **kwargs):
+        pass

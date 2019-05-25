@@ -26,29 +26,18 @@ if __name__ == "__main__":
     gui.add_vehicle(vehicle2, color="red")
 
     # Add radars
-    # radar = Plane("R1", False, np.asarray([3000, 8000]))
-    #
-    # gui.add_sensor(radar, fill="orange", outline="white", radius=3500, n_sides=3, rot_offset=math.pi, font_size_scale=1.2)
-    # gui.add_sensor_group(HomogeneousTriggeredSensorGroup("Group 1", [radar], 5.,
-    #                                                      cov_mat=np.asarray([[100000, 80000],
-    #                                                                       [80000, 100000]])))
-    #
-    # radar = Plane("R2", False, np.asarray([-9000, -5000]))
-    #
-    # gui.add_sensor(radar, fill="lightblue", outline="black", radius=2500, n_sides=4, rot_offset=math.pi/4, font_size_scale=1.0)
-    # gui.add_sensor_group(HomogeneousTriggeredSensorGroup("Group 2", [radar], 5.,
-    #                                                      cov_mat=np.asarray([[100000, 30000],
-    #                                                                       [30000, 100000]])))
+    radar = Plane("R1", False, np.asarray([3000, 8000]), cov_mat=np.asarray([[100000, 80000],
+                                                                            [80000, 100000]]), meas_interval=3.0)
 
-    radar = StandAlonePlane("R2", False, np.asarray([-9000, -5000]), cov_mat=np.asarray([[100000, 30000],
-                                                                          [30000, 100000]]))
-#XXX auch für visu ein einheitliches interface bauen
+    gui.add_sensor(radar, fill="orange", outline="white", radius=3500, n_sides=3, rot_offset=math.pi, font_size_scale=1.2)
+
+    radar = Plane("R2", False, np.asarray([-9000, -5000]), cov_mat=np.asarray([[100000, 30000],
+                                                                              [30000, 100000]]), meas_interval=5.0)
+
     gui.add_sensor(radar, fill="lightblue", outline="black", radius=2500, n_sides=4, rot_offset=math.pi/4, font_size_scale=1.0)
-    gui.add_sensor_group(HomogeneousTriggeredSensorGroup("Group 2", [radar], 5.,
-                                                         cov_mat=np.asarray([[100000, 30000],
-                                                                          [30000, 100000]])))
+    # gui.add_sensor_group(HomogeneousTriggeredSensorGroup("Group 2", radar, 5., cov_mat=None), fill="pink")
 
-    sigma_c = 5.e3  # m
+    sigma_c = 5.e2  # m
     radar_positions = [{"r_x": 0, "r_y": 0},
                        {"r_x": 10000, "r_y": -3000},
                        {"r_x": 5000, "r_y": 5000},
@@ -59,7 +48,7 @@ if __name__ == "__main__":
     sensors = []
 
     for i in range(len(radar_positions)):
-        radar = Plane("R3 KF Test #{:03d}".format(i), True, np.asarray([radar_positions[i]["r_x"], radar_positions[i]["r_y"]]))
+        radar = Plane("R3 KF Test #{:03d}".format(i), True, np.asarray([radar_positions[i]["r_x"], radar_positions[i]["r_y"]]), meas_interval=5., cov_mat=None)
         gui.add_sensor(radar, fill="violet", outline="black", radius=1000, n_sides=5, rot_offset=math.pi / 5,
                        font_size_scale=0.1)
         sensors.append(radar)

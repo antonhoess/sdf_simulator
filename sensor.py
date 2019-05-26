@@ -15,12 +15,28 @@ class PlaneMeasurement(Measurement):
         super().__init__(vehicle)
         self.val = pos
 
+    @property
+    def x(self):
+        return self.val[0]
+
+    @property
+    def y(self):
+        return self.val[1]
+
 
 # A measurement in polar coordinates
 class RadarMeasurement(Measurement):
     def __init__(self, vehicle, pos):
         super().__init__(vehicle)
         self.val = pos
+
+    @property
+    def rad(self):
+        return self.val[0]
+
+    @property
+    def phi(self):
+        return self.val[1]
 
 
 class ISensorMeasure(abc.ABC):
@@ -109,8 +125,6 @@ class Plane(ISensor, ISensorMeasure):
         meas = np.random.multivariate_normal(vehicle.r, self.cov_mat, 1)[0]
         self.append_measurement(PlaneMeasurement(vehicle, meas))
 
-        return meas
-
 
 class Radar(ISensor, ISensorMeasure):
     def __init__(self, name, active, pos, meas_interval, cov_mat):
@@ -118,9 +132,5 @@ class Radar(ISensor, ISensorMeasure):
         ISensorMeasure.__init__(self, meas_interval, cov_mat)
 
     def measure(self, vehicle, **kwargs):
-         pass
-#         # Measure azimuth and range
-#         theta = self.calc_rotation_angle(vehicle)
-#         R = self.calc_rotation_matrix_2d(theta)
-#         # meas_res = np.dot(R, np.random.multivariate_normal(vehicle.r, cov_r, 1)[0])
-#         # ...
+        meas = np.random.multivariate_normal(vehicle.r, self.cov_mat, 1)[0]
+        self.append_measurement(RadarMeasurement(vehicle, meas))

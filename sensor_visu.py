@@ -6,7 +6,7 @@ from sensor import *
 
 
 class SensorVisu(BaseVisu, TraceVisu):
-    def __init__(self, sensor, canvas, fill=None, outline=None, radius=2500, n_sides=4, rot_offset=math.pi/4, font_size_scale=1., trace_length_max=10, meas_buf_max=100):
+    def __init__(self, sensor, canvas, fill=None, outline=None, radius=2500, n_sides=4, rot_offset=None, font_size_scale=1., trace_length_max=10, meas_buf_max=100):
         BaseVisu.__init__(self, canvas)
         TraceVisu.__init__(self, trace_length_max)
 
@@ -17,7 +17,14 @@ class SensorVisu(BaseVisu, TraceVisu):
 
         self._radius = radius
         self._n_sides = n_sides
-        self._rot_offset = rot_offset
+        if rot_offset is None:
+            if n_sides % 2 == 1:
+                self._rot_offset = math.pi / 2
+            else:
+                self._rot_offset = math.pi / 2 + math.pi / n_sides
+        else:
+            self._rot_offset = rot_offset
+
         self._font_size_scale = font_size_scale
         self.meas_buf_max = meas_buf_max
         self.cov_ell_cnt = 0
@@ -91,7 +98,7 @@ class SensorVisu(BaseVisu, TraceVisu):
         for vehicle in vehicles:
             # The covariance ellipses
             if self.sensor.cov_mat_draw:
-                self.draw_cov_mat_ell(vehicle, self.sensor.cov_mat, self.cov_ell_cnt, self.fill, orient=False)
+                self.draw_cov_mat_ell(self.sensor, vehicle, self.sensor.cov_mat, self.cov_ell_cnt, self.fill, orient=isinstance(self.sensor, Radar))
 
             # The sensor's measurements
             measurements = []

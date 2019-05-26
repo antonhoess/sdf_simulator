@@ -34,7 +34,7 @@ class SensorGroupVisu(BaseVisu, TraceVisu):
         for vehicle in vehicles:
             # The covariance ellipses
             if self.sensor_group.cov_mat_draw:
-                self.draw_cov_mat_ell(vehicle, self.sensor_group.cov_mat, self.cov_ell_cnt, self.fill, orient=False)
+                self.draw_cov_mat_ell(None, vehicle, self.sensor_group.cov_mat, self.cov_ell_cnt, self.fill, orient=False)
         # end for
 
         # For each vehicle draw the Kalman filtered measurement information

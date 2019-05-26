@@ -37,3 +37,5 @@ TODO:
 * Think about renaming and changing the SensorGroup to something with Kalman filter.
 * Try to restructure HomogeneousTriggeredSensorGroup e.g. to SensorGroup with parameters homogeneous and triggered to unify it in one place.
 * Correctly implement SensorVisu.calc_rotation_angle(), since it makes sense for radar, but not for plane.
+* ? In BaseVisu.draw_cov_mat_ell() correct the adaptation of the covariance matrix ellipsis. Generally introduce a function that transforms polar coordinates to cartesian coordinates and apply this function. It will also be useful in other places, where this transformation is necessary.
+* In Radar.measure() two coordinate systems are mixed - check it.

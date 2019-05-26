@@ -4,16 +4,15 @@ import abc
 
 
 class Measurement:
-    def __init__(self, vehicle):
+    def __init__(self, vehicle, pos):
         self.vehicle = vehicle
-        self.val = None  # List of different measures, the sensor can measure (position, range, azimuth, etc.)
+        self.val = pos  # XXX List of different measures, the sensor can measure (position, range, azimuth, etc.)
 
 
 # A measurement in a rectangular 2D plane
 class PlaneMeasurement(Measurement):
     def __init__(self, vehicle, pos):
-        super().__init__(vehicle)
-        self.val = pos
+        super().__init__(vehicle, pos)
 
     @property
     def x(self):
@@ -27,11 +26,10 @@ class PlaneMeasurement(Measurement):
 # A measurement in polar coordinates
 class RadarMeasurement(Measurement):
     def __init__(self, vehicle, pos):
-        super().__init__(vehicle)
-        self.val = pos
+        super().__init__(vehicle, pos)
 
     @property
-    def rad(self):
+    def rho(self):
         return self.val[0]
 
     @property

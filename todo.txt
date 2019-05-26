@@ -39,3 +39,15 @@ TODO:
 * Correctly implement SensorVisu.calc_rotation_angle(), since it makes sense for radar, but not for plane.
 * ? In BaseVisu.draw_cov_mat_ell() correct the adaptation of the covariance matrix ellipsis. Generally introduce a function that transforms polar coordinates to cartesian coordinates and apply this function. It will also be useful in other places, where this transformation is necessary.
 * In Radar.measure() two coordinate systems are mixed - check it.
+* For Radar and for Plane adjust the calculation so that the sensor only measures the relative position between the vehicle and itself and adds/handles its position afterwards.
+* Rename KalmanFilter to ExtendedKalmanFilter? Or derive it or make the KalmanFilter a special Version of the ExtendedKalmanFilter. Update its description.
+* Is it possible to prepare f, h, F and H in/as a functions (given in the constructor of the EKF) that only gets passed the current state as parameters?
+* Place the following code in the right location:
+    def h(self, pos):
+        x = pos[0]
+        y = pos[1]
+
+        rho = np.linalg.norm(pos)
+        phi = np.arctan2(y, x)
+
+        return np.asarray([])

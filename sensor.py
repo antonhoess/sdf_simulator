@@ -3,16 +3,21 @@ import math
 import abc
 
 
-class Measurement:
-    def __init__(self, vehicle, pos):
+class Measurement(abc.ABC):
+    def __init__(self, vehicle, meas, sensor_pos):
         self.vehicle = vehicle
-        self.val = pos  # XXX List of different measures, the sensor can measure (position, range, azimuth, etc.)
+        self.val = meas
+        self.sensor_pos = sensor_pos
+
+    @abc.abstractmethod
+    def get_abs_cartesian(self):
+        pass
 
 
 # A measurement in a rectangular 2D plane
 class PlaneMeasurement(Measurement):
-    def __init__(self, vehicle, pos):
-        super().__init__(vehicle, pos)
+    def __init__(self, vehicle, meas, sensor_pos):
+        super().__init__(vehicle, meas, sensor_pos)
 
     @property
     def x(self):
@@ -22,11 +27,14 @@ class PlaneMeasurement(Measurement):
     def y(self):
         return self.val[1]
 
+    def get_abs_cartesian(self):
+        return self.val + self.sensor_pos
+
 
 # A measurement in polar coordinates
 class RadarMeasurement(Measurement):
-    def __init__(self, vehicle, pos):
-        super().__init__(vehicle, pos)
+    def __init__(self, vehicle, meas, pos):
+        super().__init__(vehicle, meas, pos)
 
     @property
     def rho(self):
@@ -35,6 +43,9 @@ class RadarMeasurement(Measurement):
     @property
     def phi(self):
         return self.val[1]
+
+    def get_abs_cartesian(self):
+        return self.rho * np.asarray([math.cos(self.phi), math.sin(self.phi)]) + self.sensor_pos
 
 
 class ISensorMeasure(abc.ABC):
@@ -120,8 +131,9 @@ class Plane(ISensor, ISensorMeasure):
 
     def measure(self, vehicle, **kwargs):
         # Measure position
-        meas = np.random.multivariate_normal(vehicle.r, self.cov_mat, 1)[0]
-        self.append_measurement(PlaneMeasurement(vehicle, meas))
+        meas = np.random.multivariate_normal(np.asarray([0, 0]), self.cov_mat, 1)[0]
+        meas += vehicle.r - self.pos
+        self.append_measurement(PlaneMeasurement(vehicle, meas, self.pos))
 
 
 class Radar(ISensor, ISensorMeasure):
@@ -130,5 +142,6 @@ class Radar(ISensor, ISensorMeasure):
         ISensorMeasure.__init__(self, meas_interval, cov_mat)
 
     def measure(self, vehicle, **kwargs):
-        meas = np.random.multivariate_normal(vehicle.r, self.cov_mat, 1)[0]
-        self.append_measurement(RadarMeasurement(vehicle, meas))
+        meas = np.random.multivariate_normal(np.asarray([0, 0]), self.cov_mat, 1)[0]
+        meas += np.asarray([np.linalg.norm(vehicle.r - self.pos), self.calc_rotation_angle(vehicle)])
+        self.append_measurement(RadarMeasurement(vehicle, meas, self.pos))

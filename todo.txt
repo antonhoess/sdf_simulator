@@ -21,12 +21,7 @@ TODO:
   * Sampling points
   * Draw covariance ellipse
   * Calculate Q of the Kalman filter
-* Introduce a sensor group class which contains one or more sensors.
-  * The sensor group acts as a trigger for all contained sensors.
-  * The sensors itself will loose their measurement interval property, since this will be moves to the sensor group.
-  * The sensor group will trigger the measurements and handle the results of the individual sensors as a single one, according to the selected mode (arithmetic or geometric mean).
-  * Check, if it makes sense, to allow a sensor to be added to multiple groups.
-* Strictly separate logic and gui - use callback/hooks?
+* Strictly separate logic and gui? Use callback/hooks?
 * What if we have a group of inhomogeneous sensors, how to set the covariance matrix for each sensor? Try to unify this.
 * Explicitly add a vehicle to a sensor, instead of waiting until it get's measured the first time? Which one is better?
 * Implement exercises 4* and 5*.
@@ -40,14 +35,7 @@ TODO:
 * ? In BaseVisu.draw_cov_mat_ell() correct the adaptation of the covariance matrix ellipsis. Generally introduce a function that transforms polar coordinates to cartesian coordinates and apply this function. It will also be useful in other places, where this transformation is necessary.
 * In Radar.measure() two coordinate systems are mixed - check it.
 * For Radar and for Plane adjust the calculation so that the sensor only measures the relative position between the vehicle and itself and adds/handles its position afterwards.
-* Rename KalmanFilter to ExtendedKalmanFilter? Or derive it or make the KalmanFilter a special Version of the ExtendedKalmanFilter. Update its description.
-* Is it possible to prepare f, h, F and H in/as a functions (given in the constructor of the EKF) that only gets passed the current state as parameters?
-* Place the following code in the right location:
-    def h(self, pos):
-        x = pos[0]
-        y = pos[1]
-
-        rho = np.linalg.norm(pos)
-        phi = np.arctan2(y, x)
-
-        return np.asarray([])
+* Make Measurement.val a list of different measures, the sensor can measure (position, range, azimuth, etc.)?
+* For the dara also add the orientation of the sensor as an attribute and correctly apply it in all calculation. The reason is, that we cannot just assume, that all radars are adjusted to the same direction
+* HomogeneousTriggeredSensorGroup.measure() is not correctly implemented, since joining multiple radar measurements (polar coordinates) from different positions dies not work that way.
+* KalmanFilterFactory.get_kalman_filter() in case filter_type == KalmanFilterType.POLAR_2D implement the Jacobi matrix instead of returning the fixed fake matrix.

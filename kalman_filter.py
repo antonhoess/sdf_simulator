@@ -1,8 +1,8 @@
 import numpy as np
 
 
-class KalmanFilter:
-    def __init__(self, x_init, P_init, F, B, Q, H, R):
+class EKF:
+    def __init__(self, x_init, P_init, F, B, Q, H, R, cb_f=None, cb_F=None, cb_h=None, cb_H=None):
         """ Constructor of the The N-dimensional Kalman filter
 
         Parameters:
@@ -18,6 +18,7 @@ class KalmanFilter:
         An initialized Kalman filter object which can be used for further filtering.
         """
 
+        # KF
         self.x = x_init
         self.P = P_init
         self.F = F
@@ -26,34 +27,46 @@ class KalmanFilter:
         self.H = H
         self.R = R
 
+        # EKF
+        self.f = cb_f
+        self.cb_F = cb_F
+        self.h = cb_h
+        self.cb_H = cb_H
+
+        if bool(self.f is None) != bool(self.cb_F is None):
+            raise ValueError("cb_f() and cb_F() need to be set both or none of them.")
+
+        if bool(self.h is None) != bool(self.cb_H is None):
+            raise ValueError("cb_h() and cb_H() need to be set both or none of them.")
+
     # Predicts the new state vector x using the transition matrix F and the specified control vector u and updates the
     # uncertainty covariance
     # Matrix F embodies our knowledge about the system dynamics
-    def predict(self, u, F=None, f=None):
-        if F is not None:
-            self.F = F
-
+    def predict(self, u):
         # Predict new state
-        if f is None:
+        if self.f is None:
             self.x = np.dot(self.F, self.x) + np.dot(self.B, u)
         else:
-            self.x = f(self.x) + np.dot(self.B, u)
+            self.x = self.f(self.x) + np.dot(self.B, u)
+
+        if self.cb_F is not None:
+            self.F = self.cb_F(self.x)
 
         # Update uncertainty covariance matrix
         self.P = np.dot(self.F, np.dot(self.P, self.F.T)) + self.Q
 
-    def filter(self, z, R=None, H=None, h=None):
+    def filter(self, z, R=None):
         if R is not None:
             self.R = R
 
-        if H is not None:
-            self.H = H
-
         # Compute innovation y
-        if h is None:
+        if self.h is None:
             y = z - np.dot(self.H, self.x)
         else:
-            y = z - h(self.x)
+            y = z - self.h(self.x)
+
+        if self.cb_H is not None:
+            self.H = self.cb_H(self.x)
 
         # Compute residual covariance matrix S
         S = np.dot(self.H, np.dot(self.P, self.H.T)) + self.R
@@ -103,3 +116,8 @@ class KalmanFilter:
         # end if
 
         return R_res, z_res
+
+
+class KF(EKF):
+    def __init__(self, x_init, P_init, F, B, Q, H, R):
+        EKF.__init__(self, x_init, P_init, F, B, Q, H, R)

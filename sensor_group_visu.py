@@ -21,7 +21,7 @@ class SensorGroupVisu(BaseVisu, TraceVisu):
         if vehicle not in self._trace_pos_filtered:
             self._trace_pos_filtered[vehicle] = []
 
-        self.add_cur_val_to_trace(self._trace_pos_filtered[vehicle], self.sensor_group.measurements[vehicle][-1])
+        self.add_cur_val_to_trace(self._trace_pos_filtered[vehicle], self.sensor_group.measurements[vehicle][-1].get_abs_cartesian())
 
     def _draw_trace(self, trace, draw_arrow=True, fill_format="#000000", **kwargs):
         BaseVisu.draw_trace(self.canvas, trace=trace, draw_arrow=draw_arrow, fill_format=fill_format, color=self.fill, trace_length_max=self.trace_length_max, **kwargs)

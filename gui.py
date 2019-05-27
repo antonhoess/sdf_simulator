@@ -77,6 +77,9 @@ class Gui:
         self._move_origin = [-1, -1]
         self._move_origin_canvas = [-1, -1]
 
+        self.canvas_width = 1
+        self.canvas_height = 1
+
         # Place GUI elements
         self.master = tk.Tk()
         self.master.title("SDF Simulator")
@@ -564,6 +567,12 @@ class Gui:
         self.draw()
 
     def cb_canvas_configure(self, _event):
+        self.canvas.set_offset((self.canvas.winfo_width() / self.canvas_width) * self.canvas.offset_x,
+                               (self.canvas.winfo_height() / self.canvas_height) * self.canvas.offset_y)
+
+        self.canvas_width = self.canvas.winfo_width()
+        self.canvas_height = self.canvas.winfo_height()
+
         self.draw()
 
     def update_zoom_label(self):

@@ -8,7 +8,6 @@ TODO:
 * scalable_canvas.py: Try to unify the two functions that scale coordinates (for creating drawing elements and for the scaled motion event) - attention: the order of multiplication and addition is changed and the mathematical inverse operator is used except for the invert_y.
 * scalable_canvas.py: Instead of get_* and set_* use real getters and setters or remove the existing ones, if they are not really needed - also adapt function to return tuples for x and y instead of separate functions.
 * Put more comments in the code.
-* On the ScalableCanvas <Configure> event the objects can even move out of the window then changing the window size - this seems only to happen when the object got moved away from the origin before.
 * How to handle the scale factors (10000., etc.) in vehicle_visu, especially when changing the velocity and acceleration or when adding further vehicles with different parameters.
 * Test, if by choosing the element nearest to the mouse pointer on the canvas and keeping track of the association of the line segment, etc. to the vehicle/sensor, it is possible to select e.g. a sensor and interaxt with it (e.g. show a list of the recent measurements)
 * Check, if complex numbers or a self defined type or tuples might make things easier with the (x, y) pairs. See http://effbot.org/zone/tkinter-complex-canvas.htm.

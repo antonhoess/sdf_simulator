@@ -326,7 +326,7 @@ class Gui:
                     frm_proj_scale.pack(fill=tk.X, side=tk.TOP, padx=5)
                     lbl_proj_scale = tk.Label(frm_proj_scale, text="Proj. Scale", width=9, anchor=tk.W)
                     lbl_proj_scale.pack(fill=tk.X, side=tk.LEFT)
-                    self.lbl_proj_scale_val = tk.Label(frm_proj_scale, text="", bg="white", anchor=tk.E)
+                    self.lbl_proj_scale_val = tk.Label(frm_proj_scale, bg="white", anchor=tk.E)
                     self.lbl_proj_scale_val.pack(expand=True, fill=tk.X, side=tk.LEFT)
 
                     self.proj_scale = tk.IntVar()
@@ -351,7 +351,7 @@ class Gui:
                 frm.pack(fill=tk.X, side=tk.TOP)
                 lbl_cov_ell_cnt = tk.Label(frm, text="# Cov. Ell.:", width=9, anchor=tk.W)
                 lbl_cov_ell_cnt.pack(fill=tk.X, side=tk.LEFT)
-                self.lbl_cov_ell_cnt_val = tk.Label(frm, text="", bg="white", anchor=tk.E)
+                self.lbl_cov_ell_cnt_val = tk.Label(frm, bg="white", anchor=tk.E)
                 self.lbl_cov_ell_cnt_val.pack(expand=True, fill=tk.X, side=tk.LEFT)
 
                 self.cov_ell_cnt = tk.IntVar()
@@ -370,7 +370,7 @@ class Gui:
 
                 lbl_zoom = tk.Label(frm, text="Zoom [%]:", width=9, anchor=tk.W)
                 lbl_zoom.pack(fill=tk.X, side=tk.LEFT)
-                self.lbl_zoom_val = tk.Label(frm, text="{:.2f}".format(1. * 100.), bg="white", anchor=tk.E)
+                self.lbl_zoom_val = tk.Label(frm, bg="white", anchor=tk.E)
                 self.lbl_zoom_val.pack(expand=True, fill=tk.X, side=tk.LEFT)
 
                 btn_zoom_out = tk.Button(frm, text="-", bg="lightblue", width=2)
@@ -390,7 +390,7 @@ class Gui:
                 frm.pack(fill=tk.X, side=tk.TOP)
                 lbl_time_incr = tk.Label(frm, text="Time incr.:", width=9, anchor=tk.W)
                 lbl_time_incr.pack(fill=tk.X, side=tk.LEFT)
-                self.lbl_time_incr_val = tk.Label(frm, text="1.0", bg="white", anchor=tk.E)
+                self.lbl_time_incr_val = tk.Label(frm, bg="white", anchor=tk.E)
                 self.lbl_time_incr_val.pack(expand=True, fill=tk.X, side=tk.LEFT)
 
                 self.time_incr = tk.DoubleVar()
@@ -405,7 +405,7 @@ class Gui:
                 frm.pack(fill=tk.X, side=tk.TOP)
                 lbl_time_tick = tk.Label(frm, text="Time tick. [s]:", width=11, anchor=tk.W)
                 lbl_time_tick.pack(fill=tk.X, side=tk.LEFT)
-                self.lbl_time_tick_val = tk.Label(frm, text="0.00", bg="white", anchor=tk.E)
+                self.lbl_time_tick_val = tk.Label(frm, bg="white", anchor=tk.E)
                 self.lbl_time_tick_val.pack(expand=True, fill=tk.X, side=tk.LEFT)
 
                 self.time_tick = tk.DoubleVar()
@@ -422,7 +422,7 @@ class Gui:
                 frm.pack(fill=tk.X, side=tk.TOP)
                 lbl_trace_length_max = tk.Label(frm, text="Trace len. max.:", anchor=tk.W)
                 lbl_trace_length_max.pack(fill=tk.X, side=tk.LEFT)
-                self.lbl_trace_length_max_val = tk.Label(frm, text="100", bg="white", width=4, anchor=tk.E)
+                self.lbl_trace_length_max_val = tk.Label(frm, bg="white", width=4, anchor=tk.E)
                 self.lbl_trace_length_max_val.pack(expand=True, fill=tk.X, side=tk.LEFT)
 
                 self.trace_length_max = tk.IntVar()
@@ -437,7 +437,7 @@ class Gui:
                 frm.pack(fill=tk.X, side=tk.TOP)
                 lbl_meas_buf_max = tk.Label(frm, text="Meas. cnt.:", anchor=tk.W)
                 lbl_meas_buf_max.pack(fill=tk.X, side=tk.LEFT)
-                self.lbl_meas_buf_max_val = tk.Label(frm, text="100", bg="white", width=4, anchor=tk.E)
+                self.lbl_meas_buf_max_val = tk.Label(frm, bg="white", width=4, anchor=tk.E)
                 self.lbl_meas_buf_max_val.pack(expand=True, fill=tk.X, side=tk.LEFT)
 
                 self.meas_buf_max = tk.IntVar()
@@ -462,7 +462,7 @@ class Gui:
                     frm.pack(fill=tk.X)
                     self.frm_vehicle_settings_content = frm
 
-                    self.scf_vehicle = ScrollFrame(self.frm_vehicle_settings_content, max_width=200, max_height=20)
+                    self.scf_vehicle = ScrollFrame(self.frm_vehicle_settings_content, max_width=200, max_height=50)
                     self.scf_vehicle.update()
 
                     frm = frm.parent
@@ -483,7 +483,7 @@ class Gui:
                     frm.pack(fill=tk.X)
                     self.frm_sensor_settings_content = frm
 
-                    self.scf_sensor = ScrollFrame(self.frm_sensor_settings_content, max_width=200, max_height=100)
+                    self.scf_sensor = ScrollFrame(self.frm_sensor_settings_content, max_width=200)
                     self.scf_sensor.update()
 
                     frm = frm.parent
@@ -527,6 +527,8 @@ class Gui:
 
         self._bv = BaseVisu(self.canvas)
         self._gui_inited = True
+
+        self.update_zoom_label()
 
     # Play / pause button
     def cb_play_pause(self, _event=None):

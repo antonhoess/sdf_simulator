@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import messagebox
 from base_visu import BaseVisu
 from vehicle_visu import VehicleVisu
 from sensor_visu import SensorVisu
@@ -60,6 +61,7 @@ class Gui:
 
         self._gui_inited = False
         self._is_running = False
+        self._exited = False
 
         self._play = False
         self._enter_command = False
@@ -78,6 +80,12 @@ class Gui:
         # Place GUI elements
         self.master = tk.Tk()
         self.master.title("SDF Simulator")
+
+        def ask_quit():
+            if tk.messagebox.askokcancel("Quit", "Are you sure, you want to quit now?"):
+                self._exited = True
+
+        self.master.protocol("WM_DELETE_WINDOW", ask_quit)
 
         root = tk.Frame(self.master)
         root.pack(expand=True, fill=tk.BOTH)
@@ -892,7 +900,7 @@ class Gui:
             if auto_play:
                 self.cb_play_pause()
 
-            while True:
+            while not self._exited:
                 start = time.time()
 
                 if self._play:

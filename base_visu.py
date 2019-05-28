@@ -29,38 +29,53 @@ class BaseVisu:
     def draw_trace(canvas, trace, draw_arrow=True, proj_dim=0, proj_scale=1., fill_format="#000000", color="black", trace_length_max=100, **kwargs):
         num_steps = len(trace)
 
-        for step in range(1, num_steps):
-            x = step / float(trace_length_max - 1)
+        if num_steps > 1:
+            p0 = None
+            p1 = None
+            fill = None
 
-            fill = fill_format.format(int(x * 255), int((1 - x) * 255))
+            arrow = None
+            capstyle = tk.ROUND
 
-            if draw_arrow and step == num_steps - 1:
+            for step in range(1, num_steps):
+                x = step / float(trace_length_max - 1)
+
+                fill = fill_format.format(int(x * 255), int((1 - x) * 255))
+
+                p0 = trace[step - 1]
+                p1 = trace[step]
+
+                if proj_dim == 1:
+                    p0 = p0 * np.asarray([1., 0.]) + np.asarray([0., (step - 1) * proj_scale])
+                    p1 = p1 * np.asarray([1., 0.]) + np.asarray([0., step * proj_scale])
+
+                elif proj_dim == 2:
+                    p0 = p0 * np.asarray([0., 1.]) + np.asarray([(step - 1) * proj_scale, 0.])
+                    p1 = p1 * np.asarray([0., 1.]) + np.asarray([step * proj_scale, 0.])
+
+                canvas.create_line(p0[0],
+                                   p0[1],
+                                   p1[0],
+                                   p1[1],
+                                   fill=fill, capstyle=capstyle, arrow=arrow, **kwargs)
+            # end for
+
+            if draw_arrow:
                 arrow = tk.LAST
                 capstyle = None
 
                 if color is not None:
                     fill = color
-            else:
-                arrow = None
-                capstyle = tk.ROUND
 
-            p0 = trace[step - 1]
-            p1 = trace[step]
+                p0 = p1 - (p1 - p0) * 1.e-10
 
-            if proj_dim == 1:
-                p0 = p0 * np.asarray([1., 0.]) + np.asarray([0., (step - 1) * proj_scale])
-                p1 = p1 * np.asarray([1., 0.]) + np.asarray([0., step * proj_scale])
-
-            elif proj_dim == 2:
-                p0 = p0 * np.asarray([0., 1.]) + np.asarray([(step - 1) * proj_scale, 0.])
-                p1 = p1 * np.asarray([0., 1.]) + np.asarray([step * proj_scale, 0.])
-
-            canvas.create_line(p0[0],
-                               p0[1],
-                               p1[0],
-                               p1[1],
-                               fill=fill, capstyle=capstyle, arrow=arrow, **kwargs)
-        # end for
+                canvas.create_line(p0[0],
+                                   p0[1],
+                                   p1[0],
+                                   p1[1],
+                                   fill=fill, capstyle=capstyle, arrow=arrow, **kwargs)
+            # end if
+        # end if
 
     def draw_cov_mat_ell(self, sensor, vehicle, cov_mat, cov_ell_cnt, fill, orient=False):
         # The covariance ellipses

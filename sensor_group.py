@@ -20,8 +20,17 @@ class _SensorGroup:
 
         return False
 
+    @abc.abstractmethod
+    def _cb_meas(self, vehicle, measurement):
+        pass
+
     def add_sensor(self, sensor):
         self.sensors.append(sensor)
+        self.sensors.add_measure_listener(self._cb_meas)
+
+    def remove_sensor(self, sensor):
+        self.sensors.remove(sensor)
+        self.sensors.remove_measure_listener(self._cb_meas)
 
 
 class HomogeneousTriggeredSensorGroup(ISensorMeasure, _SensorGroup):
@@ -30,23 +39,30 @@ class HomogeneousTriggeredSensorGroup(ISensorMeasure, _SensorGroup):
         _SensorGroup.__init__(self, name, sensors)
 
         self.kalman_filter = {}
+        self.temp_measurements = {}
 
         for sensor in sensors:
             sensor.set_meas_interval(self.meas_interval)
             sensor.set_cov_mat(self.cov_mat)
+            sensor.add_measure_listener(self._cb_meas)
 
     def __str__(self):
         return "{}: ∆T={:f}".format(self.name, self.meas_interval)
 
-    def measure(self, vehicle, **kwargs):
+    def _cb_meas(self, vehicle, measurement):
+        if vehicle not in self.temp_measurements:
+            self.temp_measurements[vehicle] = []
+
+        self.temp_measurements[vehicle].append(measurement)
+
+    def _measure(self, vehicle, **kwargs):
         meas_res = []
 
-        for s in self.sensors:
-            meas_res.append((self.cov_mat, s.measurements[vehicle][-1].val + s.measurements[vehicle][-1].sensor_pos))  # Is it correct to add sensor_pos at this point at this point?
+        for meas in self.temp_measurements[vehicle]:
+            meas_res.append((self.cov_mat, meas.val + meas.sensor_pos))  # Is it correct to add sensor_pos at this point at this point?
         # end for
 
-        if vehicle not in self.measurements:
-            self.measurements[vehicle] = []
+        self.temp_measurements[vehicle].clear()
 
         if vehicle not in self.kalman_filter:
             self.kalman_filter[vehicle] \
@@ -63,8 +79,11 @@ class HomogeneousTriggeredSensorGroup(ISensorMeasure, _SensorGroup):
 
         self.kalman_filter[vehicle].filter(z=z, R=R)
 
-        self.append_measurement(PlaneMeasurement(vehicle, self.kalman_filter[vehicle].get_current_state_estimate(), np.zeros(6)))
+        measurement = PlaneMeasurement(vehicle, self.kalman_filter[vehicle].get_current_state_estimate(), np.zeros(6))
+        self.append_measurement(vehicle, measurement)
         # self.measurements[vehicle].append(self.kalman_filter[vehicle].get_current_state_estimate())
+
+        return measurement
 
     def add_sensor(self, sensor):
         _SensorGroup.add_sensor(sensor)

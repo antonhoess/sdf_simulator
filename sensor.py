@@ -57,6 +57,8 @@ class ISensorMeasure(abc.ABC):
         self.measurements = {}
         self.last_meas_time = 0.
 
+        self.listeners = []
+
     def set_meas_interval(self, meas_interval):
         self.meas_interval = meas_interval
 
@@ -67,18 +69,29 @@ class ISensorMeasure(abc.ABC):
     def trigger(self, t):
         if t >= self.last_meas_time + self.meas_interval:
             self.last_meas_time += self.meas_interval  # Don't loose the modulo rest
-
             return True
         else:
             return False
 
+    def add_measure_listener(self, l):
+        self.listeners.append(l)
+
+    def remove_measure_listener(self, l):
+        self.listeners.remove(l)
+
     @abc.abstractmethod
-    def measure(self, vehicle, **kwargs):
+    def _measure(self, vehicle, **kwargs):
         pass
 
-    def append_measurement(self, meas):
-        vehicle = meas.vehicle
+    def measure(self, vehicle, **kwargs):
+        res = self._measure(vehicle, **kwargs)
 
+        for l in self.listeners:
+            l(vehicle, res)  # Callback
+
+        return res
+
+    def append_measurement(self, vehicle, meas):
         # Add position measurement to the measurement list
         if vehicle not in self.measurements:
             self.measurements[vehicle] = []
@@ -129,11 +142,15 @@ class Plane(ISensor, ISensorMeasure):
         ISensor.__init__(self, name, active, pos)
         ISensorMeasure.__init__(self, meas_interval, cov_mat)
 
-    def measure(self, vehicle, **kwargs):
+    def _measure(self, vehicle, **kwargs):
         # Measure position
         meas = np.random.multivariate_normal(np.asarray([0, 0]), self.cov_mat, 1)[0]
         meas += vehicle.r - self.pos
-        self.append_measurement(PlaneMeasurement(vehicle, meas, self.pos))
+
+        measurement = PlaneMeasurement(vehicle, meas, self.pos)
+        self.append_measurement(vehicle, measurement)
+
+        return measurement
 
 
 class Radar(ISensor, ISensorMeasure):
@@ -141,7 +158,11 @@ class Radar(ISensor, ISensorMeasure):
         ISensor.__init__(self, name, active, pos)
         ISensorMeasure.__init__(self, meas_interval, cov_mat)
 
-    def measure(self, vehicle, **kwargs):
+    def _measure(self, vehicle, **kwargs):
         meas = np.random.multivariate_normal(np.asarray([0, 0]), self.cov_mat, 1)[0]
         meas += np.asarray([np.linalg.norm(vehicle.r - self.pos), self.calc_rotation_angle(vehicle)])
-        self.append_measurement(RadarMeasurement(vehicle, meas, self.pos))
+
+        measurement = RadarMeasurement(vehicle, meas, self.pos)
+        self.append_measurement(vehicle, measurement)
+
+        return measurement

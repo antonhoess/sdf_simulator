@@ -53,7 +53,7 @@ if __name__ == "__main__":
     sensors = []
 
     for i in range(len(radar_positions)):
-        sensor = Plane("P3 KF #{:03d}".format(i), False, np.asarray([radar_positions[i]["r_x"], radar_positions[i]["r_y"]]), meas_interval=None, cov_mat=None)
+        sensor = Plane("P3 KF #{:02d}".format(i), False, np.asarray([radar_positions[i]["r_x"], radar_positions[i]["r_y"]]), meas_interval=None, cov_mat=None)
         gui.add_sensor(sensor, fill="violet", outline="black", radius=1000, n_sides=5, rot_offset=math.pi / 5,
                        font_size_scale=0.5)
         sensors.append(sensor)

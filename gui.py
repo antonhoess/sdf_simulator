@@ -9,6 +9,7 @@ from scroll_frame import ScrollFrame
 from popup_menu import PopupMenu
 import time
 from enum import Enum
+import signal
 
 
 class Gui:
@@ -89,6 +90,11 @@ class Gui:
                 self._exited = True
 
         self.master.protocol("WM_DELETE_WINDOW", ask_quit)
+
+        def keyboard_interrupt_handler(_signal, _frame):
+            self._exited = True
+
+        signal.signal(signal.SIGINT, keyboard_interrupt_handler)
 
         root = tk.Frame(self.master)
         root.pack(expand=True, fill=tk.BOTH)

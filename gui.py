@@ -854,8 +854,8 @@ class Gui:
             if sv.sensor.trigger(self._t):
                 for vv in self._vv:
                     v = vv.vehicle
-                    sv.sensor.measure(vehicle=v)
-                    sv.add_cur_vals_to_traces(vehicle=v)
+                    sv.sensor.measure(v)
+                    sv.add_cur_vals_to_traces(v)
                     draw = True
                 # end for
             # end if
@@ -866,8 +866,8 @@ class Gui:
             if sgv.sensor_group.trigger(self._t):
                 for vv in self._vv:
                     v = vv.vehicle
-                    sgv.sensor_group.measure(vehicle=v)
-                    sgv.add_cur_vals_to_traces(vehicle=v)
+                    sgv.sensor_group.measure(v)
+                    sgv.add_cur_vals_to_traces(v)
                     draw = True
                 # end for
             # end if

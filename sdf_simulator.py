@@ -29,14 +29,14 @@ if __name__ == "__main__":
     # Add sensors
     # -----------
     # > Add sensor
-    sensor = Plane("P1", False, np.asarray([3000, 8000]), cov_mat=np.asarray([[100000, 80000],
-                                                                            [80000, 100000]]), meas_interval=3.0)
+    sensor = Plane("P1", False, np.asarray([3000, 8000]), 3., np.asarray([[100000, 80000],
+                                                                          [80000, 100000]]))
 
-    gui.add_sensor(sensor, fill="orange", outline="white", radius=3500, n_sides=3, font_size_scale=0.8)
+    gui.add_sensor(sensor, fill="orange", outline="white", radius=3500, n_sides=3, font_size_scale=.8)
 
     # > Add sensor
-    sensor = Plane("P2", False, np.asarray([-9000, -5000]), cov_mat=np.asarray([[100000, 30000],
-                                                                              [30000, 100000]]), meas_interval=5.0)
+    sensor = Plane("P2", False, np.asarray([-9000, -5000]), 5., np.asarray([[100000, 30000],
+                                                                            [30000, 100000]]))
 
     gui.add_sensor(sensor, fill="lightblue", outline="black", radius=2500, n_sides=4, font_size_scale=1.0)
     # gui.add_sensor_group(HomogeneousTriggeredSensorGroup("Group 2", radar, 5., cov_mat=None), fill="pink")
@@ -53,7 +53,7 @@ if __name__ == "__main__":
     sensors = []
 
     for i in range(len(radar_positions)):
-        sensor = Plane("P3 KF #{:02d}".format(i), False, np.asarray([radar_positions[i]["r_x"], radar_positions[i]["r_y"]]), meas_interval=None, cov_mat=None)
+        sensor = Plane("P3 KF #{:02d}".format(i), False, np.asarray([radar_positions[i]["r_x"], radar_positions[i]["r_y"]]), None, None)
         gui.add_sensor(sensor, fill="violet", outline="black", radius=1000, n_sides=5, rot_offset=math.pi / 5,
                        font_size_scale=0.5)
         sensors.append(sensor)
@@ -61,8 +61,8 @@ if __name__ == "__main__":
     gui.add_sensor_group(HomogeneousTriggeredSensorGroup("Multi Group", sensors, meas_interval=5., cov_mat=np.identity(2) * sigma_c ** 2), fill="pink")
 
     # > Add sensor
-    sensor = Radar("R1", True, np.asarray([4000, 7000]), cov_mat=np.asarray([[.001, 0],
-                                                                            [0, .01]]), meas_interval=12.0)
+    sensor = Radar("R1", True, np.asarray([4000, 7000]), 12., np.asarray([[.001, 0],
+                                                                          [0, .01]]))
 
     gui.add_sensor(sensor, fill="green", outline="white", radius=3500, n_sides=3, rot_offset=math.pi, font_size_scale=.7)
 

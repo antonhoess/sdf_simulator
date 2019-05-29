@@ -37,3 +37,6 @@ TODO:
 * For the dara also add the orientation of the sensor as an attribute and correctly apply it in all calculation. The reason is, that we cannot just assume, that all radars are adjusted to the same direction
 * HomogeneousTriggeredSensorGroup.measure() is not correctly implemented, since joining multiple radar measurements (polar coordinates) from different positions dies not work that way.
 * KalmanFilterFactory.get_kalman_filter() in case filter_type == KalmanFilterType.POLAR_2D implement the Jacobi matrix instead of returning the fixed fake matrix.
+
+* Supply all functions with type hints and decorators. Already complete: sensors.py.
+* In gui.py at "sv.sensor.measure(v)" they static type checking hould also work with "sv.sensor.measure(vehicle=v)", as it was before. The problem is that it was in kwargs instead of args.

@@ -1,8 +1,10 @@
+#!/usr/bin/env python
+
 import numpy as np
 
 
 class EKF:
-    def __init__(self, x_init, P_init, F, B, Q, H, R, cb_f=None, cb_F=None, cb_h=None, cb_H=None):
+    def __init__(self, x_init, P_init, F, B, Q, H, R, cb_f=None, cb_F=None, cb_h=None, cb_H=None, init_with_first_meas=False):
         """ Constructor of the The N-dimensional Kalman filter
 
         Parameters:
@@ -39,10 +41,15 @@ class EKF:
         if bool(self.h is None) != bool(self.cb_H is None):
             raise ValueError("cb_h() and cb_H() need to be set both or none of them.")
 
+        self._inited = not init_with_first_meas  # Makes the first measurement used as the initial state
+
     # Predicts the new state vector x using the transition matrix F and the specified control vector u and updates the
     # uncertainty covariance
     # Matrix F embodies our knowledge about the system dynamics
     def predict(self, u):
+        if not self._inited:
+            return
+
         # Predict new state
         if self.f is None:
             self.x = np.dot(self.F, self.x) + np.dot(self.B, u)
@@ -56,6 +63,10 @@ class EKF:
         self.P = np.dot(self.F, np.dot(self.P, self.F.T)) + self.Q
 
     def filter(self, z, R=None):
+        if not self._inited:
+            self._inited = True
+            self.x = np.pad(z, (0, len(self.x) - len(z)), 'constant')  # XXX not correct - needs to be transformed from the measurement corrdinate system to the dynamic one's - but works, if both systems are the same
+
         if R is not None:
             self.R = R
 
@@ -119,5 +130,6 @@ class EKF:
 
 
 class KF(EKF):
-    def __init__(self, x_init, P_init, F, B, Q, H, R):
-        EKF.__init__(self, x_init, P_init, F, B, Q, H, R)
+    def __init__(self, x_init, P_init, F, B, Q, H, R, init_with_first_meas=False):
+        EKF.__init__(self, x_init, P_init, F, B, Q, H, R, init_with_first_meas=init_with_first_meas)
+

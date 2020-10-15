@@ -40,3 +40,6 @@ TODO:
 
 * Supply all functions with type hints and decorators. Already complete: sensors.py.
 * In gui.py at "sv.sensor.measure(v)" they static type checking hould also work with "sv.sensor.measure(vehicle=v)", as it was before. The problem is that it was in kwargs instead of args.
+
+* Provide a further description in the doc-string of the main classes.
+* The measurements seems to get projected to the X-axis - fix this bug.

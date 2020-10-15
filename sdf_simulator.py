@@ -1,3 +1,9 @@
+#!/usr/bin/env python
+
+
+"""This programs simulates vehicles, sensors, sensor-measurements and Kalman-filtered estimation of the vehicles position."""
+
+
 from vehicle import Vehicle
 from sensor import *
 from sensor_group import HomogeneousTriggeredSensorGroup
@@ -6,16 +12,42 @@ import numpy as np
 import math
 
 
-def cb_main_loop():
+__author__ = "Anton Höß"
+__copyright__ = "Copyright 2020"
+__credits__ = list()
+__license__ = "BSD"
+__version__ = "0.1"
+__maintainer__ = "Anton Höß"
+__email__ = "anton.hoess42@gmail.com"
+__status__ = "Development"
+
+
+def cb_main_loop(gui: Gui):
+    """The main-loop's callback that allows to enter commands.
+
+    Parameters
+    ----------
+    gui : Gui
+        The gui that calls this callback.
+
+    Returns
+    -------
+    bool
+        A value of False will quit the program, True will let it continue to run.
+    """
     s = input("Enter command: ")
     if s == "q":
         return True
     else:
         gui.add_vehicle(Vehicle("Vehicle3", True, 100.0, 50.0), color="blue")
         return False
+    # end if
+# end def
 
 
-if __name__ == "__main__":
+def main():
+    """The main program. Defines all simulation and visualization components and runs the simulation."""
+    
     gui = Gui(canvas_width=800, canvas_height=400, base_scale_factor=.8e-4, zoom_factor=1.1, trace_length_max=100,
               meas_buf_max=10)
 
@@ -67,3 +99,9 @@ if __name__ == "__main__":
     gui.add_sensor(sensor, fill="green", outline="white", radius=3500, n_sides=3, rot_offset=math.pi, font_size_scale=.7)
 
     gui.run(cb_main_loop=cb_main_loop)
+# end def
+
+
+if __name__ == "__main__":
+    main()
+# end def

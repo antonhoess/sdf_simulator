@@ -2,9 +2,35 @@ import tkinter as tk
 import numpy as np
 
 
-class ScaleCanvas(tk.Canvas):
+__author__ = "Anton Höß"
+__copyright__ = "Copyright 2020"
 
-    # scale_ratio = width / height
+
+class ScaleCanvas(tk.Canvas):
+    """A canvas that can be scaled.
+
+    Parameters
+    ----------
+    widget
+        The parent widget.
+    scale_factor : float, optional
+        The scale factor for all objects based to the origin. A value of 1. means the original size.
+    scale_ratio : float, optional
+        Defines the scale ratio (= width / height) that forces the view to keep this ratio when adjusting the content to its area.
+    invert_y : bool, optional
+        Inverts the direction of y axis.
+    center_origin : bool, optional
+        Indicates, if the origin is centered in the viewing area instead of being on (0, 0).
+    offset_x : float, optional
+        Offset in x-direction.
+    offset_y : float, optional
+        Offset in y-direction.
+    zoom_factor : float, optional
+        Defines the zoom factor for one time zooming in or out.
+    **kwargs : dict, optional
+        Keyword arguments passed to tkinter.Canvas.
+    """
+
     def __init__(self, widget, scale_factor=1.0, scale_ratio=None, invert_y=False,
                  center_origin=False, offset_x=0, offset_y=0, zoom_factor=1., **kwargs):
         super().__init__(widget, **kwargs)
@@ -20,8 +46,17 @@ class ScaleCanvas(tk.Canvas):
         self.zoom = 1.
 
         self.bind("<Motion>", self._cb_motion)
+    # end def
 
     def _cb_motion(self, event):
+        """Callback that handles the mouse move event, transforms the coordinates and call the used defined callback with these scales values.
+
+        Parameters
+        ----------
+        event
+            The event information.
+        """
+
         x, y = self._scale_point(event.x, event.y)
 
         e = {
@@ -32,8 +67,11 @@ class ScaleCanvas(tk.Canvas):
         # We only need to update x and y, since all other values of event are automatically generated.
         # It's not possible to add new key-names
         self.event_generate("<<MotionScaled>>", **e)
+    # end def
 
     def zoom_in(self):
+        """Zooms in to make objects appear larger. The zoom center is the current mouse cursor position."""
+
         zoom_factor_update = 1. * self.zoom_factor
         zoom_factor_diff = abs(zoom_factor_update - 1)
         self.zoom *= self.zoom_factor
@@ -41,8 +79,11 @@ class ScaleCanvas(tk.Canvas):
                 self.offset_x + (self.winfo_width() / 2. if self.get_center_origin() else 0.))) * zoom_factor_diff,
                         self.offset_y - (self.winfo_pointery() - self.winfo_rooty() - (self.offset_y + (
                             self.winfo_height() / 2. if self.get_center_origin() else 0.))) * zoom_factor_diff)
+    # end def
 
     def zoom_out(self):
+        """Zooms out to make objects appear smaller. The zoom center is the current mouse cursor position."""
+
         zoom_factor_update = 1. / self.zoom_factor
         zoom_factor_diff = abs(zoom_factor_update - 1)
         self.zoom /= self.zoom_factor
@@ -50,18 +91,37 @@ class ScaleCanvas(tk.Canvas):
                 self.offset_x + (self.winfo_width() / 2. if self.get_center_origin() else 0.))) * zoom_factor_diff,
                         self.offset_y + (self.winfo_pointery() - self.winfo_rooty() - (self.offset_y + (
                             self.winfo_height() / 2. if self.get_center_origin() else 0.))) * zoom_factor_diff)
+    # end def
 
     def get_offset(self):
         return self.offset_x, self.offset_y
+    # end def
 
     def set_offset(self, offset_x, offset_y):
         self.offset_x = offset_x
         self.offset_y = offset_y
+    # end def
 
     def get_center_origin(self):
         return self.center_origin
+    # end def
 
     def _scale_point(self, x, y):
+        """Scales a given point by applying the basic scaling factor, the zoom factor and the y-inversion.
+
+        Parameters
+        ----------
+        x : float
+            Point's x-coordinate.
+        y : float
+            Point's y-coordinate.
+
+        Returns
+        -------
+        (float, float)
+            The x and y-coordinate of the scaled point.
+        """
+
         p = np.asarray([x, y], dtype=np.float)
 
         width = self.winfo_width()
@@ -91,8 +151,24 @@ class ScaleCanvas(tk.Canvas):
         p /= self.zoom
 
         return p[0], p[1]
+    # end def
 
     def _create(self, *args, **kwargs):
+        """Applies some transformations after using the tkinter create() function to transform the object's points.
+
+        Parameters
+        ----------
+        *args : tuple, optional
+            Arguments passed to tkinter.Canvas._create().
+        **kwargs : dict, optional
+            Keyword arguments passed to tkinter.Canvas._create().
+
+        Returns
+        -------
+        int
+            The handle of the created object.
+        """
+
         x = super()._create(*args, **kwargs)
 
         width = self.winfo_width()
@@ -122,3 +198,5 @@ class ScaleCanvas(tk.Canvas):
         self.move(x, self.offset_x, self.offset_y)
 
         return x
+    # end def
+# end class

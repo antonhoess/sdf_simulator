@@ -1,25 +1,47 @@
-#!/usr/bin/env python
-
 import numpy as np
 
 
+__author__ = "Anton Höß"
+__copyright__ = "Copyright 2020"
+
+
 class EKF:
+    """Creates a N-dimensional Kalman filter.
+
+    Parameters
+    ----------
+    x_init : numpy.ndarray, optional
+        Initial state vector: What we know about the (probable) start state.
+    P_init : numpy.ndarray, optional
+        Initial (uncertainty) covariance matrix: How sure are we about the start state - in each dimension?
+    F : numpy.ndarray, optional
+        State transition matrix: For predicting the next state from the current state.
+    B : numpy.ndarray, optional
+        Control matrix: For predicting the next state from the current state using control signals.
+    Q : numpy.ndarray, optional
+        Process noise covariance matrix: Describes the (Gaussian) randomness of state transitions in each dimension.
+    H : numpy.ndarray, optional
+        Measurement matrix: Describes how we think that our sensors map states to measurements z.
+    R : numpy.ndarray, optional
+        Measurement noise covariance matrix: Describes the (Gaussian) randomness of measurements per dimension.
+    cb_f : callable, optional
+        Callback that predicts a point in the state space (necessary for the EKF). If set, overwrites F.
+    cb_F : callable, optional
+        Callback that returns the matrix F (calculated for the current time).
+    cb_h : callable, optional
+        Callback that transforms a point from the state space to the measurement space (necessary for the EKF). If set, overwrites H.
+    cb_H : callable, optional
+        Callback that returns the matrix H (calculated for the current time).
+    init_with_first_meas : bool
+        Indicates if the first measurement shall be used to initialize the filters extimated position.
+
+    Returns
+    -------
+    EKF
+        An initialized (Extended) Kalman filter object which can be used for further filtering.
+    """
+
     def __init__(self, x_init, P_init, F, B, Q, H, R, cb_f=None, cb_F=None, cb_h=None, cb_H=None, init_with_first_meas=False):
-        """ Constructor of the The N-dimensional Kalman filter
-
-        Parameters:
-        x_init (array): Initial state vector: What we know about the (probable) start state
-        P_init (array): Initial (uncertainty) covariance matrix: How sure are we about the start state - in each dimension?
-        F      (array): State transition matrix: For predicting the next state from the current state
-        B      (array): Control matrix: For predicting the next state from the current state using control signals
-        Q      (array): Process noise covariance matrix: Describes the (Gaussian) randomness of state transitions in each dimension
-        H      (array): Measurement matrix: Describes how we think that our sensors map states to measurements z
-        R      (array): Measurement noise covariance matrix: Describes the (Gaussian) randomness of measurements per dimension
-
-        Returns:
-        An initialized Kalman filter object which can be used for further filtering.
-        """
-
         # KF
         self.x = x_init
         self.P = P_init
@@ -42,11 +64,16 @@ class EKF:
             raise ValueError("cb_h() and cb_H() need to be set both or none of them.")
 
         self._inited = not init_with_first_meas  # Makes the first measurement used as the initial state
+    # end def
 
-    # Predicts the new state vector x using the transition matrix F and the specified control vector u and updates the
-    # uncertainty covariance
-    # Matrix F embodies our knowledge about the system dynamics
     def predict(self, u):
+        """Predicts the new state vector x using the transition matrix F and the specified control vector u and updates the uncertainty covariance. Matrix F embodies our knowledge about the system dynamics.
+
+        Parameters
+        ----------
+        u : numpy.ndarray
+            Control vector applied by the control-input-model B.
+        """
         if not self._inited:
             return
 
@@ -61,11 +88,22 @@ class EKF:
 
         # Update uncertainty covariance matrix
         self.P = np.dot(self.F, np.dot(self.P, self.F.T)) + self.Q
+    # end def
 
     def filter(self, z, R=None):
+        """Updates the previously predicted state by incorporating the new measurement.
+
+        Parameters
+        ----------
+        z : numpy.ndarray
+            Measurement vector used to update the estimation.
+        R : numpy.ndarray, optional
+            Measurement covariance matrix. Can be set to overwrite the initial one (in case R is not constant).
+        """
+
         if not self._inited:
             self._inited = True
-            self.x = np.pad(z, (0, len(self.x) - len(z)), 'constant')  # XXX not correct - needs to be transformed from the measurement corrdinate system to the dynamic one's - but works, if both systems are the same
+            self.x = np.pad(z, (0, len(self.x) - len(z)), 'constant')  # XXX Not correct - needs to be transformed from the measurement corrdinate system to the dynamic one's - but works, if both systems are the same
 
         if R is not None:
             self.R = R
@@ -92,19 +130,48 @@ class EKF:
         # Update uncertainty covariance matrix
         self.P = self.P - np.dot(K, np.dot(self.H, self.P))
 
-    # Returns the current estimated state vector x, may it be after the predict() or
-    # after the correct_by_measurement() step
+    #
     def get_current_state_estimate(self):
+        """Returns the current estimated state vector x, may it be after the predict() or after the correct_by_measurement() step.
+
+        Returns
+        -------
+        numpy.ndarray
+            Current estimated state vector x.
+        """
+
         return self.x
+    # end def
 
     # Returns the current estimated uncertainty covariance matrix P may it be after the predict() or after the
     # correct_by_measurement() step the covariance matrix describes the variance of each state vector argument
     # = uncertainty about this argument of the state vector
     def get_current_uncertainty(self):
+        """Returns the current estimated uncertainty covariance matrix P may it be after the predict() or after the
+        correct_by_measurement() step the covariance matrix describes the variance of each state vector argument
+         = uncertainty about this argument of the state vector.
+
+        Returns
+        -------
+        numpy.ndarray
+            Current estimated uncertainty covariance matrix P.
+        """
+
         return self.P
+    # end def
 
     @staticmethod
     def join_measurements(R_z_list, mode=1):
+        """Joins multiple measurements.
+
+        Parameters
+        ----------
+        R_z_list
+            List of tuples where each tuple holds the pair of R and z.
+        mode : int
+            If mode equals 1, the inverse of the sum of all inverted measurements is being used.  Mode 0 (stacking of measurements) is not implemented yet.
+        """
+
         R_res = None
         z_res = None
 
@@ -127,9 +194,13 @@ class EKF:
         # end if
 
         return R_res, z_res
+    # end def
 
 
 class KF(EKF):
+    """Creates a Kalman filter (as a special case of the Extended Kalman filter). See description of class EKF."""
+
     def __init__(self, x_init, P_init, F, B, Q, H, R, init_with_first_meas=False):
         EKF.__init__(self, x_init, P_init, F, B, Q, H, R, init_with_first_meas=init_with_first_meas)
-
+    # end def
+# end class

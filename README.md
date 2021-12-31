@@ -32,7 +32,7 @@ First of all, the main program sdf_simulator.py can be altered to change or crea
 * **Shift+Left-Click+Mouse-Move**: Translates the origin of the drawing area.
 * **Shift+Arrow-Left**: Move the origin a certain amount to the left.
 * **Shift+Arrow-Right**: Move the origin a certain amount to the right.
-* **Shift++Arrow-Up**: Move the origin a certain amount to the top.
+* **Shift+Arrow-Up**: Move the origin a certain amount to the top.
 * **Shift+Arrow-Down**: Move the origin a certain amount to the bottom. 
 * **Right-Click**: A context menu appears. As for now it has one entry:
   * **Reset Transformation**: Resets the zoom and translation to the basic values.
@@ -69,10 +69,10 @@ First of all, the main program sdf_simulator.py can be altered to change or crea
 * **Meas cnt.**: Sets the max. number of measurements in the measurement buffer. Increasing the buffer size can make sense if changing the trace length, since the trace can only be as long as data in the buffer.
 * **Show Vehicle Settings** / **Hide Vehicle Settings**: Toggles the vehicle control area.
   * **Vehicle A**: Toggles the activity of the first defined vehicle.
-  * **Vehicle ...**: Toggles the activity of the second one ..."
+  * **Vehicle ...**: Toggles the activity of the second one ...
 * **Show Sensor Settings** / **Hide Sensor Settings**: Toggles the sensor control area.
   * **Sensor A**: Toggles the activity of the first defined sensor.
-  * **Sensor ...**: Toggles the activity of the second one ..."
+  * **Sensor ...**: Toggles the activity of the second one ...
 
 ## Nomenclature
 * r = position

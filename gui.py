@@ -540,7 +540,7 @@ class Gui:
                     frm.pack(fill=tk.X)
                     self.frm_sensor_settings_content = frm
 
-                    self.scf_sensor = ScrollFrame(self.frm_sensor_settings_content, max_width=200)
+                    self.scf_sensor = ScrollFrame(self.frm_sensor_settings_content, max_width=200, max_height=150)
                     self.scf_sensor.update()
 
                     frm = frm.parent
@@ -1231,7 +1231,6 @@ class Gui:
             The sensor to add.
         **kwargs : dict
             Passed to VehicleVisu().
-
         """
 
         self._sv.append(SensorVisu(s, self.canvas, trace_length_max=self._trace_length_max, meas_buf_max=self._meas_buf_max, **kwargs))
